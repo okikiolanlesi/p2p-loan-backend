@@ -1,9 +1,9 @@
 using FluentValidation;
-using P2PLoan.DTOs.Requests;
+using P2PLoan.DTOs;
 
 namespace P2PLoan.Validators;
 
-public class LoginRequestValidator : AbstractValidator<LoginRequestDTO>
+public class LoginRequestValidator : AbstractValidator<LoginRequestDto>
 {
     // Invokes set of rule for CreateorUpdateCategoryDto
     public LoginRequestValidator()

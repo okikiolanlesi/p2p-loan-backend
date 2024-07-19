@@ -36,4 +36,19 @@ public class UserRepository : IUserRepository
     {
         return await dbContext.SaveChangesAsync() > 0;
     }
+
+    public async Task<User?> GetByIdAsync(Guid userId)
+    {
+        return await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+    }
+
+    public void Remove(User user)
+    {
+        dbContext.Users.Remove(user);
+    }
+
+    public void MarkAsModified(User user)
+    {
+        dbContext.Entry(user).State = EntityState.Modified;
+    }
 }

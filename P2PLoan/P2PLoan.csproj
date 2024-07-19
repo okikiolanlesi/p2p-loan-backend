@@ -35,11 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\" />
     <Folder Include="Data\" />
-    <Folder Include="Interfaces\Repositories\" />
     <Folder Include="Interfaces\Services\" />
-    <Folder Include="Utils\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 

@@ -1,0 +1,14 @@
+using AutoMapper;
+using P2PLoan.DTOs;
+using P2PLoan.Models;
+
+namespace P2PLoan.Helpers
+{
+    public class MappingProfiles : Profile
+    {
+        public MappingProfiles()
+        {
+            CreateMap<User, UserDto>();
+        }
+    }
+}

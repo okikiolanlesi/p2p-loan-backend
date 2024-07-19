@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace P2PLoan.DTOs.Requests;
+namespace P2PLoan.DTOs;
 
-public class LoginRequestDTO
+public class LoginRequestDto
 {
 
     public string Email { get; set; } = string.Empty;
