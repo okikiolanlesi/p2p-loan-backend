@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace P2PLoan.Models
 {
-    public class Transaction
+    public class Transaction 
     {
         
     }

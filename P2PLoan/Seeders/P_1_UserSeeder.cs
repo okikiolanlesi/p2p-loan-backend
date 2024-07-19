@@ -17,7 +17,9 @@ public class P_1_UserSeeder : ISeeder
     }
     public async Task up()
     {
+
         var systemUser = new User
+    
         {
             FirstName = constants.SYSTEM_USER_FIRST_NAME,
             LastName = constants.SYSTEM_USER_LAST_NAME,
