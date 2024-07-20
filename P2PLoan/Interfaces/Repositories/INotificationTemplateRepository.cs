@@ -8,8 +8,10 @@ namespace P2PLoan.Interfaces;
 
 public interface INotificationTemplateRepository
 {
-    Task CreateAsync(Notification notification, User user);
-    Task<Notification> GetByIdAsync(Guid notoficationId, Guid userId);
-    Task<IEnumerable<Notification>> GetAllByUserIdAsync(Guid userId);
-    Task UpdateAsync(Notification notification, Guid userId);
+    Task CreateAsync(NotificationTemplate notificationTemplate);
+    Task<NotificationTemplate> GetByIdAsync(Guid NotificationTemplateId, Guid id);
+    Task<IEnumerable<NotificationTemplate>> GetAllByIdAsync(Guid id);
+    Task UpdateAsync(NotificationTemplate notificationTemplate, Guid id);
+
+    Task Delete(NotificationTemplate notificationTemplate, Guid id);
 }
