@@ -103,6 +103,7 @@ public class P2PLoanDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+<<<<<<< HEAD
     public DbSet<Loan> Loans { get; set; }
     public DbSet<LoanOffer> LoanOffers{ get; set; }
     public DbSet<Repayment> Repayments { get; set; }
@@ -145,5 +146,8 @@ public class P2PLoanDbContext : DbContext
         return userIdClaim != null ? Guid.Parse(userIdClaim.Value) : Guid.Empty;
     }
 
+=======
+    public DbSet<Notification> Notifications {get; set;}
+>>>>>>> 2c53b5e461aeb12cc53fff588328757cceab5836
 }
 
