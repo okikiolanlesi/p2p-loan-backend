@@ -104,11 +104,13 @@ builder.Services.AddSingleton<IEmailService>(provider =>
 builder.Services
 .AddFluentValidationAutoValidation();
 
-// 
+builder.Services.AddHttpContextAccessor();
+
+// Register seeders
 builder.Services.AddScoped<P_1_UserSeeder>();
 builder.Services.AddScoped<P_2_ModuleSeeder>();
 
-
+// Register services
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();

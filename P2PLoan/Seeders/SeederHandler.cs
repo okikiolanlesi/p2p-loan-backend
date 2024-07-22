@@ -41,9 +41,6 @@ public class SeederHandler : ISeederHandler
 
         Dictionary<string, Seed> executedSeedsDictionary = alreadyExecutedSeeds.ToDictionary(e => e.Name);
 
-        // Use DbContextTransaction to ensure atomicity of operations
-        // using (var transaction = await seedRepository.BeginTransactionAsync())
-        // {
         try
         {
             foreach (var seederType in seederTypes)
@@ -65,20 +62,17 @@ public class SeederHandler : ISeederHandler
                 await seedRepository.SaveChangesAsync();
             }
 
-            // Commit transaction if all seeds executed successfully
-            // await transaction.CommitAsync();
         }
         catch (Exception ex)
         {
-            // Rollback transaction if any seed failed
-            // await transaction.RollbackAsync();
+
             // Log the exception
             Console.WriteLine($"Error occurred while seeding: {ex.Message}");
             // You may want to log detailed exception information
         }
-        // }
 
     }
+    
     // Helper method to extract the order number from the class name
     static int ExtractOrderNumber(string className)
     {
