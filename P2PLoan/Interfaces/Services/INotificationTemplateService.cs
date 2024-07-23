@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace P2PLoan.Services;
 
 public interface INotificationTemplateService
 {
-    Task CreateNotificationAsync();
-    Task GetByIdAsync();
-    Task GetAllNotificationAsync();
-    Task UpdateNotificationAsync();
+    Task<NotificationTemplate> CreateNotificationAsync(NotificationTemplate notificationTemplate);
+    Task<NotificationTemplate> GetByIdAsync(Guid id);
+    Task<IEnumerable<NotificationTemplate>> GetAllNotificationAsync(Guid id);
+    Task<NotificationTemplate> UpdateNotificationAsync(NotificationTemplate notificationTemplate,Guid id);
 
 }

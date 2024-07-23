@@ -117,6 +117,8 @@ builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ISeedRepository, SeedRepository>();
 builder.Services.AddScoped<IConstants, Constants>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
+builder.Services.AddScoped<INotificationTemplateService, NotificationTemplateService>();
+builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
 
 
 var app = builder.Build();

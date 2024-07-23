@@ -5,38 +5,66 @@ using P2PLoan.Interfaces;
 using P2PLoan.Models;
 using P2PLoan.Services;
 using AutoMapper;
+using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace P2PLoan.Services;
 
 public class NotificationTemplateService : INotificationTemplateService
 {
-    private readonly INotificationTemplateRepository notificationTemplateRepository;
-    private readonly IMapper mapper;
-    private readonly IConstants constant;
+   private readonly INotificationTemplateRepository notificationTemplateRepository;
 
-    public NotificationTemplateService( IMapper mapper, INotificationRepository notificationRepository)
+    public NotificationTemplateService(INotificationTemplateRepository notificationTemplateRepository)
     {
-        this.notificationTemplateRepository= notificationTemplateRepository;
-        this.mapper = mapper;
-
+        this.notificationTemplateRepository = notificationTemplateRepository;
     }
-    public Task CreateNotificationAsync()
+    public async Task<NotificationTemplate> CreateNotificationAsync(NotificationTemplate notificationTemplate)
     {
-        throw new System.NotImplementedException();
+        if (notificationTemplate == null)
+    {
+        throw new ArgumentNullException(nameof(notificationTemplate));
     }
 
-    public Task GetAllNotificationAsync()
-    {
-        throw new System.NotImplementedException();
+        var createdTemplate = await notificationTemplateRepository.CreateAsync(notificationTemplate);
+        return createdTemplate;
     }
 
-    public Task GetByIdAsync()
+    public async Task <IEnumerable<NotificationTemplate>>GetAllNotificationAsync(Guid id)
     {
-        throw new System.NotImplementedException();
+        var GetTemplate = await notificationTemplateRepository.GetAllByIdAsync(id);
+        if(GetTemplate == null)
+        {
+            throw new ArgumentException("");
+        }
+        return GetTemplate;
+        
     }
 
-    public Task UpdateNotificationAsync()
+    public async Task <NotificationTemplate>GetByIdAsync(Guid id)
     {
-        throw new System.NotImplementedException();
+        var template = await notificationTemplateRepository.GetByIdAsync(id);
+            if (template == null)
+            {
+                throw new KeyNotFoundException("NotificationTemplate not found.");
+            }
+
+            return template;
+    }
+
+    public async Task<NotificationTemplate>UpdateNotificationAsync(NotificationTemplate notificationTemplate,Guid id)
+    {
+         if (notificationTemplate == null)
+    {
+        throw new ArgumentNullException(nameof(notificationTemplate));
+    }
+
+    var updatedTemplate = await notificationTemplateRepository.UpdateAsync(notificationTemplate, id);
+    if (updatedTemplate == null)
+    {
+        throw new KeyNotFoundException("NotificationTemplate not found.");
+    }
+
+    return updatedTemplate;
+
     }
 }

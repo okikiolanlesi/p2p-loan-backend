@@ -19,11 +19,11 @@ namespace P2PLoan.Models
         public decimal InterestRate { get; set; }
 
         //Navigation Properties
+
         public User User {get; set;}
-       // public Guid UserId { get; set; }
+         public Guid UserId { get; set; }
         public Loan Loan{ get; set; }
         public Guid LoanId { get; set; }
-
 
     }
 }

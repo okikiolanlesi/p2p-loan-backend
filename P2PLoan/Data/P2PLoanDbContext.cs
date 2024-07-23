@@ -20,11 +20,43 @@ public class P2PLoanDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // modelBuilder.Entity<User>()
-        //     .Property(e => e.Role)
-        //     .HasConversion<string>(); // Convert enum to string
+        // Configure LoanRequest and User relationship
+        modelBuilder.Entity<LoanRequest>()
+            .HasOne(lr => lr.User)
+            .WithMany(u => u.LoanRequests)
+            .HasForeignKey(lr => lr.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+         // Configure the one-to-many relationship between User and Wallet
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.Wallets)
+            .WithOne(w => w.User)
+            .HasForeignKey(w => w.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         base.OnModelCreating(modelBuilder);
+
+        // Configure precision and scale for the decimal properties in Loan
+            modelBuilder.Entity<Loan>()
+                .Property(l => l.AccruingInterestRate)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Loan>()
+                .Property(l => l.InitialInterestRate)
+                .HasPrecision(18, 2);
+
+             modelBuilder.Entity<LoanOffer>()
+                .Property(lo => lo.AccruingInterest)
+                .HasPrecision(18, 2);
+
+            // Configure precision and scale for the decimal properties in Repayment
+            modelBuilder.Entity<Repayment>()
+                .Property(r => r.InterestRate)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Repayment>()
+                .Property(r => r.PrincipalAmount)
+                .HasPrecision(18, 2);
 
         ConfigureAuditableEntity<Module>(modelBuilder);
         ConfigureAuditableEntity<Permission>(modelBuilder);
@@ -32,58 +64,19 @@ public class P2PLoanDbContext : DbContext
         ConfigureAuditableEntity<UserRole>(modelBuilder);
         ConfigureAuditableEntity<LoanOffer>(modelBuilder);
         ConfigureAuditableEntity<Repayment>(modelBuilder);
-        ConfigureAuditableEntity<Transaction>(modelBuilder);
-
-        // Configure the relationship between LoanOffer and User
-            modelBuilder.Entity<LoanOffer>()
-                .HasOne(offer => offer.CreatedBy)
-                .WithMany(user => user.LoanOffers)
-                .HasForeignKey(offer => offer.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict); 
-
-            modelBuilder.Entity<Repayment>()
-        .HasOne(r => r.Loan)
-        .WithMany()
-        //.HasForeignKey(r => r.LoanId)
-        .OnDelete(DeleteBehavior.Restrict);
-
-             // Configure Repayment entity
-        // modelBuilder.Entity<Repayment>()
-        //     .HasOne(r => r.User)
-        //     .WithMany(u => u.Repayments)
-        //     .HasForeignKey(r => r.UserId)
-        //     .IsRequired();
-
-        // Configure additional relationships if needed
-    // modelBuilder.Entity<Repayment>()
-    //     .HasOne(r => r.Loan)
-    //     .WithMany()
-    //     //.HasForeignKey(r => r.LoanId)
-    //     .OnDelete(DeleteBehavior.Restrict);
-
-    // modelBuilder.Entity<Repayment>()
-    //     .HasOne<User>()
-    //     .WithMany(u => u.Repayments)
-    //     .HasForeignKey(r => r.UserId)
-    //     .OnDelete(DeleteBehavior.Restrict);
-
-           modelBuilder.Entity<Transaction>()
-                .HasOne(transaction => transaction.CreatedBy)
-                .WithMany(user => user.Transactions)
-                .HasForeignKey(transaction => transaction.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure one-to-many relationship between User and Wallet
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.Wallets)
-                .WithOne(w => w.User)
-                //.HasForeignKey(w => w.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-            
+        ConfigureAuditableEntity<Transaction>(modelBuilder);  
+        ConfigureAuditableEntity<Loan>(modelBuilder);  
+        ConfigureAuditableEntity<Wallet>(modelBuilder); 
+        ConfigureAuditableEntity<LoanRequest>(modelBuilder); 
+         ConfigureAuditableEntity<TransactionType>(modelBuilder); 
+        ConfigureAuditableEntity<WalletProvider>(modelBuilder);  
+        ConfigureAuditableEntity<NotificationTemplateVariable>(modelBuilder);  
+        ConfigureAuditableEntity<NotificationTemplate>(modelBuilder);            
              
     }
     private void ConfigureAuditableEntity<TEntity>(ModelBuilder modelBuilder) where TEntity : AuditableEntity
     {
+
         modelBuilder.Entity<TEntity>()
             .HasOne(e => e.CreatedBy)
             .WithMany()
@@ -103,42 +96,45 @@ public class P2PLoanDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
-<<<<<<< HEAD
     public DbSet<Loan> Loans { get; set; }
     public DbSet<LoanOffer> LoanOffers{ get; set; }
+    public DbSet<LoanRequest> LoanRequests{ get; set; }
     public DbSet<Repayment> Repayments { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<TransactionType> TransactionTypes{ get; set; }
     public DbSet<Wallet> Wallets{ get; set; }
     public DbSet<WalletProvider> WalletProviders{ get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<NotificationTemplate> NotificationTemplates{ get; set; }
+    public DbSet<NotificationTemplateVariable> NotificationTemplateVariables{ get; set; }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        UpdateAuditFields();
-        return base.SaveChangesAsync(cancellationToken);
+    // public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    // {
+    //     UpdateAuditFields();
+    //     return base.SaveChangesAsync(cancellationToken);
 
-    }
+    // }
 
-    private void UpdateAuditFields()
-    {
-        var userId = GetCurrentUserId();
+    // private void UpdateAuditFields()
+    // {
+    //     var userId = GetCurrentUserId();
 
-        foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
-                entry.Entity.CreatedById = userId;
-            }
+    //     foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+    //     {
+    //         if (entry.State == EntityState.Added)
+    //         {
+    //             entry.Entity.CreatedAt = DateTime.UtcNow;
+    //             entry.Entity.CreatedById = userId;
+    //         }
 
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.ModifiedAt = DateTime.UtcNow;
-                entry.Entity.ModifiedById = userId;
-            }
-        }
+    //         if (entry.State == EntityState.Modified)
+    //         {
+    //             entry.Entity.ModifiedAt = DateTime.UtcNow;
+    //             entry.Entity.ModifiedById = userId;
+    //         }
+    //     }
         
-    }
+    // }
 
     private Guid GetCurrentUserId()
     {
@@ -146,8 +142,5 @@ public class P2PLoanDbContext : DbContext
         return userIdClaim != null ? Guid.Parse(userIdClaim.Value) : Guid.Empty;
     }
 
-=======
-    public DbSet<Notification> Notifications {get; set;}
->>>>>>> 2c53b5e461aeb12cc53fff588328757cceab5836
 }
 

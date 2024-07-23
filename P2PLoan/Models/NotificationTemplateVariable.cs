@@ -15,7 +15,8 @@ namespace P2PLoan.Models
         public DateTime ModifiedAt { get; set; }
 
         // foreign key
-        public string NotificationTemplateId { get; set; }
+        public Guid NotificationTemplateId { get; set; }
+        public NotificationTemplate NotificationTemplate{ get; set; }
         
     }
 }

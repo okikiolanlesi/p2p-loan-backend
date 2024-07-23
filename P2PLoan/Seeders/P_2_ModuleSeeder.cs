@@ -11,7 +11,7 @@ public class P_2_ModuleSeeder : ISeeder
     private readonly IModuleRepository moduleRepository;
     private readonly IUserRepository userRepository;
 
-    public P_2_ModuleSeede(IModuleRepository moduleRepository, IUserRepository userRepository)
+    public P_2_ModuleSeeder(IModuleRepository moduleRepository, IUserRepository userRepository)
     {
         this.moduleRepository = moduleRepository;
         this.userRepository = userRepository;

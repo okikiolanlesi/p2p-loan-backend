@@ -16,6 +16,7 @@ namespace P2PLoan.Models
         public DateTime ModifiedAt { get; set; }=DateTime.UtcNow;
 
         //foreign key
+        public Guid UserId{ get; set; }
         public User User{ get; set; }
     }
 }

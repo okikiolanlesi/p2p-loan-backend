@@ -9,6 +9,7 @@
 // using Microsoft.Extensions.Configuration;
 // using Microsoft.IdentityModel.Tokens;
 // using P2PLoan.DTOs;
+// using P2PLoan.DTOs.Requests;
 // using P2PLoan.Interfaces;
 // using P2PLoan.Models;
 // using P2PLoan.Repositories;
@@ -17,7 +18,7 @@
 // namespace P2PLoan.Controllers;
 
 // [ApiController]
-// [Route("api/noti")]
+// [Route("user/notification")]
 
 // public class NotificationController : ControllerBase
 // {
@@ -25,14 +26,27 @@
 //     private readonly IMapper _mapper;
 //     private readonly IConfiguration _configuration;
 
-//     public NotificationController(IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
+//     private readonly INotificationService _notificationService;
+
+//     public NotificationController(INotificationService notificationService,IUserRepository userRepository, IMapper mapper, IConfiguration configuration)
 //     {
 //         _userRepository = userRepository;
 //         _mapper = mapper;
 //         _configuration = configuration;
+//         _notificationService = notificationService;
+
 
 //     }
 
 //     [HttpPost]
-//     public async Task<ActiobResult> 
+//     // public async Task<ActionResult>CreateNotification ([FromBody] NotificationRequestDTO notificationRequestDTO, Notification notification, Guid id)
+//     // {
+//     //      await _notificationService.CreateNotificationAsync(notification, id)
+
+
+        
+
+//     // }
+
+
 // }

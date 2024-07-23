@@ -17,7 +17,9 @@ namespace P2PLoan.Models
         public string FinancialTranscationId { get; set; }
 
         //foreign key
-        public string UserId { get; set; }
+         public Guid UserId { get; set; }
+
+         public User User{ get; set; }
 
         
     }

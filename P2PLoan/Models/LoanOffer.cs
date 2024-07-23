@@ -10,8 +10,6 @@ namespace P2PLoan.Models
         public Guid Id { get; set; }
         public int Amount { get; set; }
         public Frequency frequency{ get; set; }
-        //type
-        //field
         public int GracePeriod { get; set; }
         public int Duration { get; set; }
         public decimal AccruingInterest { get; set; }
@@ -24,10 +22,12 @@ namespace P2PLoan.Models
 
 
         // foreign key
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         //Navigation properties
+        public User User{ get; set; }
         public ICollection<LoanRequest> LoanRequests { get; set; }
+
 
     }
 }

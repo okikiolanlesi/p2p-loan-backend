@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace P2PLoan.Models
 {
-    public class LoanRequest
+    public class LoanRequest:  AuditableEntity
     {
         public Guid Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -16,12 +16,12 @@ namespace P2PLoan.Models
         public Type type{ get; set; }
 
          // foreign key
-        public string UserId { get; set; }
-        public string LoanOfferId { get; set; }
-
-        public string WalletId { get; set; }
+         public Guid UserId { get; set; }
+        //public Guid LoanOfferId { get; set; }
+        // public Guid WalletId { get; set; }
 
         // navigation properties
+        public User User { get; set; }
 
         public Wallet Wallet{ get; set; }
 

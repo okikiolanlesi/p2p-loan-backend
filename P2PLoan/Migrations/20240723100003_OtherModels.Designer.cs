@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using P2PLoan.Data;
 
@@ -11,9 +12,11 @@ using P2PLoan.Data;
 namespace P2PLoan.Migrations
 {
     [DbContext(typeof(P2PLoanDbContext))]
-    partial class P2PLoanDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240723100003_OtherModels")]
+    partial class OtherModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,7 +85,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("Loans", (string)null);
+                    b.ToTable("Loans");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.LoanOffer", b =>
@@ -141,7 +144,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoanOffers", (string)null);
+                    b.ToTable("LoanOffers");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.LoanRequest", b =>
@@ -189,7 +192,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("LoanRequests", (string)null);
+                    b.ToTable("LoanRequests");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Module", b =>
@@ -229,7 +232,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Modules", (string)null);
+                    b.ToTable("Modules");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Notification", b =>
@@ -262,7 +265,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.NotificationTemplate", b =>
@@ -305,7 +308,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("NotificationTemplates", (string)null);
+                    b.ToTable("NotificationTemplates");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.NotificationTemplateVariable", b =>
@@ -349,7 +352,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("NotificationTemplateId");
 
-                    b.ToTable("NotificationTemplateVariables", (string)null);
+                    b.ToTable("NotificationTemplateVariables");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Permission", b =>
@@ -389,7 +392,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Permissions", (string)null);
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Repayment", b =>
@@ -441,7 +444,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Repayments", (string)null);
+                    b.ToTable("Repayments");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Role", b =>
@@ -476,7 +479,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Transaction", b =>
@@ -527,7 +530,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.TransactionType", b =>
@@ -567,7 +570,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TransactionTypes", (string)null);
+                    b.ToTable("TransactionTypes");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.User", b =>
@@ -596,7 +599,7 @@ namespace P2PLoan.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.UserRole", b =>
@@ -633,7 +636,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Wallet", b =>
@@ -674,7 +677,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("WalletProviderId");
 
-                    b.ToTable("Wallets", (string)null);
+                    b.ToTable("Wallets");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.WalletProvider", b =>
@@ -709,7 +712,7 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("WalletProviders", (string)null);
+                    b.ToTable("WalletProviders");
                 });
 
             modelBuilder.Entity("P2PLoan.Seed", b =>
@@ -734,7 +737,7 @@ namespace P2PLoan.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Seeds", (string)null);
+                    b.ToTable("Seeds");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Loan", b =>

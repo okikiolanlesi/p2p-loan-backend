@@ -13,12 +13,12 @@ public class User
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
     //Navigation properties
     public ICollection<UserRole> UserRoles { get; set; }
-    public ICollection<LoanOffer> LoanOffers { get; set; }
-    public ICollection<Wallet> Wallets{ get; set; }
+    public ICollection<Module> Modules{ get; set; }
+     public ICollection<LoanOffer> LoanOffers { get; set; }
+     public ICollection<Wallet> Wallets{ get; set; }
     public ICollection<LoanRequest> LoanRequests{ get; set; }
     public ICollection<Transaction> Transactions{ get; set; }
-
     public ICollection<Repayment> Repayments{ get; set; }
-
     public ICollection<Notification> Notifications{ get; set; }
+    public ICollection<TransactionType> TransactionTypes{ get; set; }
 }
