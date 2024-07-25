@@ -23,8 +23,21 @@ using P2PLoan.Repositories;
 using P2PLoan.Seeders;
 using P2PLoan.Services;
 using P2PLoan.Validators;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuration variables (retrieved from environment variables)
+var tenantId = builder.Configuration["AZURE_TENANT_ID"];
+var clientId = builder.Configuration["AZURE_CLIENT_ID"];
+var clientSecret = builder.Configuration["AZURE_CLIENT_SECRET"];
+var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
+
+// Create ClientSecretCredential
+var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
+
+// Add Azure Key Vault to configuration
+builder.Configuration.AddAzureKeyVault(vaultUri, clientSecretCredential);
 
 builder.Services.AddCors(options =>
 {
@@ -45,9 +58,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-    });
+{
+    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
