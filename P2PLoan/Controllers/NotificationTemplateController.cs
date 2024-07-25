@@ -31,16 +31,17 @@ namespace P2PLoan.Controllers
             {
                 // Map DTO to Entity
                 var notificationTemplate = new NotificationTemplate
-                {
-
-                     Id = Guid.NewGuid(),
-                    Title = notificationTemplateRequestDTO.Title,
-                    Name = notificationTemplateRequestDTO.Name,
-                    Description = notificationTemplateRequestDTO.Description,
-                    Content = notificationTemplateRequestDTO.Content,
-                    CreatedAt = DateTime.UtcNow, // Set to current time or default
-                    ModifiedAt = DateTime.UtcNow // Set to current time or default
-                };
+                       {
+                            Id = Guid.NewGuid(),
+                            Title = notificationTemplateRequestDTO.Title,
+                            Name = notificationTemplateRequestDTO.Name,
+                            Description = notificationTemplateRequestDTO.Description,
+                            Content = notificationTemplateRequestDTO.Content,
+                            CreatedAt = DateTime.UtcNow,
+                            ModifiedAt = DateTime.UtcNow,
+                            CreatedById = notificationTemplateRequestDTO.CreatedById,
+                            ModifiedById = notificationTemplateRequestDTO.ModifiedById
+                        };
 
         // Create the template using the service
         var createdTemplate = await _notificationTemplateService.CreateNotificationAsync(notificationTemplate);
@@ -90,23 +91,36 @@ namespace P2PLoan.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] NotificationTemplate notificationTemplate)
+        public async Task<IActionResult> Update(Guid id, [FromBody] NotificationTemplateRequestDTO notificationTemplateRequestDTO)
         {
-            if (notificationTemplate == null)
+            if (notificationTemplateRequestDTO == null)
             {
                 return BadRequest("NotificationTemplate cannot be null.");
             }
 
-            try
-            {
-                var updatedTemplate = await _notificationTemplateService.UpdateNotificationAsync(notificationTemplate, id);
-                if (updatedTemplate == null)
-                {
-                    return NotFound();
-                }
+          try
+    {
+        // Map DTO to Entity
+        var notificationTemplate = new NotificationTemplate
+        {
+            Id = id,
+            Title = notificationTemplateRequestDTO.Title,
+            Name = notificationTemplateRequestDTO.Name,
+            Description = notificationTemplateRequestDTO.Description,
+            Content = notificationTemplateRequestDTO.Content,
+            ModifiedAt = DateTime.UtcNow // Update the modified date to current time
+        };
 
-                return Ok(updatedTemplate);
-            }
+        // Update the template using the service
+        var updatedTemplate = await _notificationTemplateService.UpdateNotificationAsync(notificationTemplate, id);
+
+        if (updatedTemplate == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(updatedTemplate);
+    }
             catch (Exception ex)
             {
                 // Log exception here

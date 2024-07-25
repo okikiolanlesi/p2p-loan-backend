@@ -9,10 +9,9 @@ namespace P2PLoan.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string Content { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime ModifiedAt { get; set; }
+        public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
 
         // foreign key
         public Guid NotificationTemplateId { get; set; }

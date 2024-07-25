@@ -12,27 +12,67 @@ namespace P2PLoan.Repositories;
 
 public class NotificationTemplateVariableRepository : INotificationTemplateVariableRepository
 {
-    public Task CreateAsync(Notification notification, User user)
+    private readonly P2PLoanDbContext dbContext;
+
+    public NotificationTemplateVariableRepository(P2PLoanDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+      
+    }
+    public async Task<NotificationTemplateVariable> CreateAsync(NotificationTemplateVariable notificationTemplateVariable)
+    {
+        if (notificationTemplateVariable == null)
+    {
+        throw new ArgumentNullException(nameof(notificationTemplateVariable));
+    }
+
+    // Optionally check if the related NotificationTemplate exists
+    if (notificationTemplateVariable.NotificationTemplateId != Guid.Empty)
+    {
+        var relatedTemplate = await dbContext.NotificationTemplates.FindAsync(notificationTemplateVariable.NotificationTemplateId);
+        if (relatedTemplate == null)
+        {
+            throw new ArgumentException("Related NotificationTemplate does not exist.");
+        }
+    }
+
+    await dbContext.NotificationTemplateVariables.AddAsync(notificationTemplateVariable);
+    await dbContext.SaveChangesAsync();
+    return notificationTemplateVariable;
+        
+    }
+
+    public Task<IEnumerable<NotificationTemplateVariable>> GetAllByUserIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Notification>> GetAllByUserIdAsync(Guid userId)
+    public Task<NotificationTemplateVariable> GetByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Notification> GetByIdAsync(Guid notoficationId, Guid userId)
+    public async Task<NotificationTemplateVariable> UpdateAsync(NotificationTemplateVariable notificationTemplateVariable, Guid id)
     {
-        throw new NotImplementedException();
-    }
+       if (notificationTemplateVariable == null)
+            {
+                throw new ArgumentNullException(nameof(notificationTemplateVariable));
+            }
+            var existingTemplate = await dbContext.NotificationTemplateVariables
+                .Include(nt => nt.CreatedBy)
+                .Include(nt => nt.ModifiedBy)
+                .FirstOrDefaultAsync(nt => nt.Id == notificationTemplateVariable.Id);
 
-    public Task UpdateAsync(Notification notification, Guid userId)
-    {
-        throw new NotImplementedException();
-    }
-}
+            if (existingTemplate == null)
+            {
+                throw new KeyNotFoundException("NotificationTemplate not found.");
+            }
 
-public interface INotificationTemplateVariable
-{
+            existingTemplate.Name = notificationTemplateVariable.Name;
+            existingTemplate.Description = notificationTemplateVariable.Description;
+
+            dbContext.NotificationTemplateVariables.Update(existingTemplate);
+            await dbContext.SaveChangesAsync();
+            return existingTemplate;
+    }
 }

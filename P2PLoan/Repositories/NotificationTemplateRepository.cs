@@ -28,6 +28,17 @@ public class NotificationTemplateRepository : INotificationTemplateRepository
                 throw new ArgumentNullException(nameof(notificationTemplate));
             }
 
+                // Assign valid user IDs for CreatedBy and ModifiedBy
+            if (notificationTemplate.CreatedById == Guid.Empty)
+            {
+                throw new ArgumentException("CreatedById cannot be empty.", nameof(notificationTemplate.CreatedById));
+            }
+
+            if (notificationTemplate.ModifiedById == Guid.Empty)
+            {
+                throw new ArgumentException("ModifiedById cannot be empty.", nameof(notificationTemplate.ModifiedById));
+            }
+
             await dbContext.NotificationTemplates.AddAsync(notificationTemplate);
             await dbContext.SaveChangesAsync();
             return notificationTemplate;
@@ -54,6 +65,9 @@ public class NotificationTemplateRepository : INotificationTemplateRepository
             }
 
             var existingTemplate = await dbContext.NotificationTemplates
+                .Include(nt => nt.NotificationTemplateVariables)
+                .Include(nt => nt.CreatedBy)
+                .Include(nt => nt.ModifiedBy)
                 .FirstOrDefaultAsync(nt => nt.Id == notificationTemplate.Id);
 
             if (existingTemplate == null)

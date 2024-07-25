@@ -49,40 +49,40 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
         options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
     });
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             ValidateIssuerSigningKey = true,
+//             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+//             ValidateIssuer = false,
+//             ValidateAudience = false
+//         };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-                {
-                    context.Response.Headers.Append("Token-Expired", "true");
-                    context.Response.StatusCode = 401;
-                }
-                return Task.CompletedTask;
-            },
-            OnChallenge = async context =>
-            {
-                context.HandleResponse();
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-                var responseBody = JsonConvert.SerializeObject(new { message = "Unauthorized" });
-                await context.Response.WriteAsync(responseBody);
-                return;
-            }
-        };
+//         options.Events = new JwtBearerEvents
+//         {
+//             OnAuthenticationFailed = context =>
+//             {
+//                 if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+//                 {
+//                     context.Response.Headers.Append("Token-Expired", "true");
+//                     context.Response.StatusCode = 401;
+//                 }
+//                 return Task.CompletedTask;
+//             },
+//             OnChallenge = async context =>
+//             {
+//                 context.HandleResponse();
+//                 context.Response.StatusCode = 401;
+//                 context.Response.ContentType = "application/json";
+//                 var responseBody = JsonConvert.SerializeObject(new { message = "Unauthorized" });
+//                 await context.Response.WriteAsync(responseBody);
+//                 return;
+//             }
+//         };
 
-    });
+//     });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -109,6 +109,8 @@ builder.Services.AddHttpContextAccessor();
 // Register seeders
 builder.Services.AddScoped<P_1_UserSeeder>();
 builder.Services.AddScoped<P_2_ModuleSeeder>();
+builder.Services.AddScoped<P_3_NotificationTemplateSeeder>();
+builder.Services.AddScoped<P_4_NotificationTemplateVariableSeeder>();
 
 // Register services
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
@@ -119,7 +121,8 @@ builder.Services.AddScoped<IConstants, Constants>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 builder.Services.AddScoped<INotificationTemplateService, NotificationTemplateService>();
 builder.Services.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>();
-
+builder.Services.AddScoped<INotificationTemplateVariableService, NotificationTemplateVariableService>();
+builder.Services.AddScoped<INotificationTemplateVariableRepository, NotificationTemplateVariableRepository>();
 
 var app = builder.Build();
 
