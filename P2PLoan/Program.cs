@@ -24,6 +24,7 @@ using P2PLoan.Seeders;
 using P2PLoan.Services;
 using P2PLoan.Validators;
 using Azure.Identity;
+using P2PLoan.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clie
 
 // Add Azure Key Vault to configuration
 builder.Configuration.AddAzureKeyVault(vaultUri, clientSecretCredential);
+
 
 builder.Services.AddCors(options =>
 {
@@ -131,6 +133,7 @@ builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 
 
 var app = builder.Build();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
