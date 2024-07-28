@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using P2PLoan;
+using P2PLoan.Clients;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Repositories;
@@ -117,7 +118,10 @@ builder.Services.AddSingleton<IEmailService>(provider =>
 builder.Services
 .AddFluentValidationAutoValidation();
 
-// 
+builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new P2PLoan.Clients.TokenHandler("/api/v1/auth/login", builder.Configuration["Monnify:APIKey"], builder.Configuration["Monnify:SecretKey"]))
+;
+
+// Seeders
 builder.Services.AddScoped<P_1_UserSeeder>();
 builder.Services.AddScoped<P_2_ModuleSeeder>();
 

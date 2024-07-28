@@ -11,6 +11,7 @@ public class User
     public string Email { get; set; }
     public string Password { get; set; }
     public int PIN { get; set; }
+    public bool HasPin { get; set; }
     public string BVN { get; set; }
     public string PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiration { get; set; }

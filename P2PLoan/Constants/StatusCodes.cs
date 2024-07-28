@@ -13,5 +13,7 @@ public enum StatusCodes
     NoWalletsLinked = 0006,
     NoPinCreated = 0007,
     AlreadyExists = 0008,
+    ValidationError = 0009,
+    ResourceNotFound = 0010,
     InternalServerError = 9999,
 }

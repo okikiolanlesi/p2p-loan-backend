@@ -21,6 +21,8 @@ public class P2PLoanDbContext : DbContext
         ConfigureAuditableEntity<Permission>(modelBuilder);
         ConfigureAuditableEntity<Role>(modelBuilder);
         ConfigureAuditableEntity<UserRole>(modelBuilder);
+        ConfigureAuditableEntity<Wallet>(modelBuilder);
+        ConfigureAuditableEntity<WalletProvider>(modelBuilder);
     }
     private void ConfigureAuditableEntity<TEntity>(ModelBuilder modelBuilder) where TEntity : AuditableEntity
     {
@@ -43,5 +45,7 @@ public class P2PLoanDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<Wallet> Wallets { get; set; }
+    public DbSet<WalletProvider> WalletProviders { get; set; }
 }
 

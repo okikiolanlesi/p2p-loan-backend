@@ -8,7 +8,8 @@ public class Wallet : AuditableEntity
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public Guid WalletProviderId { get; set; }
-    public string WalletAccountNumber { get; set; }
+    public string AccountNumber { get; set; }
+    public Guid ReferenceId { get; set; }
 
     // navigation properties
     public User User { get; set; }
