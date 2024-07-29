@@ -15,5 +15,6 @@ public enum StatusCodes
     AlreadyExists = 0008,
     ValidationError = 0009,
     ResourceNotFound = 0010,
+    InvalidProvider = 0011,
     InternalServerError = 9999,
 }

@@ -2,7 +2,7 @@
 
 namespace P2PLoan;
 
-public class MonifyApiResponse<T>
+public class MonnifyApiResponse<T>
 {
     public bool RequestSuccessful { get; set; }
     public string ResponseMessage { get; set; }

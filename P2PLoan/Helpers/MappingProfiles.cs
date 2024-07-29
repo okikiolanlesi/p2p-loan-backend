@@ -9,6 +9,9 @@ namespace P2PLoan.Helpers
         public MappingProfiles()
         {
             CreateMap<User, UserDto>();
+            CreateMap<MonnifyApiResponse<MonnifyCreateWalletResponseBody>, CreateWalletResponseDto>().ForMember(m => m, d => d.MapFrom(s => s.ResponseBody));
+            CreateMap<MonnifyApiResponse<MonnifyGetBalanceResponseBody>, GetBalanceResponseDto>().ForMember(m => m, d => d.MapFrom(s => s.ResponseBody));
+
         }
     }
 }

@@ -82,7 +82,7 @@ public class TokenHandler : DelegatingHandler
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var tokenResponse = JsonSerializer.Deserialize<MonifyApiResponse<TokenResponseBody>>(content);
+                var tokenResponse = JsonSerializer.Deserialize<MonnifyApiResponse<TokenResponseBody>>(content);
 
                 _accessToken = tokenResponse.ResponseBody.AccessToken;
                 _tokenExpiration = DateTime.UtcNow.AddSeconds(tokenResponse.ResponseBody.ExpiresIn - 60); // Subtract 60 seconds for buffer

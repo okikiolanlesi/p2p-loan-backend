@@ -10,4 +10,5 @@ public interface IConstants
     public int PASSWORD_RESET_TOKEN_LENGTH { get; }
     public int EMAIL_VERIFICATION_TOKEN_LENGTH { get; }
     public int EMAIL_VERIFICATION_TOKEN_EXPIRATION_MINUTES { get; }
+    public string USER_WALLET_NAME_PREFIX { get; }
 }

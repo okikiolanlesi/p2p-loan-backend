@@ -117,7 +117,7 @@ public class AuthService
                 string bvnDateOfBirth;
                 try
                 {
-                    bvnDateOfBirth = registerDto.BvnDateOfBirth;
+                    bvnDateOfBirth = DateConverter.ConvertIsoToDate(registerDto.BvnDateOfBirth);
                 }
                 catch
                 {
@@ -142,7 +142,7 @@ public class AuthService
 
                 if (!createdWalletInfo.Created)
                 {
-
+                    //TODO: return response based on create wallet response
                 }
 
                 var wallet = new Wallet
@@ -151,7 +151,7 @@ public class AuthService
                     UserId = user.Id,
                     WalletProviderId = walletProvider.Id,
                     AccountNumber = createdWalletInfo.AccountNumber,
-                    ReferenceId = walletReferenceId,
+                    ReferenceId = $"{walletReferenceId}",
                 };
 
                 walletRepository.Add(wallet);

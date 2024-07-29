@@ -1,8 +1,29 @@
 ﻿using System;
+using System.Threading.Tasks;
+using AutoMapper;
 
 namespace P2PLoan;
 
 public class MonnifyWalletProviderService : IWalletProviderService
 {
+    private readonly IMonnifyApiService monnifyApiService;
+    private readonly IMapper mapper;
 
+    public MonnifyWalletProviderService(IMonnifyApiService monnifyApiService, IMapper mapper)
+    {
+        this.monnifyApiService = monnifyApiService;
+        this.mapper = mapper;
+    }
+    public async Task<CreateWalletResponseDto> Create(CreateWalletDto createWalletDto)
+    {
+        var createdWallet = await monnifyApiService.CreateWallet(createWalletDto);
+        return mapper.Map<CreateWalletResponseDto>(createdWallet);
+    }
+
+    public async Task<GetBalanceResponseDto> GetBalance(string walletUniqueReference)
+    {
+        var walletBalance = await monnifyApiService.GetWalletBalance(walletUniqueReference);
+
+        return mapper.Map<GetBalanceResponseDto>(walletBalance);
+    }
 }

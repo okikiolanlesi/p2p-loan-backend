@@ -132,6 +132,11 @@ builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ISeedRepository, SeedRepository>();
 builder.Services.AddScoped<IConstants, Constants>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
+builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific wallet provider services are registered
+builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 
 
 var app = builder.Build();

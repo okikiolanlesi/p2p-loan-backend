@@ -7,7 +7,7 @@ using P2PLoan.Clients;
 
 namespace P2PLoan;
 
-public class MonnifyApiService
+public class MonnifyApiService : IMonnifyApiService
 {
     private readonly MonnifyClient monnifyClient;
 
@@ -15,7 +15,7 @@ public class MonnifyApiService
     {
         this.monnifyClient = monnifyClient;
     }
-    public async Task CreateWallet(CreateWalletDto createWalletDto)
+    public async Task<MonnifyApiResponse<MonnifyCreateWalletResponseBody>> CreateWallet(CreateWalletDto createWalletDto)
     {
         var jsonContent = JsonSerializer.Serialize(createWalletDto);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -26,7 +26,9 @@ public class MonnifyApiService
         {
             // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(successContent);
+            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyCreateWalletResponseBody>>(successContent);
+
+            return data;
         }
         else
         {
@@ -36,27 +38,27 @@ public class MonnifyApiService
         }
     }
 
-    public Task CreditWallet()
+
+    public async Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber)
     {
-        throw new NotImplementedException();
+        var requestUri = $"/api/v1/disbursements/wallet/balance?accountNumber={Uri.EscapeDataString(accountNumber)}";
+
+        var response = await monnifyClient.Client.GetAsync(requestUri);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>>(successContent);
+            return data;
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error getting wallet transactions: {response.StatusCode}, {errorContent}");
+        }
     }
 
-    public Task DebitWallet()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task GetWalletBalance()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task GetWalletTransactions()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task WalletTransfer()
+    public Task Transfer()
     {
         throw new NotImplementedException();
     }
@@ -64,4 +66,26 @@ public class MonnifyApiService
     {
         throw new NotImplementedException();
     }
+
+    public async Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference)
+    {
+        // Create the query string with the walletUniqueReference parameter
+        var requestUri = $"/api/v1/disbursements/wallet/balance?walletReference={Uri.EscapeDataString(walletUniqueReference)}";
+
+        var response = await monnifyClient.Client.GetAsync(requestUri);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyGetBalanceResponseBody>>(successContent);
+            return data;
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error getting wallet balance: {response.StatusCode}, {errorContent}");
+        }
+
+    }
 }
+

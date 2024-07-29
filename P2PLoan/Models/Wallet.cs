@@ -9,7 +9,7 @@ public class Wallet : AuditableEntity
     public Guid UserId { get; set; }
     public Guid WalletProviderId { get; set; }
     public string AccountNumber { get; set; }
-    public Guid ReferenceId { get; set; }
+    public string ReferenceId { get; set; }
 
     // navigation properties
     public User User { get; set; }
