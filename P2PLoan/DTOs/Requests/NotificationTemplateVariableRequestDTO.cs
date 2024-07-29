@@ -9,5 +9,8 @@ namespace P2PLoan.DTOs.Requests
     {
         public string Name { get; set; }
         public string? Description { get; set; }
+        public Guid CreatedById { get; set; }
+        public Guid ModifiedById { get; set; }
+        public Guid NotificationTemplateId { get; set; }
     }
 }

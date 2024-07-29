@@ -26,7 +26,7 @@ namespace P2PLoan.Seeders
         }
         public async Task up()
         {
-            var id = new Guid("660E7603-46D6-45B7-AE17-2CDE0236DBD7");
+            var id = new Guid("ED2F06AE-5BEC-4FF0-8357-3F3B6F2C7D5F");
             
          var userId = new Guid("ED7E3236-FEF6-405C-F63C-08DCACC0ACAD");
          // Check if the user exists
@@ -66,18 +66,18 @@ namespace P2PLoan.Seeders
                     NotificationTemplateId = id ,
                     CreatedById = userId, // Replace with actual user ID
                     ModifiedById = userId// Use a valid NotificationTemplateId
-                },
-                new NotificationTemplateVariable
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "AccountUpdate",
-                    Description = "Variable for account update message",
-                    CreatedAt = DateTime.UtcNow,
-                    ModifiedAt = DateTime.UtcNow,
-                    NotificationTemplateId = id ,
-                    CreatedById = userId, // Replace with actual user ID
-                    ModifiedById = userId// Use a valid NotificationTemplateId a valid NotificationTemplateId
                 }
+                // new NotificationTemplateVariable
+                // {
+                //     Id = Guid.NewGuid(),
+                //     Name = "AccountUpdate",
+                //     Description = "Variable for account update message",
+                //     CreatedAt = DateTime.UtcNow,
+                //     ModifiedAt = DateTime.UtcNow,
+                //     NotificationTemplateId = id ,
+                //     CreatedById = userId, // Replace with actual user ID
+                //     ModifiedById = userId// Use a valid NotificationTemplateId a valid NotificationTemplateId
+                // }
             };
 
             // Add new variables

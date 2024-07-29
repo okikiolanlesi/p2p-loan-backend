@@ -7,15 +7,17 @@ using P2PLoan.Services;
 using AutoMapper;
 using P2PLoan.Repositories;
 using System;
+using P2PLoan.DTOs.Requests;
 
 namespace P2PLoan.Services;
 
 public class NotificationTemplateVariableService : INotificationTemplateVariableService
 {
     private readonly INotificationTemplateVariableRepository notificationTemplateVariableRepository;
+
   
 
-    public NotificationTemplateVariableService( INotificationTemplateVariableRepository notificationTemplateRepository)
+    public NotificationTemplateVariableService( INotificationTemplateVariableRepository notificationTemplateVariableRepository)
     {
         this.notificationTemplateVariableRepository= notificationTemplateVariableRepository;
 
@@ -42,25 +44,48 @@ public class NotificationTemplateVariableService : INotificationTemplateVariable
         throw new System.NotImplementedException();
     }
 
-    public Task<NotificationTemplateVariable> GetNotificationTemplateVariableByIdAsync()
+    public async Task<NotificationTemplateVariable> GetNotificationTemplateVariableByIdAsync(Guid id)
     {
-        throw new System.NotImplementedException();
-    }
-
-    public async Task<NotificationTemplateVariable> UpdateNotificationTemplateVariableAsync(Guid id,NotificationTemplateVariable notificationTemplateVariable)
-    {
-           if (notificationTemplateVariable == null)
-    {
+        
+      var notificationTemplateVariable = await notificationTemplateVariableRepository.GetByIdAsync(id);
+      if(notificationTemplateVariable == null)
+      {
+        
         throw new ArgumentNullException(nameof(notificationTemplateVariable));
+      }
+      return notificationTemplateVariable;
+        
     }
 
-    var updatedTemplate = await notificationTemplateVariableRepository.UpdateAsync(notificationTemplateVariable, id);
+    public async Task<NotificationTemplateVariableRequestDTO> UpdateNotificationTemplateVariableAsync(Guid id,NotificationTemplateVariableRequestDTO notificationTemplateVariableRequestDTO)
+    {
+        // Retrieve the existing entity from the repository    
+    var updatedTemplate = await notificationTemplateVariableRepository.GetByIdAsync(id);
+
     if (updatedTemplate == null)
     {
-        throw new KeyNotFoundException("NotificationTemplate not found.");
+        throw new KeyNotFoundException("NotificationTemplateVariable not found.");
     }
+      
+       updatedTemplate.Name = notificationTemplateVariableRequestDTO.Name;
+       updatedTemplate.Description = notificationTemplateVariableRequestDTO.Description;
+       updatedTemplate.ModifiedById=notificationTemplateVariableRequestDTO.ModifiedById;
+       updatedTemplate.CreatedById=notificationTemplateVariableRequestDTO.CreatedById;
+       updatedTemplate.NotificationTemplateId = notificationTemplateVariableRequestDTO.NotificationTemplateId;
 
-    return updatedTemplate;
+    // Update the entity in the repository
+    await notificationTemplateVariableRepository.UpdateAsync(updatedTemplate, id);
+       // Map the updated entity back to DTO
+    var updatedDTO = new NotificationTemplateVariableRequestDTO
+    {
+        Name = updatedTemplate.Name,
+        Description = updatedTemplate.Description,
+        CreatedById = updatedTemplate.CreatedById, // Include other properties as needed
+        ModifiedById = updatedTemplate.ModifiedById,
+        NotificationTemplateId = updatedTemplate.NotificationTemplateId,
+    };
+
+    return updatedDTO;
 
     }
 }

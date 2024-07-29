@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Math.EC.Rfc7748;
 using P2PLoan.Data;
+using P2PLoan.DTOs.Requests;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 
@@ -47,32 +48,44 @@ public class NotificationTemplateVariableRepository : INotificationTemplateVaria
         throw new NotImplementedException();
     }
 
-    public Task<NotificationTemplateVariable> GetByIdAsync(Guid id)
+    public async Task<NotificationTemplateVariable> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await dbContext.NotificationTemplateVariables
+            .Include(v => v.NotificationTemplate) // Include related entities if needed
+            .FirstOrDefaultAsync(v => v.Id == id);
     }
 
     public async Task<NotificationTemplateVariable> UpdateAsync(NotificationTemplateVariable notificationTemplateVariable, Guid id)
     {
-       if (notificationTemplateVariable == null)
-            {
-                throw new ArgumentNullException(nameof(notificationTemplateVariable));
-            }
-            var existingTemplate = await dbContext.NotificationTemplateVariables
-                .Include(nt => nt.CreatedBy)
-                .Include(nt => nt.ModifiedBy)
-                .FirstOrDefaultAsync(nt => nt.Id == notificationTemplateVariable.Id);
+       
+           var existingTemplate = await dbContext.NotificationTemplateVariables
+        .Include(nt => nt.CreatedBy)
+        .Include(nt => nt.ModifiedBy)
+        .Include(nt => nt.NotificationTemplate) // Assuming you need to include the related entity
+        .FirstOrDefaultAsync(nt => nt.Id == id);
 
-            if (existingTemplate == null)
-            {
-                throw new KeyNotFoundException("NotificationTemplate not found.");
-            }
+    if (existingTemplate == null)
+    {
+        throw new KeyNotFoundException("NotificationTemplateVariable not found.");
+    }
 
-            existingTemplate.Name = notificationTemplateVariable.Name;
-            existingTemplate.Description = notificationTemplateVariable.Description;
+    // Check if NotificationTemplateId is present
+    if (notificationTemplateVariable.NotificationTemplateId == Guid.Empty)
+    {
+        throw new InvalidOperationException("NotificationTemplateId is required.");
+    }
 
-            dbContext.NotificationTemplateVariables.Update(existingTemplate);
-            await dbContext.SaveChangesAsync();
-            return existingTemplate;
+    // Update properties
+    existingTemplate.Name = notificationTemplateVariable.Name;
+    existingTemplate.Description = notificationTemplateVariable.Description;
+    existingTemplate.ModifiedAt = notificationTemplateVariable.ModifiedAt;
+    existingTemplate.CreatedAt = notificationTemplateVariable.CreatedAt;
+    existingTemplate.NotificationTemplateId = notificationTemplateVariable.NotificationTemplateId;
+
+    dbContext.NotificationTemplateVariables.Update(existingTemplate);
+    await dbContext.SaveChangesAsync();
+
+    return existingTemplate;
+
     }
 }

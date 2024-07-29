@@ -46,6 +46,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     {
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
         options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
     });
 
