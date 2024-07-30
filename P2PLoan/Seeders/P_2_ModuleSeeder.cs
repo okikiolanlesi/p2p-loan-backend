@@ -44,6 +44,66 @@ public class P_2_ModuleSeeder : ISeeder
                 CreatedBy = systemUser,
                 ModifiedBy = systemUser
             },
+            new Module{
+                Name= Modules.loan.ToString(),
+                Description= "Module for loan management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.loanRequest.ToString(),
+                Description= "Module for loan request management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.loanOffer.ToString(),
+                Description= "Module for loan offer management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.repayment.ToString(),
+                Description= "Module for repayment management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.wallet.ToString(),
+                Description= "Module for wallet management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.walletProvider.ToString(),
+                Description= "Module for wallet provider management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.notification.ToString(),
+                Description= "Module for notification management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.notificationTemplate.ToString(),
+                Description= "Module for notification template management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.wallet.ToString(),
+                Description= "Module for wallet management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
+            new Module{
+                Name= Modules.notificationTemplateVariable.ToString(),
+                Description= "Module for wallet notification template variable management",
+                CreatedBy = systemUser,
+                ModifiedBy = systemUser
+            },
         };
 
         moduleRepository.AddRange(modules);

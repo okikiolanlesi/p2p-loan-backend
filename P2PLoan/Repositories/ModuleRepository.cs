@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -23,6 +24,11 @@ public class ModuleRepository : IModuleRepository
     public void AddRange(IEnumerable<Module> modules)
     {
         dbContext.Modules.AddRange(modules);
+    }
+
+    public async Task<IEnumerable<Module>> GetAllAsync()
+    {
+        return await dbContext.Modules.ToListAsync();
     }
 
     public async Task<bool> SaveChangesAsync()

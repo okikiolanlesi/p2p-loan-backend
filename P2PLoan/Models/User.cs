@@ -10,6 +10,7 @@ public class User
     public string LastName { get; set; }
     public string Email { get; set; }
     public string Password { get; set; }
+    public UserType UserType { get; set; }
     public int PIN { get; set; }
     public bool HasPin { get; set; }
     public string BVN { get; set; }

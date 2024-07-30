@@ -11,5 +11,6 @@ public interface IModuleRepository
     void Add(Module module);
 
     void AddRange(IEnumerable<Module> modules);
+    Task<IEnumerable<Module>> GetAllAsync();
     Task<bool> SaveChangesAsync();
 }

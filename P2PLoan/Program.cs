@@ -124,12 +124,20 @@ builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new 
 // Seeders
 builder.Services.AddScoped<P_1_UserSeeder>();
 builder.Services.AddScoped<P_2_ModuleSeeder>();
+builder.Services.AddScoped<P_3_WalletProviderSeeder>();
+builder.Services.AddScoped<P_4_PermissionSeeder>();
+builder.Services.AddScoped<P_5_RoleSeeder>();
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ISeedRepository, SeedRepository>();
+builder.Services.AddScoped<IWalletProviderRepository, WalletProviderRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IConstants, Constants>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();

@@ -7,5 +7,6 @@ public enum ResponseStatus
     Processing,
     NotFound,
     Unauthorized,
-    BadRequest
+    BadRequest,
+    Accepted
 }

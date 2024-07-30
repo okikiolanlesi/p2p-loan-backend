@@ -6,12 +6,12 @@ using P2PLoan.Models;
 
 namespace P2PLoan.Seeders;
 
-public class P_2_WalletProviderSeeder : ISeeder
+public class P_3_WalletProviderSeeder : ISeeder
 {
     private readonly IWalletProviderRepository walletProviderRepository;
     private readonly IUserRepository userRepository;
 
-    public P_2_WalletProviderSeeder(IWalletProviderRepository walletProviderRepository, IUserRepository userRepository)
+    public P_3_WalletProviderSeeder(IWalletProviderRepository walletProviderRepository, IUserRepository userRepository)
     {
         this.walletProviderRepository = walletProviderRepository;
         this.userRepository = userRepository;
@@ -21,17 +21,18 @@ public class P_2_WalletProviderSeeder : ISeeder
         var systemUser = await userRepository.GetSystemUser();
         var walletProviders = new List<WalletProvider>{
             new WalletProvider{
-                Name= "Momo",
-                Description= "MOMO wallet provider",
+                Name= WalletProviders.monnify.ToString(),
+                Description= "Monnify wallet provider",
+                Slug = WalletProviders.monnify,
+                Enabled = true,
                 CreatedBy = systemUser,
                 ModifiedBy = systemUser
             },
-
         };
 
-        // WalletProviderRepository.AddRange(walletProviders);
+        walletProviderRepository.AddRange(walletProviders);
 
-        // await WalletProviderRepository.SaveChangesAsync();
+        await walletProviderRepository.SaveChangesAsync();
     }
     public async Task down()
     {

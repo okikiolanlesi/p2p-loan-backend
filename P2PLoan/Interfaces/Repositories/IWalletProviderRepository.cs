@@ -7,8 +7,9 @@ namespace P2PLoan.Interfaces;
 public interface IWalletProviderRepository
 {
     void Add(WalletProvider walletProvider);
+    void AddRange(List<WalletProvider> walletProviders);
     Task<WalletProvider?> FindById(Guid id);
     Task<IEnumerable<WalletProvider>> GetAll();
-    Task<WalletProvider?> FindBySlug(string slug);
+    Task<WalletProvider?> FindBySlug(WalletProviders slug);
     Task<bool> SaveChangesAsync();
 }

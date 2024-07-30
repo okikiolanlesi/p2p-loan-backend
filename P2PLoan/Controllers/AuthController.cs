@@ -20,50 +20,49 @@ namespace P2PLoan.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
-    private readonly IEmailService _emailService;
-
-    public AuthController(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService)
+    private readonly IAuthService authService;
+    public AuthController(IAuthService authService)
     {
-        _userRepository = userRepository;
-        _mapper = mapper;
-        _configuration = configuration;
-        _emailService = emailService;
+        this.authService = authService;
     }
 
-    // [HttpPost("register")]
-    // public async Task<ActionResult> Register([FromBody] RegisterDto registerDto)
-    // {
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerDto)
+    {
+        var response = await authService.Register(registerDto);
+        return ControllerHelper.HandleApiResponse(response);
 
-    // }
+    }
 
-    // [HttpPost("login")]
-    // public async Task<ActionResult> Login(LoginDto loginDto)
-    // {
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequestDto loginDto)
+    {
+        var response = await authService.Login(loginDto);
+        return ControllerHelper.HandleApiResponse(response);
 
+    }
 
-    // }
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] Guid userId, [FromQuery] string token)
+    {
+        var response = await authService.VerifyEmail(userId, token);
+        return ControllerHelper.HandleApiResponse(response);
+    }
 
-    // [HttpGet("verify-email")]
-    // public async Task<IActionResult> VerifyEmail([FromQuery] Guid userId, [FromQuery] string token)
-    // {
+    [HttpPost]
+    [Route("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto forgotPasswordDto)
+    {
+        var response = await authService.ForgotPassword(forgotPasswordDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
 
-    // }
-
-    // [HttpPost]
-    // [Route("forgot-password")]
-    // public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
-    // {
-
-    // }
-
-    // [HttpPost]
-    // [Route("reset-password")]
-    // public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
-    // {
-
-    // }
+    [HttpPost]
+    [Route("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto resetPasswordDto)
+    {
+        var response = await authService.ResetPassword(resetPasswordDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
 
 }

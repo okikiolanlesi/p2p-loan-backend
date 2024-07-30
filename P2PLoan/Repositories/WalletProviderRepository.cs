@@ -21,14 +21,19 @@ public class WalletProviderRepository : IWalletProviderRepository
         dbContext.WalletProviders.Add(walletProvider);
     }
 
+    public void AddRange(List<WalletProvider> walletProviders)
+    {
+        dbContext.WalletProviders.AddRange(walletProviders);
+    }
+
     public async Task<WalletProvider?> FindById(Guid id)
     {
         return await dbContext.WalletProviders.FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<WalletProvider?> FindBySlug(string slug)
+    public async Task<WalletProvider?> FindBySlug(WalletProviders slug)
     {
-        return await dbContext.WalletProviders.FirstOrDefaultAsync(x => x.slug == slug);
+        return await dbContext.WalletProviders.FirstOrDefaultAsync(x => x.Slug == slug);
     }
 
     public async Task<IEnumerable<WalletProvider>> GetAll()

@@ -20,19 +20,19 @@ namespace P2PLoan
             this.mapper = mapper;
         }
 
-        public async Task<ApiResponse<object>> CreateWalletForController(WalletProviders walletProvider, CreateWalletDto createWalletDto, User user, Guid walletProviderId)
+        public async Task<ServiceResponse<object>> CreateWalletForController(WalletProviders walletProvider, CreateWalletDto createWalletDto, User user, Guid walletProviderId)
         {
             var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
 
             if (providerService == null)
             {
-                return new ApiResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
             var createWalletResponse = await providerService.Create(createWalletDto);
             if (createWalletResponse == null)
             {
-                return new ApiResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
             }
 
             var wallet = new Wallet
@@ -50,10 +50,10 @@ namespace P2PLoan
 
             if (!result)
             {
-                return new ApiResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
             }
 
-            return new ApiResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Wallet created successfully", wallet);
+            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Wallet created successfully", wallet);
         }
 
         public async Task<CreateWalletResponse> Create(WalletProviders walletProvider, CreateWalletDto createWalletDto)
@@ -75,12 +75,12 @@ namespace P2PLoan
             return mapper.Map<CreateWalletResponse>(response);
         }
 
-        public async Task<ApiResponse<object>> GetBalanceForController(WalletProviders walletProvider, string walletUniqueReference)
+        public async Task<ServiceResponse<object>> GetBalanceForController(WalletProviders walletProvider, string walletUniqueReference)
         {
             var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
 
             var balanceResponse = await providerService.GetBalance(walletUniqueReference);
-            return new ApiResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", balanceResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", balanceResponse);
         }
         public async Task<GetBalanceResponseDto> GetBalance(WalletProviders walletProvider, string walletUniqueReference)
         {
@@ -90,20 +90,20 @@ namespace P2PLoan
             return balanceResponse;
         }
 
-        public async Task<ApiResponse<object>> GetTransactions(WalletProviders walletProvider, string accountNumber, int pageSize = 10, int pageNo = 1)
+        public async Task<ServiceResponse<object>> GetTransactions(WalletProviders walletProvider, string accountNumber, int pageSize = 10, int pageNo = 1)
         {
             var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
             if (providerService == null)
             {
-                return new ApiResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
             var transactionsResponse = await providerService.GetTransactions(accountNumber, pageSize, pageNo);
 
-            return new ApiResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", transactionsResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", transactionsResponse);
         }
 
-        public Task<ApiResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)
+        public Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)
         {
             throw new NotImplementedException();
         }

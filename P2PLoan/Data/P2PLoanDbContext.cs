@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using P2PLoan.Models;
 
 namespace P2PLoan.Data;
@@ -11,11 +13,13 @@ public class P2PLoanDbContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // modelBuilder.Entity<User>()
-        //     .Property(e => e.Role)
-        //     .HasConversion<string>(); // Convert enum to string
 
         base.OnModelCreating(modelBuilder);
+
+        // Configure the enum converter for MyEntity and its MyEnumProperty
+        ConfigureEnumConverter<WalletProvider, WalletProviders>(modelBuilder, e => e.Slug);
+        ConfigureEnumConverter<Permission, PermissionAction>(modelBuilder, e => e.Action);
+        ConfigureEnumConverter<User, UserType>(modelBuilder, e => e.UserType);
 
         ConfigureAuditableEntity<Module>(modelBuilder);
         ConfigureAuditableEntity<Permission>(modelBuilder);
@@ -23,6 +27,7 @@ public class P2PLoanDbContext : DbContext
         ConfigureAuditableEntity<UserRole>(modelBuilder);
         ConfigureAuditableEntity<Wallet>(modelBuilder);
         ConfigureAuditableEntity<WalletProvider>(modelBuilder);
+        ConfigureAuditableEntity<RolePermission>(modelBuilder);
     }
     private void ConfigureAuditableEntity<TEntity>(ModelBuilder modelBuilder) where TEntity : AuditableEntity
     {
@@ -38,6 +43,12 @@ public class P2PLoanDbContext : DbContext
             .HasForeignKey(e => e.ModifiedById)
             .OnDelete(DeleteBehavior.Restrict);
     }
+    private void ConfigureEnumConverter<TEntity, TProperty>(ModelBuilder modelBuilder, Expression<Func<TEntity, TProperty>> propertyExpression) where TEntity : class
+    {
+        modelBuilder.Entity<TEntity>()
+            .Property(propertyExpression)
+            .HasConversion<string>(); // Convert enum to string
+    }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
@@ -47,5 +58,6 @@ public class P2PLoanDbContext : DbContext
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<WalletProvider> WalletProviders { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
 }
 

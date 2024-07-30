@@ -31,7 +31,6 @@ public class DbInitializer
 
     private async static Task SeedData(ISeederHandler seederHandler)
     {
-        Console.WriteLine("made it here");
         await seederHandler.seed();
     }
 }

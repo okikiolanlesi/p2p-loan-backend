@@ -21,7 +21,8 @@ public class P_1_UserSeeder : ISeeder
         {
             FirstName = constants.SYSTEM_USER_FIRST_NAME,
             LastName = constants.SYSTEM_USER_LAST_NAME,
-            Email = constants.SYSTEM_USER_EMAIL
+            Email = constants.SYSTEM_USER_EMAIL,
+            UserType = UserType.admin
         };
 
         userRepository.Add(systemUser);

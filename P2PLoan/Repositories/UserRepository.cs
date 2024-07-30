@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -50,5 +51,10 @@ public class UserRepository : IUserRepository
     public void MarkAsModified(User user)
     {
         dbContext.Entry(user).State = EntityState.Modified;
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await dbContext.Database.BeginTransactionAsync();
     }
 }

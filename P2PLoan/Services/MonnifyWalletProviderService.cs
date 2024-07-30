@@ -26,4 +26,11 @@ public class MonnifyWalletProviderService : IWalletProviderService
 
         return mapper.Map<GetBalanceResponseDto>(walletBalance);
     }
+
+    public async Task<GetTransactionsResponseDto> GetTransactions(string walletUniqueReference, int pageSize, int pageNo)
+    {
+        var walletTransactions = await monnifyApiService.GetWalletTransactions(walletUniqueReference, pageSize, pageNo);
+
+        return mapper.Map<GetTransactionsResponseDto>(walletTransactions);
+    }
 }

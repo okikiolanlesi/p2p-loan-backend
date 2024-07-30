@@ -39,9 +39,9 @@ public class MonnifyApiService : IMonnifyApiService
     }
 
 
-    public async Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber)
+    public async Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1)
     {
-        var requestUri = $"/api/v1/disbursements/wallet/balance?accountNumber={Uri.EscapeDataString(accountNumber)}";
+        var requestUri = $"/api/v1/disbursements/wallet/balance?accountNumber={Uri.EscapeDataString(accountNumber)},pageSize={Uri.EscapeDataString($"{pageSize}")},pageNo={Uri.EscapeDataString($"{pageNo}")}";
 
         var response = await monnifyClient.Client.GetAsync(requestUri);
 
