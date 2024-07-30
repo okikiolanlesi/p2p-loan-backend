@@ -11,7 +11,7 @@ namespace P2PLoan.Services;
 
 public interface INotificationTemplateVariableService
 {
-    Task<NotificationTemplateVariable> CreateNotificationTemplateVariableAsync(NotificationTemplateVariable notificationTemplateVariable);
+    Task<NotificationTemplateVariable> CreateNotificationTemplateVariableAsync(NotificationTemplateVariableRequestDTO notificationTemplateVariableRequestDTO);
     Task<NotificationTemplateVariable> GetNotificationTemplateVariableByIdAsync(Guid id);
     Task GetAllNotificationTemplateVariableAsync();
     Task<NotificationTemplateVariableRequestDTO> UpdateNotificationTemplateVariableAsync(Guid id, NotificationTemplateVariableRequestDTO notificationTemplateVariableRequestDTO);

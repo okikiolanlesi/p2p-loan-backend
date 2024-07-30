@@ -20,59 +20,23 @@ namespace P2PLoan.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] NotificationTemplateRequestDTO notificationTemplateRequestDTO)
+        public async Task<ActionResult<NotificationTemplate>> Create([FromBody] NotificationTemplateRequestDTO notificationTemplateRequestDTO)
         {
-                if (notificationTemplateRequestDTO == null)
-            {
-                return BadRequest("NotificationTemplateRequestDTO cannot be null.");
-            }
-
-            try
-            {
-                // Map DTO to Entity
-                var notificationTemplate = new NotificationTemplate
-                       {
-                            Id = Guid.NewGuid(),
-                            Title = notificationTemplateRequestDTO.Title,
-                            Name = notificationTemplateRequestDTO.Name,
-                            Description = notificationTemplateRequestDTO.Description,
-                            Content = notificationTemplateRequestDTO.Content,
-                            CreatedAt = DateTime.UtcNow,
-                            ModifiedAt = DateTime.UtcNow,
-                            CreatedById = notificationTemplateRequestDTO.CreatedById,
-                            ModifiedById = notificationTemplateRequestDTO.ModifiedById
-                        };
-
-        // Create the template using the service
-        var createdTemplate = await _notificationTemplateService.CreateNotificationAsync(notificationTemplate);
-
-        // Return CreatedAtAction response
-        return CreatedAtAction(nameof(GetById), new { id = createdTemplate.Id }, createdTemplate);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Internal server error: {ex.Message}");
-    }
+            var notificationTemplate = await _notificationTemplateService.CreateNotificationAsync(notificationTemplateRequestDTO);
+            if (notificationTemplate is null) 
+            return BadRequest("Failed to create notification template.");
+            return StatusCode (201, notificationTemplate);     
+  
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
-            try
-            {
+                     
                 var template = await _notificationTemplateService.GetByIdAsync(id);
-                if (template == null)
-                {
+                if (template is null)
                     return NotFound();
-                }
-
-                return Ok(template);
-            }
-            catch (Exception ex)
-            {
-                // Log exception here
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+                return Ok(template);   
         }
 
         [HttpGet]
@@ -91,41 +55,26 @@ namespace P2PLoan.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] NotificationTemplateRequestDTO notificationTemplateRequestDTO)
+        public async Task<ActionResult<NotificationTemplateRequestDTO>> Update(Guid id, [FromBody] NotificationTemplateRequestDTO notificationTemplateRequestDTO)
         {
-            if (notificationTemplateRequestDTO == null)
+            try
             {
-                return BadRequest("NotificationTemplate cannot be null.");
+                var updateNotification = await _notificationTemplateService.UpdateNotificationAsync(notificationTemplateRequestDTO, id);
+                return StatusCode(201, updateNotification);
+
+
             }
-
-          try
-    {
-        // Map DTO to Entity
-        var notificationTemplate = new NotificationTemplate
-        {
-            Id = id,
-            Title = notificationTemplateRequestDTO.Title,
-            Name = notificationTemplateRequestDTO.Name,
-            Description = notificationTemplateRequestDTO.Description,
-            Content = notificationTemplateRequestDTO.Content,
-            ModifiedAt = DateTime.UtcNow // Update the modified date to current time
-        };
-
-        // Update the template using the service
-        var updatedTemplate = await _notificationTemplateService.UpdateNotificationAsync(notificationTemplate, id);
-
-        if (updatedTemplate == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(updatedTemplate);
-    }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
-                // Log exception here
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                // Log the exception (not shown)
+                return StatusCode(500, "An unexpected error occurred.");
             }
+
+
         }
     }
 }

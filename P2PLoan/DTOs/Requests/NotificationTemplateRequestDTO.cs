@@ -11,5 +11,6 @@ public class NotificationTemplateRequestDTO
     public string Content { get; set; }
     public Guid CreatedById { get; set; }
     public Guid ModifiedById { get; set; }
+   
 }
 

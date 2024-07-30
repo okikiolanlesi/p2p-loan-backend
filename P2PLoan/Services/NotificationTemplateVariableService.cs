@@ -13,26 +13,58 @@ namespace P2PLoan.Services;
 
 public class NotificationTemplateVariableService : INotificationTemplateVariableService
 {
-    private readonly INotificationTemplateVariableRepository notificationTemplateVariableRepository;
+     private readonly INotificationTemplateVariableRepository notificationTemplateVariableRepository;
+     private readonly INotificationTemplateRepository notificationTemplateRepository;
 
   
 
-    public NotificationTemplateVariableService( INotificationTemplateVariableRepository notificationTemplateVariableRepository)
+    public NotificationTemplateVariableService( INotificationTemplateVariableRepository notificationTemplateVariableRepository,INotificationTemplateRepository notificationTemplateRepository)
     {
         this.notificationTemplateVariableRepository= notificationTemplateVariableRepository;
+         this.notificationTemplateRepository = notificationTemplateRepository;
 
     }
-    public async Task<NotificationTemplateVariable> CreateNotificationTemplateVariableAsync(NotificationTemplateVariable notificationTemplateVariable)
+    public async Task<NotificationTemplateVariable> CreateNotificationTemplateVariableAsync(NotificationTemplateVariableRequestDTO notificationTemplateVariableRequestDTO)
     {
-         if (notificationTemplateVariable == null)
-    {
-        throw new ArgumentNullException(nameof(notificationTemplateVariable));
-    }
+         if (notificationTemplateVariableRequestDTO == null)
+            {
+                throw new ArgumentNullException(nameof(notificationTemplateVariableRequestDTO));
+            }
+            
+       var notificationTemplate = await notificationTemplateRepository.GetByIdAsync(notificationTemplateVariableRequestDTO.NotificationTemplateId);
+          
+            if (notificationTemplate is null)
+            {
+                throw new ArgumentException("fhfh");
+            }
 
-        var createdTemplate = await notificationTemplateVariableRepository.CreateAsync(notificationTemplateVariable);
-        return createdTemplate;
+                // Log incoming request DTO
+                Console.WriteLine($"Received DTO: Name = {notificationTemplateVariableRequestDTO.Name}, Description = {notificationTemplateVariableRequestDTO.Description}");
+
+                // Map DTO to Entity
+                var notificationTemplateVariable = new NotificationTemplateVariable
+                {
+                    Name = notificationTemplateVariableRequestDTO.Name,
+                    Description = notificationTemplateVariableRequestDTO.Description,
+                    CreatedAt = DateTime.UtcNow,
+                    ModifiedAt = DateTime.UtcNow,
+                    CreatedById = notificationTemplateVariableRequestDTO.CreatedById,
+                    ModifiedById = notificationTemplateVariableRequestDTO.ModifiedById,
+                    NotificationTemplate = notificationTemplate
+                };
+            
+                // Create the template using the service
+                var createdTemplate = await notificationTemplateVariableRepository.CreateAsync(notificationTemplateVariable);
+
+                // Log created entity properties
+                Console.WriteLine($"Created Entity: Id = {createdTemplate?.Id}, Name = {createdTemplate?.Name}, Description = {createdTemplate?.Description}, CreatedAt = {createdTemplate?.CreatedAt}, ModifiedAt = {createdTemplate?.ModifiedAt}");
+
+                // Return the created entity
+                return  createdTemplate;
         
     }
+
+   
 
     public Task DeleteNotificationTemplateVariableAsync()
     {

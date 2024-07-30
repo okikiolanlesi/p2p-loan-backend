@@ -50,7 +50,7 @@ public class NotificationTemplateRepository : INotificationTemplateRepository
         return await dbContext.NotificationTemplates.ToListAsync();
     }
 
-    public async Task<NotificationTemplate?> GetByIdAsync( Guid id)
+    public async Task<NotificationTemplate> GetByIdAsync( Guid id)
     {
         return await dbContext.NotificationTemplates
                 .FirstOrDefaultAsync(n => n.Id == id);

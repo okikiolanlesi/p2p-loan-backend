@@ -28,50 +28,10 @@ namespace P2PLoan.Controllers
         [HttpPost]
         public async Task<ActionResult<NotificationTemplateVariable>> Create([FromBody] NotificationTemplateVariableRequestDTO notificationTemplateVariableRequestDTO)
         {
-            if (notificationTemplateVariableRequestDTO == null)
-            {
-                return BadRequest("NotificationTemplateRequestDTO cannot be null.");
-            }
-            var notificationTemplate = await notificationTemplateRepository.GetByIdAsync(notificationTemplateVariableRequestDTO.NotificationTemplateId);
-            if (notificationTemplate is null)
-            {
-                return BadRequest("Notification Template does not exist");
-            }
+            var createTemplateVariable = await notificationTemplateVariableService.CreateNotificationTemplateVariableAsync(notificationTemplateVariableRequestDTO);
+            if (createTemplateVariable == null)  return NotFound();
+            return Ok(createTemplateVariable);         
 
-            try
-            {
-                // Log incoming request DTO
-                Console.WriteLine($"Received DTO: Name = {notificationTemplateVariableRequestDTO.Name}, Description = {notificationTemplateVariableRequestDTO.Description}");
-
-                // Map DTO to Entity
-                var notificationTemplateVariable = new NotificationTemplateVariable
-                {
-                    Name = notificationTemplateVariableRequestDTO.Name,
-                    Description = notificationTemplateVariableRequestDTO.Description,
-                    CreatedAt = DateTime.UtcNow,
-                    ModifiedAt = DateTime.UtcNow,
-                    CreatedById = notificationTemplateVariableRequestDTO.CreatedById,
-                    ModifiedById = notificationTemplateVariableRequestDTO.ModifiedById,
-                    NotificationTemplate = notificationTemplate
-                };
-
-                // Log mapped entity properties
-                Console.WriteLine($"Mapped Entity: Id = {notificationTemplateVariable.Id}, Name = {notificationTemplateVariable.Name}, Description = {notificationTemplateVariable.Description}, CreatedAt = {notificationTemplateVariable.CreatedAt}, ModifiedAt = {notificationTemplateVariable.ModifiedAt},CreatedById={notificationTemplateVariable.CreatedById}");
-
-                // Create the template using the service
-                var createdTemplate = await notificationTemplateVariableService.CreateNotificationTemplateVariableAsync(notificationTemplateVariable);
-
-                // Log created entity properties
-                Console.WriteLine($"Created Entity: Id = {createdTemplate?.Id}, Name = {createdTemplate?.Name}, Description = {createdTemplate?.Description}, CreatedAt = {createdTemplate?.CreatedAt}, ModifiedAt = {createdTemplate?.ModifiedAt}");
-
-                // Return the created entity
-                return  createdTemplate;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
         }
 
         [HttpGet("{id}")]
