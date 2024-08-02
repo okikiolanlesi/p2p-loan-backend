@@ -162,6 +162,10 @@ public class AuthService : IAuthService
                     WalletProviderId = walletProvider.Id,
                     AccountNumber = createdWalletInfo.AccountNumber,
                     ReferenceId = $"{walletReferenceId}",
+                    TopUpAccountName = createdWalletInfo.TopUpAccountName,
+                    TopUpAccountNumber = createdWalletInfo.TopUpAccountNumber,
+                    TopUpBankName = createdWalletInfo.TopUpBankName,
+                    TopUpBankCode = createdWalletInfo.TopUpBankCode,
                     CreatedById = user.Id,
                     ModifiedById = user.Id,
                 };
