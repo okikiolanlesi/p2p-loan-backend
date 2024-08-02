@@ -6,7 +6,7 @@ using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 
-namespace P2PLoan;
+namespace P2PLoan.Repositories;
 
 public class PermissionRepository : IPermissionRepository
 {

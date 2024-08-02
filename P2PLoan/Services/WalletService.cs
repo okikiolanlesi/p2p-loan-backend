@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
+using P2PLoan.Constants;
+using P2PLoan.DTOs;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 
-namespace P2PLoan
+namespace P2PLoan.Services
 {
     public class WalletService : IWalletService
     {
@@ -26,13 +28,13 @@ namespace P2PLoan
 
             if (providerService == null)
             {
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
             var createWalletResponse = await providerService.Create(createWalletDto);
             if (createWalletResponse == null)
             {
-                return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
             }
 
             var wallet = new Wallet
@@ -50,10 +52,10 @@ namespace P2PLoan
 
             if (!result)
             {
-                return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
             }
 
-            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Wallet created successfully", wallet);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallet created successfully", wallet);
         }
 
         public async Task<CreateWalletResponse> Create(WalletProviders walletProvider, CreateWalletDto createWalletDto)
@@ -71,8 +73,11 @@ namespace P2PLoan
                 throw new Exception("Unable to create wallet");
 
             }
+            var result = mapper.Map<CreateWalletResponse>(response);
 
-            return mapper.Map<CreateWalletResponse>(response);
+            result.Created = true;
+
+            return result;
         }
 
         public async Task<ServiceResponse<object>> GetBalanceForController(WalletProviders walletProvider, string walletUniqueReference)
@@ -80,7 +85,7 @@ namespace P2PLoan
             var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
 
             var balanceResponse = await providerService.GetBalance(walletUniqueReference);
-            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", balanceResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", balanceResponse);
         }
         public async Task<GetBalanceResponseDto> GetBalance(WalletProviders walletProvider, string walletUniqueReference)
         {
@@ -95,12 +100,12 @@ namespace P2PLoan
             var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
             if (providerService == null)
             {
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidProvider, "Invalid wallet provider", null);
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
             var transactionsResponse = await providerService.GetTransactions(accountNumber, pageSize, pageNo);
 
-            return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Balance fetched successfully", transactionsResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", transactionsResponse);
         }
 
         public Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)

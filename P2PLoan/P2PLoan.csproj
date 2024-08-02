@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="Requirements\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 

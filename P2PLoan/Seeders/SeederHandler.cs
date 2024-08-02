@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using P2PLoan.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using P2PLoan.Models;
 
 namespace P2PLoan.Seeders;
 

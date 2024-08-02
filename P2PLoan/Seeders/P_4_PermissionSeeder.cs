@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
-using P2PLoan.Repositories;
 
 namespace P2PLoan.Seeders;
 
@@ -37,7 +36,7 @@ public class P_4_PermissionSeeder : ISeeder
             {
                 permissions.Add(new Permission
                 {
-                    Id = new Guid(),
+                    Id = Guid.NewGuid(),
                     ModuleId = module.Id,
                     Action = permissionAction,
                     CreatedBy = systemUser,

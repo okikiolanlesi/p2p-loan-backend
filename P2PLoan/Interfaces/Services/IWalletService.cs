@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using P2PLoan.DTOs;
 using P2PLoan.Helpers;
 using P2PLoan.Models;
 

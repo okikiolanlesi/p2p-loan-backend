@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace P2PLoan;
+namespace P2PLoan.Constants;
 
-public enum StatusCodes
+public enum AppStatusCodes
 {
     Success = 0000,
     BvnNotVerified = 0001,
@@ -16,5 +16,6 @@ public enum StatusCodes
     ValidationError = 0009,
     ResourceNotFound = 0010,
     InvalidProvider = 0011,
+    Unauthorized = 0012,
     InternalServerError = 9999,
 }

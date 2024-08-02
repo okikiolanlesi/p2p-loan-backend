@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+// using FluentValidation;
+// using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,6 +24,15 @@ using P2PLoan.Seeders;
 using P2PLoan.Services;
 using P2PLoan.Validators;
 using Azure.Identity;
+using Microsoft.AspNetCore.Authorization;
+using P2PLoan.Helpers;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using P2PLoan.Providers;
+using P2PLoan.Constants;
+using P2PLoan.Models;
+using P2PLoan.Requirements;
+using P2PLoan.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,10 +66,14 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-});
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        }).AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
+        }); ;
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -76,21 +88,43 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.Events = new JwtBearerEvents
         {
-            OnAuthenticationFailed = context =>
+            OnAuthenticationFailed = async context =>
             {
-                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                // This should handle cases like invalid tokens or malformed tokens.
+                if (context.Exception is SecurityTokenExpiredException)
                 {
                     context.Response.Headers.Append("Token-Expired", "true");
-                    context.Response.StatusCode = 401;
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    var responseBody = JsonConvert.SerializeObject(new ServiceResponse<object>(ResponseStatus.Unauthorized, AppStatusCodes.Unauthorized, "Token expired", null));
+                    await context.Response.WriteAsync(responseBody);
                 }
-                return Task.CompletedTask;
+                else
+                {
+                    context.Response.Headers.Append("Authentication-Failed", "true");
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    var responseBody = JsonConvert.SerializeObject(new ServiceResponse<object>(ResponseStatus.Unauthorized, AppStatusCodes.Unauthorized, "Authentication failed", null));
+                    await context.Response.WriteAsync(responseBody);
+                }
+                return;
             },
             OnChallenge = async context =>
             {
+                // This should handle cases where no authentication was provided.
                 context.HandleResponse();
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
-                var responseBody = JsonConvert.SerializeObject(new { message = "Unauthorized" });
+                var responseBody = JsonConvert.SerializeObject(new ServiceResponse<object>(ResponseStatus.Unauthorized, AppStatusCodes.Unauthorized, "Unauthorized", null));
+                await context.Response.WriteAsync(responseBody);
+                return;
+            },
+            OnForbidden = async context =>
+            {
+                // This handles cases where authentication succeeded but the user lacks permissions.
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                var responseBody = JsonConvert.SerializeObject(new ServiceResponse<object>(ResponseStatus.Forbidden, AppStatusCodes.Unauthorized, "You are not allowed to use this feature", null));
                 await context.Response.WriteAsync(responseBody);
                 return;
             }
@@ -98,7 +132,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
     });
 
+builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("PermissionPolicy", policy =>
+            {
+                policy.Requirements.Add(new PermissionRequirement(Modules.notification, PermissionAction.create, UserType.borrower)); // Dummy requirement to force the handler to run
+            });
+        });
+
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddHttpContextAccessor();
+;
 
 builder.Services.AddDbContext<P2PLoanDbContext>(opt =>
 {
@@ -115,11 +162,14 @@ builder.Services.AddSingleton<IEmailService>(provider =>
     return new EmailService(templatesFolderPath, logger, builder.Configuration);
 });
 
-builder.Services
-.AddFluentValidationAutoValidation();
+// builder.Services
+// .AddFluentValidationAutoValidation();
 
-builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new P2PLoan.Clients.TokenHandler("/api/v1/auth/login", builder.Configuration["Monnify:APIKey"], builder.Configuration["Monnify:SecretKey"]))
+builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new P2PLoan.Clients.TokenHandler("/api/v1/auth/login", builder.Configuration["Monnify:APIKey"], builder.Configuration["Monnify:SecretKey"], builder.Configuration["Monnify:BaseUrl"]))
 ;
+
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>();
+
 
 // Seeders
 builder.Services.AddScoped<P_1_UserSeeder>();
@@ -129,7 +179,7 @@ builder.Services.AddScoped<P_4_PermissionSeeder>();
 builder.Services.AddScoped<P_5_RoleSeeder>();
 
 
-builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+// builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ISeedRepository, SeedRepository>();
@@ -142,6 +192,7 @@ builder.Services.AddScoped<IConstants, Constants>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific wallet provider services are registered
 builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
 builder.Services.AddScoped<IWalletService, WalletService>();
@@ -164,6 +215,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+app.UseCustomExceptionHandler();
 
 try
 {

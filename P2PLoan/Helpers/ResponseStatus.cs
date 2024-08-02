@@ -8,5 +8,6 @@ public enum ResponseStatus
     NotFound,
     Unauthorized,
     BadRequest,
-    Accepted
+    Accepted,
+    Forbidden
 }

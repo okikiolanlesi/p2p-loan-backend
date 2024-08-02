@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
+
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using P2PLoan.Constants;
+using P2PLoan.Helpers;
 
-namespace P2PLoan;
+namespace P2PLoan.Middlewares;
 
 public class ExceptionHandlingMiddleware
 {
@@ -32,63 +32,33 @@ public class ExceptionHandlingMiddleware
         {
             _logger.LogError(e, "Exception occurred: {Message}", e.Message);
 
-            var exceptionDetails = GetExceptionDetails(e);
+            // var exceptionDetails = GetExceptionDetails(e);
 
-            var problemDetails = new ProblemDetails
-            {
-                Status = exceptionDetails.Status,
-                Type = exceptionDetails.Type,
-                Title = exceptionDetails.Title,
-                Detail = exceptionDetails.Detail,
-            };
+            context.Response.StatusCode = 500;
 
-            if (exceptionDetails.Errors is not null)
-            {
-                problemDetails.Extensions["errors"] = exceptionDetails.Errors;
-            }
-
-            context.Response.StatusCode = exceptionDetails.Status;
-
-            await context.Response.WriteAsJsonAsync(problemDetails);
+            await context.Response.WriteAsJsonAsync(new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "An unexpected error has occurred", null));
         }
     }
 
-    private static ExceptionDetails GetExceptionDetails(Exception exception)
-    {
-        return exception switch
-        {
-            ValidationException validationException => new ExceptionDetails(
-                            (int)HttpStatusCode.BadRequest,
-                            "ValidationFailure",
-                            "Validation error",
-                            "One or more validation errors has occurred",
-                            validationException.Errors),
-            _ => new ExceptionDetails(
-                            (int)HttpStatusCode.InternalServerError,
-                "ServerError",
-                "Server error",
-                "An unexpected error has occurred",
-                null)
-        };
-    }
+    // private static ServiceResponse<object> GetExceptionDetails(Exception exception)
+    // {
+    //     return exception switch
+    //     {
+    //         ValidationException validationException => new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.ValidationError, "Validation Error", null),
+    //         _ => new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "An unexpected error has occurred", null)
+    //     };
+    // }
 
-    private sealed class ValidationException : Exception
-    {
-        public ValidationException(IEnumerable<ValidationError> errors)
-        {
-            Errors = errors;
-        }
+    // private sealed class ValidationException : Exception
+    // {
+    //     public ValidationException(IEnumerable<ValidationError> errors)
+    //     {
+    //         Errors = errors;
+    //     }
 
-        public IEnumerable<ValidationError> Errors { get; }
-    }
+    //     public IEnumerable<ValidationError> Errors { get; }
+    // }
 
-    private sealed record ValidationError(string PropertyName, string ErrorMessage);
+    // private sealed record ValidationError(string PropertyName, string ErrorMessage);
 
-    internal record ExceptionDetails(
-        int Status,
-        string Type,
-        string Title,
-        string Detail,
-        IEnumerable<object> Errors
-        );
 }

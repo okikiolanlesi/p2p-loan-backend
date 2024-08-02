@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
+using P2PLoan.Models;
 
 namespace P2PLoan.Interfaces;
 

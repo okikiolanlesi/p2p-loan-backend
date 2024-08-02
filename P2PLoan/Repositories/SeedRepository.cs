@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
+using P2PLoan.Models;
 
 namespace P2PLoan.Repositories;
 

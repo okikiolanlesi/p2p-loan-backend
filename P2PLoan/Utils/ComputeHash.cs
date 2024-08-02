@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace P2PLoan;
+namespace P2PLoan.Utils;
 
 public static class ComputeHash
 {

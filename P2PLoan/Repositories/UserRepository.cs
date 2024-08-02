@@ -18,7 +18,7 @@ public class UserRepository : IUserRepository
         this.dbContext = dbContext;
         this.constants = constants;
     }
-    public async Task<User?> FindByEmail(string email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         return await dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
     }

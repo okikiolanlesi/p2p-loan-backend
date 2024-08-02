@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
+using P2PLoan.DTOs;
+using P2PLoan.Interfaces;
 
-namespace P2PLoan;
+namespace P2PLoan.Services;
 
 public class MonnifyWalletProviderService : IWalletProviderService
 {

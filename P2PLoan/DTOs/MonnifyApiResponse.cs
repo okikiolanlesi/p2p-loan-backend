@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace P2PLoan;
+namespace P2PLoan.DTOs;
 
 public class MonnifyApiResponse<T>
 {

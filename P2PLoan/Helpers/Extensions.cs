@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
+using P2PLoan.Middlewares;
 
 namespace P2PLoan.Helpers
 {

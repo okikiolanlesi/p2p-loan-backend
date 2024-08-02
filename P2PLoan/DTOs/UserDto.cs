@@ -14,6 +14,8 @@ public class UserDto
     public bool BVNVerified { get; set; }
     public bool EmailConfirmed { get; set; }
     public bool PinCreated { get; set; }
+    public UserType UserType { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
     //Navigation properties

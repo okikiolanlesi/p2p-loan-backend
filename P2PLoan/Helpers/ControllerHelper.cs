@@ -1,8 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using P2PLoan.Helpers;
 
-namespace P2PLoan;
+namespace P2PLoan.Helpers;
 
 public class ControllerHelper
 {
@@ -26,6 +25,10 @@ public class ControllerHelper
                 StatusCode = 202,
             },
             ResponseStatus.BadRequest => new BadRequestObjectResult(response),
+            ResponseStatus.Forbidden => new ObjectResult(response)
+            {
+                StatusCode = 403,
+            },
             _ => new StatusCodeResult(500)
         };
     }

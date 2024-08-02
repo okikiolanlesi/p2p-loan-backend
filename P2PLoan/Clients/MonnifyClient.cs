@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using P2PLoan.DTOs;
 
 namespace P2PLoan.Clients;
 
@@ -14,12 +16,10 @@ public class MonnifyClient
     private readonly IConfiguration configuration;
 
     public HttpClient Client { get; }
-    public MonnifyClient(IConfiguration configuration)
+
+    public MonnifyClient(HttpClient client, IConfiguration configuration)
     {
         this.configuration = configuration;
-    }
-    public MonnifyClient(HttpClient client)
-    {
         Client = client;
         Client.BaseAddress = new Uri(configuration["Monnify:BaseUrl"]);
         Client.Timeout = new TimeSpan(0, 0, 30);
@@ -32,17 +32,20 @@ public class TokenHandler : DelegatingHandler
     private readonly string _tokenUrl;
     private readonly string _clientId;
     private readonly string _clientSecret;
+    private readonly IConfiguration configuration;
     private string _accessToken;
     private DateTime _tokenExpiration;
     private readonly HttpClient _authClient;
     private readonly SemaphoreSlim _tokenSemaphore = new SemaphoreSlim(1, 1);
 
-    public TokenHandler(string tokenUrl, string clientId, string clientSecret)
+    public TokenHandler(string tokenUrl, string clientId, string clientSecret, string baseUrl)
     {
         _tokenUrl = tokenUrl;
         _clientId = clientId;
         _clientSecret = clientSecret;
+        this.configuration = configuration;
         _authClient = new HttpClient();
+        _authClient.BaseAddress = new Uri(baseUrl);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -54,7 +57,12 @@ public class TokenHandler : DelegatingHandler
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
 
+        var requestBody = request.Content.ReadAsStringAsync();
+
         var response = await base.SendAsync(request, cancellationToken);
+
+        var content = await response.Content.ReadAsStringAsync();
+
 
         // If the token has expired, fetch a new one and retry the request
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -82,7 +90,8 @@ public class TokenHandler : DelegatingHandler
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var tokenResponse = JsonSerializer.Deserialize<MonnifyApiResponse<TokenResponseBody>>(content);
+
+                var tokenResponse = JsonConvert.DeserializeObject<MonnifyApiResponse<TokenResponseBody>>(content);
 
                 _accessToken = tokenResponse.ResponseBody.AccessToken;
                 _tokenExpiration = DateTime.UtcNow.AddSeconds(tokenResponse.ResponseBody.ExpiresIn - 60); // Subtract 60 seconds for buffer

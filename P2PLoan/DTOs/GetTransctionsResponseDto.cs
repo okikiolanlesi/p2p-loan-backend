@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace P2PLoan;
+namespace P2PLoan.DTOs;
 
 public class GetTransactionsResponseDto
 {

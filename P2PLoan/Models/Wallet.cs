@@ -1,7 +1,7 @@
 ﻿using System;
 using P2PLoan.Models;
 
-namespace P2PLoan;
+namespace P2PLoan.Models;
 
 public class Wallet : AuditableEntity
 {

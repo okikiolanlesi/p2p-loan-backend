@@ -1,18 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using P2PLoan.Attributes;
+using P2PLoan.Constants;
 using P2PLoan.DTOs;
+using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
-using P2PLoan.Repositories;
-using P2PLoan.Services;
 
 namespace P2PLoan.Controllers;
 
@@ -42,10 +37,10 @@ public class AuthController : ControllerBase
 
     }
 
-    [HttpGet("verify-email")]
-    public async Task<IActionResult> VerifyEmail([FromQuery] Guid userId, [FromQuery] string token)
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailRequestDto verifyEmailDto)
     {
-        var response = await authService.VerifyEmail(userId, token);
+        var response = await authService.VerifyEmail(verifyEmailDto);
         return ControllerHelper.HandleApiResponse(response);
     }
 
@@ -63,6 +58,14 @@ public class AuthController : ControllerBase
     {
         var response = await authService.ResetPassword(resetPasswordDto);
         return ControllerHelper.HandleApiResponse(response);
+    }
+    [HttpGet]
+    [Route("test")]
+    // [Authorize]
+    [Permission(Modules.user, PermissionAction.create, UserType.lender)]
+    public async Task<IActionResult> Test()
+    {
+        return Ok("Working");
     }
 
 }

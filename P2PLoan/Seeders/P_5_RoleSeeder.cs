@@ -26,7 +26,7 @@ public class P_5_RoleSeeder : ISeeder
 
         var adminRole = new Role
         {
-            Id = new Guid(),
+            Id = Guid.NewGuid(),
             Name = "Super Admin",
             Description = "Role for super admins",
             CreatedBy = systemUser,
@@ -45,7 +45,7 @@ public class P_5_RoleSeeder : ISeeder
         {
             permissionsForSuperAdmin.Add(new RolePermission
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Role = adminRole,
                 Permission = permission,
                 CreatedBy = systemUser,

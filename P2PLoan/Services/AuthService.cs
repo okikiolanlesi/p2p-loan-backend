@@ -8,13 +8,14 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 using P2PLoan.Utils;
 
-namespace P2PLoan;
+namespace P2PLoan.Services;
 
 public class AuthService : IAuthService
 {
@@ -41,17 +42,23 @@ public class AuthService : IAuthService
 
     public async Task<ServiceResponse<object>> Register(RegisterRequestDto registerDto)
     {
+
+        if (registerDto.UserType != UserType.borrower && registerDto.UserType != UserType.lender)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid user type", null);
+        }
+
         // Start a transaction
         using (var transaction = await userRepository.BeginTransactionAsync())
         {
             try
             {
                 // Checking if user doesn't already exists with that email
-                var alreadyExistingUser = await userRepository.FindByEmail(registerDto.Email);
+                var alreadyExistingUser = await userRepository.GetByEmailAsync(registerDto.Email);
 
                 if (alreadyExistingUser != null && alreadyExistingUser.EmailConfirmed)
                 {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.AlreadyExists, "User already exists", null);
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "User already exists", null);
                 }
 
                 //Check if wallet provider exists
@@ -59,7 +66,7 @@ public class AuthService : IAuthService
 
                 if (walletProvider is null || !walletProvider.Enabled)
                 {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.ResourceNotFound, "Invalid Wallet Provider Selected", null);
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Invalid Wallet Provider Selected", null);
                 }
 
                 // Try to verify bvn
@@ -67,7 +74,7 @@ public class AuthService : IAuthService
 
                 if (!bvnIsVerified)
                 {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.BvnNotVerified, "Unable to verify bvn details", null);
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.BvnNotVerified, "Unable to verify bvn details", null);
                 }
 
                 User user;
@@ -77,7 +84,7 @@ public class AuthService : IAuthService
                     // Map from dto to user model
                     user = mapper.Map<User>(registerDto);
 
-                    user.Id = new Guid();
+                    user.Id = Guid.NewGuid();
 
                     // Hashing the password before saving in the database
                     user.Password = HashPassword(registerDto.Password);
@@ -121,16 +128,16 @@ public class AuthService : IAuthService
                 }
                 catch
                 {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.ValidationError, "Invalid BVN date of birth format", null);
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid BVN date of birth format", null);
                 }
 
-                var walletReferenceId = new Guid();
+                var walletReferenceId = Guid.NewGuid();
                 CreateWalletDto createWalletDto = new CreateWalletDto
                 {
                     WalletReference = $"{walletReferenceId}",
                     WalletName = $"P2PLoan Wallet - {user.Id}",
                     CustomerName = $"{user.FirstName} {user.LastName}",
-                    BVNDetails = new BVNDetails
+                    BvnDetails = new BVNDetails
                     {
                         Bvn = registerDto.BVN,
                         BvnDateOfBirth = bvnDateOfBirth
@@ -147,11 +154,13 @@ public class AuthService : IAuthService
 
                 var wallet = new Wallet
                 {
-                    Id = new Guid(),
+                    Id = Guid.NewGuid(),
                     UserId = user.Id,
                     WalletProviderId = walletProvider.Id,
                     AccountNumber = createdWalletInfo.AccountNumber,
                     ReferenceId = $"{walletReferenceId}",
+                    CreatedById = user.Id,
+                    ModifiedById = user.Id,
                 };
 
                 walletRepository.Add(wallet);
@@ -182,8 +191,10 @@ public class AuthService : IAuthService
                     Console.WriteLine("Failed to send verification email");
                 }
 
+                // Commit transaction if it gets to this point
+                await transaction.CommitAsync();
 
-                return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Registered successfully", new
+                return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Registered successfully", new
                 {
                     user = mapper.Map<UserDto>(user)
                 });
@@ -193,7 +204,7 @@ public class AuthService : IAuthService
                 // Rollback the transaction if any error occurs
                 await transaction.RollbackAsync();
                 Console.WriteLine(ex);
-                return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "An unexpected error occurred", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "An unexpected error occurred", null);
             }
         }
     }
@@ -201,22 +212,22 @@ public class AuthService : IAuthService
     public async Task<ServiceResponse<object>> Login(LoginRequestDto loginDto)
     {
 
-        var user = await userRepository.FindByEmail(loginDto.Email);
+        var user = await userRepository.GetByEmailAsync(loginDto.Email);
 
         if (user is null)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidCredentials, "Invalid credentials", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
         }
 
         // Verifying if password provided matches the saved hashed password
         if (!VerifyPassword(loginDto.Password, user.Password))
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidCredentials, "Invalid credentials", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
         };
 
         if (!user.EmailConfirmed)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.EmailNotVerified, "Email yet to be verified", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.EmailNotVerified, "Email yet to be verified", null);
         }
 
         // Creating JWT
@@ -224,7 +235,7 @@ public class AuthService : IAuthService
 
         var userDto = mapper.Map<UserDto>(user);
 
-        return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Login Successful", new
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Login Successful", new
         {
             message = "Login successfull",
             token,
@@ -233,14 +244,14 @@ public class AuthService : IAuthService
 
     }
 
-    public async Task<ServiceResponse<object>> VerifyEmail(Guid userId, string token)
+    public async Task<ServiceResponse<object>> VerifyEmail(VerifyEmailRequestDto verifyEmailDto)
     {
-        var user = await userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByEmailAsync(verifyEmailDto.Email);
 
-        if (user == null || user.EmailVerificationToken is null || user.EmailVerificationToken != token)
+        if (user == null || user.EmailVerificationToken is null || user.EmailVerificationToken != verifyEmailDto.Token)
         {
             // Invalid or expired token
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidVerificationToken, "Invalid verification token.", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Invalid verification token.", null);
         }
 
         if (user.EmailVerificationTokenExpiration is null || user.EmailVerificationTokenExpiration < DateTime.UtcNow)
@@ -250,7 +261,7 @@ public class AuthService : IAuthService
 
             await userRepository.SaveChangesAsync();
 
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidVerificationToken, "Expired verification token, please register again to verify your email", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Expired verification token, please register again to verify your email", null);
         }
 
         user.EmailConfirmed = true;
@@ -263,10 +274,10 @@ public class AuthService : IAuthService
         var result = await userRepository.SaveChangesAsync();
         if (!result)
         {
-            return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
         }
 
-        return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Email verification successful. You can now log in.", new
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Email verification successful. You can now log in.", new
         {
             user = mapper.Map<UserDto>(user)
         });
@@ -274,11 +285,11 @@ public class AuthService : IAuthService
 
     public async Task<ServiceResponse<object>> ForgotPassword(ForgotPasswordRequestDto forgotPasswordDto)
     {
-        var user = await userRepository.FindByEmail(forgotPasswordDto.Email);
+        var user = await userRepository.GetByEmailAsync(forgotPasswordDto.Email);
 
         if (user == null)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidCredentials, "User does not exist", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "User does not exist", null);
         }
 
         // Generate a unique token for resetting password
@@ -290,7 +301,7 @@ public class AuthService : IAuthService
         var result = await userRepository.SaveChangesAsync();
         if (!result)
         {
-            return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
         }
 
         // Send the reset link via email
@@ -302,17 +313,17 @@ public class AuthService : IAuthService
             user.Email,
         });
 
-        return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Password reset email sent", null);
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Password reset email sent", null);
     }
 
     public async Task<ServiceResponse<object>> ResetPassword([FromBody] ResetPasswordRequestDto resetPasswordDto)
     {
-        var user = await userRepository.FindByEmail(resetPasswordDto.Email);
+        var user = await userRepository.GetByEmailAsync(resetPasswordDto.Email);
 
         if (user == null || user.PasswordResetTokenExpiration < DateTime.UtcNow)
         {
             // Token is invalid or expired
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidVerificationToken, "Invalid or expired token", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Invalid or expired token", null);
         }
 
         // Reset password
@@ -324,10 +335,10 @@ public class AuthService : IAuthService
         var result = await userRepository.SaveChangesAsync();
         if (!result)
         {
-            return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Something went wrong", null);
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
         }
 
-        return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Password reset successful", null);
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Password reset successful", null);
     }
 
     private string CreateJwtToken(User user)
@@ -384,16 +395,16 @@ public class AuthService : IAuthService
     {
 
         // Checking if user exists with that email
-        var user = await userRepository.FindByEmail(email);
+        var user = await userRepository.GetByEmailAsync(email);
 
         if (user is null)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.InvalidCredentials, "Invalid credentials", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
         }
 
         if (user != null && user.EmailConfirmed)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, StatusCodes.AlreadyExists, "Email already verified", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "Email already verified", null);
         }
 
         // Set email verification data
@@ -418,9 +429,9 @@ public class AuthService : IAuthService
             Console.WriteLine(e);
             Console.WriteLine("Failed to send verification email");
 
-            return new ServiceResponse<object>(ResponseStatus.Error, StatusCodes.InternalServerError, "Unable to send verification email", null);
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Unable to send verification email", null);
         }
 
-        return new ServiceResponse<object>(ResponseStatus.Success, StatusCodes.Success, "Verification email successfully", null);
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Verification email successfully", null);
     }
 }

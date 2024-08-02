@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
+using P2PLoan.Models;
 
-namespace P2PLoan;
+namespace P2PLoan.Repositories;
 
 public class WalletRepository : IWalletRepository
 {

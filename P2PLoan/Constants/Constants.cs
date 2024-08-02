@@ -1,7 +1,7 @@
 ﻿using System;
 using P2PLoan.Interfaces;
 
-namespace P2PLoan;
+namespace P2PLoan.Constants;
 
 public class Constants : IConstants
 {

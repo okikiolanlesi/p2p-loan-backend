@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
+using P2PLoan.Models;
+using P2PLoan.Services;
 
-namespace P2PLoan
+namespace P2PLoan.Helpers
 {
     public class WalletProviderServiceFactory : IWalletProviderServiceFactory
     {

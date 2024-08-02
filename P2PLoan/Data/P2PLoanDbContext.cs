@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using P2PLoan.Constants;
 using P2PLoan.Models;
 
 namespace P2PLoan.Data;
@@ -20,7 +21,14 @@ public class P2PLoanDbContext : DbContext
         ConfigureEnumConverter<WalletProvider, WalletProviders>(modelBuilder, e => e.Slug);
         ConfigureEnumConverter<Permission, PermissionAction>(modelBuilder, e => e.Action);
         ConfigureEnumConverter<User, UserType>(modelBuilder, e => e.UserType);
+        ConfigureEnumConverter<Module, Modules>(modelBuilder, e => e.Identifier);
 
+        //Cocnfigure unique properties on tables
+        ConfigureUniqueProperty<Module>(modelBuilder, x => x.Identifier);
+        ConfigureUniqueProperty<User>(modelBuilder, x => x.Email);
+        ConfigureUniqueProperty<WalletProvider>(modelBuilder, x => x.Slug);
+
+        //Configure auditable entity
         ConfigureAuditableEntity<Module>(modelBuilder);
         ConfigureAuditableEntity<Permission>(modelBuilder);
         ConfigureAuditableEntity<Role>(modelBuilder);
@@ -48,6 +56,12 @@ public class P2PLoanDbContext : DbContext
         modelBuilder.Entity<TEntity>()
             .Property(propertyExpression)
             .HasConversion<string>(); // Convert enum to string
+    }
+    private void ConfigureUniqueProperty<TEntity>(ModelBuilder modelBuilder, Expression<Func<TEntity, object>> propertyExpression) where TEntity : class
+    {
+        modelBuilder.Entity<TEntity>()
+            .HasIndex(propertyExpression)
+            .IsUnique();
     }
 
     public DbSet<User> Users { get; set; }

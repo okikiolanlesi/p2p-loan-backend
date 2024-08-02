@@ -3,9 +3,12 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using P2PLoan.Clients;
+using P2PLoan.DTOs;
+using P2PLoan.Interfaces;
 
-namespace P2PLoan;
+namespace P2PLoan.Services;
 
 public class MonnifyApiService : IMonnifyApiService
 {
@@ -17,7 +20,13 @@ public class MonnifyApiService : IMonnifyApiService
     }
     public async Task<MonnifyApiResponse<MonnifyCreateWalletResponseBody>> CreateWallet(CreateWalletDto createWalletDto)
     {
-        var jsonContent = JsonSerializer.Serialize(createWalletDto);
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(createWalletDto, options);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var response = await monnifyClient.Client.PostAsync("/api/v1/disbursements/wallet", content);
@@ -26,7 +35,7 @@ public class MonnifyApiService : IMonnifyApiService
         {
             // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyCreateWalletResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyCreateWalletResponseBody>>(successContent);
 
             return data;
         }
@@ -48,7 +57,7 @@ public class MonnifyApiService : IMonnifyApiService
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetTransactionsResponseBody>>(successContent);
             return data;
         }
         else
@@ -77,7 +86,7 @@ public class MonnifyApiService : IMonnifyApiService
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<MonnifyApiResponse<MonnifyGetBalanceResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetBalanceResponseBody>>(successContent);
             return data;
         }
         else

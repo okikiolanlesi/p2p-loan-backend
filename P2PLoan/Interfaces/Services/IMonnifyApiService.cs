@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using P2PLoan.DTOs;
 
-namespace P2PLoan;
+namespace P2PLoan.Interfaces;
 
 public interface IMonnifyApiService
 {

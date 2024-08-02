@@ -1,4 +1,5 @@
 ﻿using System;
+using P2PLoan.Constants;
 
 namespace P2PLoan.Helpers;
 
@@ -8,7 +9,7 @@ public class ServiceResponse<T>
     public string StatusCode { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public T? Result { get; set; } = default(T);
-    public ServiceResponse(ResponseStatus status, StatusCodes statusCode, string message, T? result)
+    public ServiceResponse(ResponseStatus status, AppStatusCodes statusCode, string message, T? result)
     {
         Status = status;
         Message = message;
