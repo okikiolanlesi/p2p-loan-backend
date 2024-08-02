@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -27,8 +28,9 @@ public class AuthService : IAuthService
     private readonly IWalletService walletService;
     private readonly IWalletRepository walletRepository;
     private readonly IWalletProviderRepository walletProviderRepository;
+    private readonly IHttpContextAccessor httpContextAccessor;
 
-    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository)
+    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository, IHttpContextAccessor httpContextAccessor)
     {
         this.userRepository = userRepository;
         this.mapper = mapper;
@@ -38,6 +40,7 @@ public class AuthService : IAuthService
         this.walletService = walletService;
         this.walletRepository = walletRepository;
         this.walletProviderRepository = walletProviderRepository;
+        this.httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<ServiceResponse<object>> Register(RegisterRequestDto registerDto)
@@ -339,6 +342,146 @@ public class AuthService : IAuthService
         }
 
         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Password reset successful", null);
+    }
+
+    public async Task<ServiceResponse<object>> CreatePin([FromBody] CreatePinRequestDto createPinDto)
+    {
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        // Check if user already created a pin
+        if (user.PinCreated)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.PinAlreadyCreated, "You already have a pin", null);
+        }
+
+        // Check if pin match
+        if (createPinDto.Pin != createPinDto.ConfirmPin)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Pin does not match", null);
+        }
+
+        //Validate that pin is in the right format
+        var pinOnlyContainsNumbers = Utilities.IsStringNumericRegex(createPinDto.Pin);
+
+        if (!pinOnlyContainsNumbers)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid pin format", null);
+        }
+
+        // Create pin
+        user.PIN = HashPassword(createPinDto.Pin);
+        user.PinCreated = true;
+        user.ModifiedAt = DateTime.UtcNow;
+
+        userRepository.MarkAsModified(user);
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Pin created successfully", null);
+    }
+
+    public async Task<ServiceResponse<object>> ChangePin([FromBody] ChangePinRequestDto changePinDto)
+    {
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        // Check if user has created a pin
+        if (!user.PinCreated)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.NoPinCreated, "User does not have a pin", null);
+        }
+
+        //Confirm if old pin is correct
+        var isOldPinCorrect = VerifyPassword(changePinDto.OldPin, user.PIN);
+
+        if (!isOldPinCorrect)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
+
+        }
+
+        // Check if pin match
+        if (changePinDto.NewPin != changePinDto.ConfirmNewPin)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Pin does not match", null);
+        }
+
+        //Validate that pin is in the right format
+        var pinOnlyContainsNumbers = Utilities.IsStringNumericRegex(changePinDto.NewPin);
+
+        if (!pinOnlyContainsNumbers)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid pin format", null);
+        }
+
+        // Change pin
+        user.PIN = HashPassword(changePinDto.NewPin);
+        user.ModifiedAt = DateTime.UtcNow;
+
+        userRepository.MarkAsModified(user);
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Pin changed successfully", null);
+    }
+
+    public async Task<ServiceResponse<object>> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordDto)
+    {
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        //Confirm if old password is correct
+        var isOldPasswordCorrect = VerifyPassword(changePasswordDto.OldPassword, user.Password);
+
+        if (!isOldPasswordCorrect)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
+
+        }
+
+        // Check if password matches
+        if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Password does not match", null);
+        }
+
+        // Change password
+        user.Password = HashPassword(changePasswordDto.NewPassword);
+        user.ModifiedAt = DateTime.UtcNow;
+
+        userRepository.MarkAsModified(user);
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Password changed successfully", null);
     }
 
     private string CreateJwtToken(User user)

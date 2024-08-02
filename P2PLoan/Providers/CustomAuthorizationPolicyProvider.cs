@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -22,18 +23,22 @@ public class CustomAuthorizationPolicyProvider : IAuthorizationPolicyProvider
         if (policyName.StartsWith("Permission"))
         {
             var parts = policyName.Split(':');
-            if (parts.Length == 4)
+
+            var module = Enum.Parse<Modules>(parts[1]);
+            var action = Enum.Parse<PermissionAction>(parts[2]);
+
+            var userTypes = new List<UserType>();
+
+            for (int i = 3; i < parts.Length; i++)
             {
-                var module = Enum.Parse<Modules>(parts[1]);
-                var action = Enum.Parse<PermissionAction>(parts[2]);
-                var userType = Enum.Parse<UserType>(parts[3]);
-
-                var policy = new AuthorizationPolicyBuilder()
-                    .AddRequirements(new PermissionRequirement(module, action, userType))
-                    .Build();
-
-                return Task.FromResult(policy);
+                userTypes.Add(Enum.Parse<UserType>(parts[i]));
             }
+
+            var policy = new AuthorizationPolicyBuilder()
+                .AddRequirements(new PermissionRequirement(module, action, userTypes))
+                .Build();
+
+            return Task.FromResult(policy);
         }
 
         return BackupPolicyProvider.GetPolicyAsync(policyName);

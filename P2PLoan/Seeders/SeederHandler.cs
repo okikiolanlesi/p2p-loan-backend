@@ -42,6 +42,8 @@ public class SeederHandler : ISeederHandler
 
         Dictionary<string, Seed> executedSeedsDictionary = alreadyExecutedSeeds.ToDictionary(e => e.Name);
 
+        var wereNewSeedsApplied = false;
+
         // Use DbContextTransaction to ensure atomicity of operations
         // using (var transaction = await seedRepository.BeginTransactionAsync())
         // {
@@ -54,6 +56,8 @@ public class SeederHandler : ISeederHandler
                     // Seed already executed, skip
                     continue;
                 }
+                //Track if any new seeds were executed
+                wereNewSeedsApplied = true;
 
                 // Create an instance of the class using the service provider
                 var instance = serviceProvider.GetService(seederType) as ISeeder;
@@ -66,6 +70,10 @@ public class SeederHandler : ISeederHandler
                 await seedRepository.SaveChangesAsync();
             }
 
+            if (!wereNewSeedsApplied)
+            {
+                Console.WriteLine("No seeds were applied. The database is already up to date.");
+            }
             // Commit transaction if all seeds executed successfully
             // await transaction.CommitAsync();
         }

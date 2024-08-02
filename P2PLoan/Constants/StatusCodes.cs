@@ -17,5 +17,6 @@ public enum AppStatusCodes
     ResourceNotFound = 0010,
     InvalidProvider = 0011,
     Unauthorized = 0012,
+    PinAlreadyCreated = 00013,
     InternalServerError = 9999,
 }

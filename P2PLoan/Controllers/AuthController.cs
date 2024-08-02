@@ -59,10 +59,38 @@ public class AuthController : ControllerBase
         var response = await authService.ResetPassword(resetPasswordDto);
         return ControllerHelper.HandleApiResponse(response);
     }
+
+    [HttpPost]
+    [Route("create-pin")]
+    [Authorize]
+    public async Task<IActionResult> CreatePin([FromBody] CreatePinRequestDto createPinRequestDtoPasswordDto)
+    {
+        var response = await authService.CreatePin(createPinRequestDtoPasswordDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpPatch]
+    [Route("change-pin")]
+    [Authorize]
+    public async Task<IActionResult> ChangePin([FromBody] ChangePinRequestDto changePinRequestDto)
+    {
+        var response = await authService.ChangePin(changePinRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpPatch]
+    [Route("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
+    {
+        var response = await authService.ChangePassword(changePasswordRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
     [HttpGet]
     [Route("test")]
     // [Authorize]
-    [Permission(Modules.user, PermissionAction.create, UserType.lender)]
+    [Permission(Modules.user, PermissionAction.create, [UserType.borrower])]
     public async Task<IActionResult> Test()
     {
         return Ok("Working");

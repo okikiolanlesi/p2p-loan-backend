@@ -25,7 +25,6 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
     {
         var user = _httpContextAccessor.HttpContext.User;
 
-        Console.WriteLine("made it here");
         if (user?.Identity == null || !user.Identity.IsAuthenticated)
         {
             context.Fail();
@@ -59,7 +58,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
         var hasPermission = userPermissions.Any(p =>
             p.Module.Identifier == requirement.Module &&
             p.Action == requirement.Action) ||
-            dbUser.UserType == requirement.UserType;
+           requirement.UserTypes.Any(x => x == dbUser.UserType);
 
         if (hasPermission)
         {

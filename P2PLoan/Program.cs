@@ -136,7 +136,7 @@ builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("PermissionPolicy", policy =>
             {
-                policy.Requirements.Add(new PermissionRequirement(Modules.notification, PermissionAction.create, UserType.borrower)); // Dummy requirement to force the handler to run
+                policy.Requirements.Add(new PermissionRequirement(Modules.notification, PermissionAction.create, [UserType.borrower])); // Dummy requirement to force the handler to run
             });
         });
 

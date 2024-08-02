@@ -7,8 +7,15 @@ namespace P2PLoan.Attributes;
 
 public class PermissionAttribute : AuthorizeAttribute
 {
-    public PermissionAttribute(Modules module, PermissionAction action, UserType userType)
+    public PermissionAttribute(Modules module, PermissionAction action, UserType[] userTypes)
     {
-        Policy = $"Permission:{module}:{action}:{userType}";
+        var userTypesString = "";
+
+        foreach (var userType in userTypes)
+        {
+            userTypesString += $":{userType}";
+        }
+
+        Policy = $"Permission:{module}:{action}{userTypesString}";
     }
 }

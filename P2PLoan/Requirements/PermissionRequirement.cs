@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using P2PLoan;
 using P2PLoan.Constants;
@@ -8,12 +9,12 @@ public class PermissionRequirement : IAuthorizationRequirement
 {
     public Modules Module { get; }
     public PermissionAction Action { get; }
-    public UserType UserType { get; }
+    public IEnumerable<UserType> UserTypes { get; }
 
-    public PermissionRequirement(Modules module, PermissionAction action, UserType userType)
+    public PermissionRequirement(Modules module, PermissionAction action, IEnumerable<UserType> userTypes)
     {
         Module = module;
         Action = action;
-        UserType = userType;
+        UserTypes = userTypes;
     }
 }

@@ -12,5 +12,8 @@ public interface IAuthService
     Task<ServiceResponse<object>> VerifyEmail(VerifyEmailRequestDto verifyEmailRequestDto);
     Task<ServiceResponse<object>> ForgotPassword(ForgotPasswordRequestDto forgotPasswordDto);
     Task<ServiceResponse<object>> ResetPassword(ResetPasswordRequestDto resetPasswordDto);
+    Task<ServiceResponse<object>> CreatePin(CreatePinRequestDto createPinRequestDto);
+    Task<ServiceResponse<object>> ChangePin(ChangePinRequestDto changePinRequestDto);
+    Task<ServiceResponse<object>> ChangePassword(ChangePasswordRequestDto changePasswordRequestDto);
     Task<ServiceResponse<object>> SendEmailVerificationEmail(string email);
 }

@@ -11,7 +11,7 @@ public class User
     public string Email { get; set; }
     public string Password { get; set; }
     public UserType UserType { get; set; }
-    public int PIN { get; set; }
+    public string PIN { get; set; }
     public bool PinCreated { get; set; }
     public string BVN { get; set; }
     public string PasswordResetToken { get; set; }

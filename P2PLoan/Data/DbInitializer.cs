@@ -24,7 +24,7 @@ public class DbInitializer
         }
         catch (Exception ex)
         {
-            // Log the error (you could use a logging framework like Serilog or NLog)
+            // Log the error (use a logging framework like Serilog or NLog)
             Console.WriteLine($"An error occurred while migrating or seeding the database: {ex.Message}");
         }
     }

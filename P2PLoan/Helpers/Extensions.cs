@@ -8,11 +8,19 @@ namespace P2PLoan.Helpers
 {
     public static class Extensions
     {
-        public static string GetLoggedInUserId(this ClaimsPrincipal claims)
+        public static Guid GetLoggedInUserId(this ClaimsPrincipal claims)
         {
-            var userId = claims.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            if (string.IsNullOrEmpty(userId))
+            var userIdString = claims.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(userIdString))
                 throw new Exception("Session expired. Please logout and login again");
+
+            var result = Guid.TryParse(userIdString, out var userId);
+
+            if (!result)
+            {
+                throw new Exception("Invaid credentials. Please logout and login again");
+
+            }
             return userId;
         }
 
