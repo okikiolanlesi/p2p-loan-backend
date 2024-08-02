@@ -22,6 +22,11 @@ public class P2PLoanDbContext : DbContext
         ConfigureEnumConverter<Permission, PermissionAction>(modelBuilder, e => e.Action);
         ConfigureEnumConverter<User, UserType>(modelBuilder, e => e.UserType);
         ConfigureEnumConverter<Module, Modules>(modelBuilder, e => e.Identifier);
+        ConfigureEnumConverter<LoanOffer, LoanOfferType>(modelBuilder, e => e.Type);
+        ConfigureEnumConverter<LoanOffer, PaymentFrequency>(modelBuilder, e => e.RepaymentFrequency);
+        ConfigureEnumConverter<LoanRequest, LoanRequestStatus>(modelBuilder, e => e.Status);
+        ConfigureEnumConverter<Loan, LoanStatus>(modelBuilder, e => e.Status);
+        ConfigureEnumConverter<Loan, PaymentFrequency>(modelBuilder, e => e.RepaymentFrequency);
 
         //Cocnfigure unique properties on tables
         ConfigureUniqueProperty<Module>(modelBuilder, x => x.Identifier);
@@ -36,6 +41,9 @@ public class P2PLoanDbContext : DbContext
         ConfigureAuditableEntity<Wallet>(modelBuilder);
         ConfigureAuditableEntity<WalletProvider>(modelBuilder);
         ConfigureAuditableEntity<RolePermission>(modelBuilder);
+        ConfigureAuditableEntity<LoanOffer>(modelBuilder);
+        ConfigureAuditableEntity<LoanRequest>(modelBuilder);
+        ConfigureAuditableEntity<Loan>(modelBuilder);
     }
     private void ConfigureAuditableEntity<TEntity>(ModelBuilder modelBuilder) where TEntity : AuditableEntity
     {
@@ -73,5 +81,8 @@ public class P2PLoanDbContext : DbContext
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<WalletProvider> WalletProviders { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<LoanOffer> LoanOffers { get; set; }
+    public DbSet<LoanRequest> LoanRequests { get; set; }
+    public DbSet<Loan> Loans { get; set; }
 }
 
