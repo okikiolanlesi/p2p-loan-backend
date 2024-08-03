@@ -12,8 +12,8 @@ using P2PLoan.Data;
 namespace P2PLoan.Migrations
 {
     [DbContext(typeof(P2PLoanDbContext))]
-    [Migration("20240730122302_CreatedRolePermissionTableAndModifiedUser")]
-    partial class CreatedRolePermissionTableAndModifiedUser
+    [Migration("20240802162503_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,212 @@ namespace P2PLoan.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("P2PLoan.Models.Loan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AccruingInterestRate")
+                        .HasColumnType("float");
+
+                    b.Property<double>("AmountLeft")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("BorrowerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Defaulted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FinancialTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("InitialInterestRate")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("LenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LoanDurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LoanOfferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LoanRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("PrincipalAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("RepaymentFrequency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BorrowerId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LenderId");
+
+                    b.HasIndex("LoanOfferId");
+
+                    b.HasIndex("LoanRequestId");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.LoanOffer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccruingInterestRate")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AdditionalInformation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("GracePeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InterestRate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanDurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RepaymentFrequency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("LoanOffers");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.LoanRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccruingInterestRate")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AdditionalInformation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("GracePeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InterestRate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanDurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LoanOfferId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LoanOfferId");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("LoanRequests");
+                });
 
             modelBuilder.Entity("P2PLoan.Models.Module", b =>
                 {
@@ -40,6 +246,10 @@ namespace P2PLoan.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
@@ -52,6 +262,9 @@ namespace P2PLoan.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("Identifier")
+                        .IsUnique();
 
                     b.HasIndex("ModifiedById");
 
@@ -169,6 +382,29 @@ namespace P2PLoan.Migrations
                     b.ToTable("RolePermissions");
                 });
 
+            modelBuilder.Entity("P2PLoan.Models.Seed", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Seeds");
+                });
+
             modelBuilder.Entity("P2PLoan.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -182,7 +418,7 @@ namespace P2PLoan.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -196,17 +432,14 @@ namespace P2PLoan.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("HasPin")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PIN")
-                        .HasColumnType("int");
+                    b.Property<string>("PIN")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
@@ -217,11 +450,21 @@ namespace P2PLoan.Migrations
                     b.Property<DateTime?>("PasswordResetTokenExpiration")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Photo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PinCreated")
+                        .HasColumnType("bit");
+
                     b.Property<string>("UserType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -263,30 +506,7 @@ namespace P2PLoan.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("P2PLoan.Seed", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Seeds");
-                });
-
-            modelBuilder.Entity("P2PLoan.Wallet", b =>
+            modelBuilder.Entity("P2PLoan.Models.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -310,6 +530,18 @@ namespace P2PLoan.Migrations
                     b.Property<string>("ReferenceId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TopUpAccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TopUpAccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TopUpBankCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TopUpBankName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -329,7 +561,7 @@ namespace P2PLoan.Migrations
                     b.ToTable("Wallets");
                 });
 
-            modelBuilder.Entity("P2PLoan.WalletProvider", b =>
+            modelBuilder.Entity("P2PLoan.Models.WalletProvider", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -358,7 +590,7 @@ namespace P2PLoan.Migrations
 
                     b.Property<string>("Slug")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -366,7 +598,139 @@ namespace P2PLoan.Migrations
 
                     b.HasIndex("ModifiedById");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.ToTable("WalletProviders");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.Loan", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "Borrower")
+                        .WithMany()
+                        .HasForeignKey("BorrowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "Lender")
+                        .WithMany()
+                        .HasForeignKey("LenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.LoanOffer", "LoanOffer")
+                        .WithMany()
+                        .HasForeignKey("LoanOfferId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.LoanRequest", "LoanRequest")
+                        .WithMany()
+                        .HasForeignKey("LoanRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Borrower");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Lender");
+
+                    b.Navigation("LoanOffer");
+
+                    b.Navigation("LoanRequest");
+
+                    b.Navigation("ModifiedBy");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.LoanOffer", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.LoanRequest", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.LoanOffer", "LoanOffer")
+                        .WithMany()
+                        .HasForeignKey("LoanOfferId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LoanOffer");
+
+                    b.Navigation("ModifiedBy");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Module", b =>
@@ -508,7 +872,7 @@ namespace P2PLoan.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("P2PLoan.Wallet", b =>
+            modelBuilder.Entity("P2PLoan.Models.Wallet", b =>
                 {
                     b.HasOne("P2PLoan.Models.User", "CreatedBy")
                         .WithMany()
@@ -528,7 +892,7 @@ namespace P2PLoan.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("P2PLoan.WalletProvider", "WalletProvider")
+                    b.HasOne("P2PLoan.Models.WalletProvider", "WalletProvider")
                         .WithMany()
                         .HasForeignKey("WalletProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -543,7 +907,7 @@ namespace P2PLoan.Migrations
                     b.Navigation("WalletProvider");
                 });
 
-            modelBuilder.Entity("P2PLoan.WalletProvider", b =>
+            modelBuilder.Entity("P2PLoan.Models.WalletProvider", b =>
                 {
                     b.HasOne("P2PLoan.Models.User", "CreatedBy")
                         .WithMany()

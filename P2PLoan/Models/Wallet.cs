@@ -10,6 +10,11 @@ public class Wallet : AuditableEntity
     public Guid WalletProviderId { get; set; }
     public string AccountNumber { get; set; }
     public string ReferenceId { get; set; }
+    public string TopUpAccountNumber { get; set; }
+    public string TopUpAccountName { get; set; }
+    public string TopUpBankCode { get; set; }
+    public string TopUpBankName { get; set; }
+
 
     // navigation properties
     public User User { get; set; }

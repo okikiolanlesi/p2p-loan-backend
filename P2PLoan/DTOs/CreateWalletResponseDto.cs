@@ -12,4 +12,8 @@ public class CreateWalletResponseDto
     public string? BVNDateOfBirth { get; set; }
     public string? CustomerEmail { get; set; }
     public string? CustomerName { get; set; }
+    public string? TopUpAccountNumber { get; set; }
+    public string? TopUpAccountName { get; set; }
+    public string? TopUpBankCode { get; set; }
+    public string? TopUpBankName { get; set; }
 }

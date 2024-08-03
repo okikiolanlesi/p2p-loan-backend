@@ -43,7 +43,11 @@ namespace P2PLoan.Services
                 UserId = user.Id,
                 WalletProviderId = walletProviderId,
                 AccountNumber = createWalletResponse.AccountNumber,
-                ReferenceId = createWalletResponse.WalletReference
+                ReferenceId = createWalletResponse.WalletReference,
+                TopUpAccountName = createWalletResponse.TopUpAccountName,
+                TopUpAccountNumber = createWalletResponse.TopUpAccountNumber,
+                TopUpBankName = createWalletResponse.TopUpBankName,
+                TopUpBankCode = createWalletResponse.TopUpBankCode,
             };
 
             walletRepository.Add(wallet);

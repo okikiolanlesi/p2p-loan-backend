@@ -23,4 +23,8 @@ public class CreateWalletResponse
     public string AccountNumber { get; set; }
     public string AccountName { get; set; }
     public string WalletReference { get; set; }
+    public string TopUpAccountNumber { get; set; }
+    public string TopUpAccountName { get; set; }
+    public string TopUpBankCode { get; set; }
+    public string TopUpBankName { get; set; }
 }

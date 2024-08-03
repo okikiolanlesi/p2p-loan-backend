@@ -17,8 +17,16 @@ public class MonnifyCreateWalletResponseBody : CreateWalletDto
     public string FeeBearer { get; set; }
     public string AccountNumber { get; set; }
     public string AccountName { get; set; }
+    public TopUpAccountDetails TopUpAccountDetails { get; set; }
 }
 
+public class TopUpAccountDetails
+{
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public string BankCode { get; set; }
+    public string BankName { get; set; }
+}
 public class MonnifyGetBalanceResponseBody
 {
     public int AvailableBalance { get; set; }
