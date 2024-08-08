@@ -28,7 +28,9 @@ public class RoleRepository : IRoleRepository
 
     public async Task<Role> FindById(Guid roleId)
     {
-        return await dbContext.Roles.FirstOrDefaultAsync(x => x.Id == roleId);
+        return await dbContext.Roles.
+        Include(r=>r.Permissions).
+        FirstOrDefaultAsync(x => x.Id == roleId);
     }
 
     public async Task<IEnumerable<Role>> GetAll()
@@ -44,5 +46,15 @@ public class RoleRepository : IRoleRepository
     public async Task<bool> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> RoleExistsAsync(string roleName)
+    {
+        return await dbContext.Roles.AnyAsync(r => r.Name == roleName);
+    }
+
+    public void Remove(Role role)
+    {
+       dbContext.Roles.Remove(role);
     }
 }

@@ -15,4 +15,5 @@ public interface IRolePermissionRepository
     void AddRange(IEnumerable<RolePermission> rolePermissions);
     void MarkAsModified(RolePermission rolePermission);
     Task<bool> SaveChangesAsync();
+   
 }
