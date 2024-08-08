@@ -23,4 +23,43 @@ public class RoleController : ControllerBase
 
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateRoleRequestDto createRoleRequestDto)
+    {
+        var response = await roleService.CreateRole(createRoleRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpGet]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> GetRole(Guid id)
+    {
+        var response = await roleService.GetRoleById(id);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var response = await roleService.GetAllRole();
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpPatch]
+    [Route("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoleRequestDto updateRoleRequestDto)
+    {
+        var response = await roleService.UpdateRoleById(id, updateRoleRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpDelete]
+    [Route("{id:guid}")]
+
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var response = await roleService.DeleteRole(id);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
 }
