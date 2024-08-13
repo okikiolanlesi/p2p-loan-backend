@@ -27,24 +27,38 @@ public class UserRoleRepository : IUserRoleRepository
         dbContext.UserRoles.AddRange(userRoles);
     }
 
-    public async Task<UserRole> FindById(Guid userRoleId)
+    public async Task<UserRole> FindById(Guid id)
     {
-        return await dbContext.UserRoles.FirstOrDefaultAsync(x => x.Id == userRoleId);
+        return await dbContext.UserRoles
+                               .Include(x=>x.Role)
+                               .Include(x=>x.User)
+                               .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<IEnumerable<UserRole>> FindAllByRoleId(Guid roleId)
     {
-        return await dbContext.UserRoles.Where(x => x.RoleId == roleId).ToListAsync();
+        return await dbContext.UserRoles
+                              .Include(x=>x.Role)
+                              .Include(x=>x.User)
+                              .Where(x => x.RoleId == roleId)
+                              .ToListAsync();
     }
 
     public async Task<IEnumerable<UserRole>> FindAllByUserId(Guid userId)
     {
-        return await dbContext.UserRoles.Where(x => x.UserId == userId).ToListAsync();
+        return await dbContext.UserRoles
+                              .Include(x=>x.Role)
+                              .Include(x=>x.User)
+                              .Where(x => x.UserId == userId)
+                              .ToListAsync();
     }
 
     public async Task<IEnumerable<UserRole>> GetAll()
     {
-        return await dbContext.UserRoles.ToListAsync();
+        return await dbContext.UserRoles
+                               .Include(u=>u.Role)
+                               .Include(u=>u.User)
+                               .ToListAsync();
     }
 
     public void MarkAsModified(UserRole userRole)
@@ -55,5 +69,17 @@ public class UserRoleRepository : IUserRoleRepository
     public async Task<bool> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync() > 0;
+    }
+
+    public void Delete(UserRole userRole)
+    {
+        dbContext.Remove(userRole);
+    }
+
+    public async Task<UserRole> FindByUserIdAndRoleId(Guid userId, Guid roleId)
+    {
+        return await dbContext.UserRoles
+          .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
     }
 }

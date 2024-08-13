@@ -37,16 +37,16 @@ using P2PLoan.Handlers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration variables (retrieved from environment variables)
-var tenantId = builder.Configuration["AZURE_TENANT_ID"];
-var clientId = builder.Configuration["AZURE_CLIENT_ID"];
-var clientSecret = builder.Configuration["AZURE_CLIENT_SECRET"];
-var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
+// var tenantId = builder.Configuration["AZURE_TENANT_ID"];
+// var clientId = builder.Configuration["AZURE_CLIENT_ID"];
+// var clientSecret = builder.Configuration["AZURE_CLIENT_SECRET"];
+// var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
 
 // Create ClientSecretCredential
-var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
+//var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 
 // Add Azure Key Vault to configuration
-builder.Configuration.AddAzureKeyVault(vaultUri, clientSecretCredential);
+//builder.Configuration.AddAzureKeyVault(vaultUri, clientSecretCredential);
 
 builder.Services.AddCors(options =>
 {
@@ -196,6 +196,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific wallet provider services are registered
 builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IModuleService, ModuleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 var app = builder.Build();

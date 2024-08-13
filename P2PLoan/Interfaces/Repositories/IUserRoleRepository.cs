@@ -12,7 +12,9 @@ public interface IUserRoleRepository
     Task<IEnumerable<UserRole>> FindAllByUserId(Guid userId);
     Task<IEnumerable<UserRole>> FindAllByRoleId(Guid roleId);
     Task<IEnumerable<UserRole>> GetAll();
+    Task<UserRole> FindByUserIdAndRoleId(Guid userId, Guid roleId);
     void AddRange(IEnumerable<UserRole> userRoles);
     void MarkAsModified(UserRole userRole);
     Task<bool> SaveChangesAsync();
+    void Delete (UserRole userRole);
 }
