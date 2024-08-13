@@ -12,7 +12,7 @@ using P2PLoan.Data;
 namespace P2PLoan.Migrations
 {
     [DbContext(typeof(P2PLoanDbContext))]
-    [Migration("20240802162503_InitialCreate")]
+    [Migration("20240812094754_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -113,11 +113,14 @@ namespace P2PLoan.Migrations
                     b.Property<int>("AccruingInterestRate")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
                     b.Property<string>("AdditionalInformation")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");

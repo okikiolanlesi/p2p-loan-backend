@@ -17,7 +17,7 @@ public interface IModuleRepository
     Task<bool> SaveChangesAsync();
 
     Task<Module> GetModuleByIdentifierAsync(Modules identifier);
-    Task<Module> GetModuleByIdAsync(Guid id)
+    Task<Module> GetModuleByIdAsync(Guid id);
 
     Task<IDbContextTransaction> BeginTransactionAsync();
 }

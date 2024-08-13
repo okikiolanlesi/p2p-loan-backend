@@ -89,9 +89,8 @@ namespace P2PLoan.Services
             {
              return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Role does not exist.", null);
             }
-            var role = mapper.Map<Role>(updateRoleRequestDto);
-            //update the role
-            roleRepository.MarkAsModified(role);
+
+            mapper.Map(updateRoleRequestDto, existingRole);
             await roleRepository.SaveChangesAsync();
 
             // Logic for adding permission to the role

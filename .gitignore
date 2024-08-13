@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+.vs
 appsettings.json
 appsettings.Development.json
 
