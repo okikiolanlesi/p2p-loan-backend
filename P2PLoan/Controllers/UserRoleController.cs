@@ -25,31 +25,35 @@ namespace P2PLoan.Controllers
            this.mapper = mapper;
         }
 
-        [HttpPost]
+       [HttpPost("attach")]
         public async Task<IActionResult> AttachRoleToUser([FromBody] UserRoleDto userRoleDto )
         {
-            // Extract UserId and RoleId from the DTO
-            var userId = userRoleDto.UserId;
-            var roleId = userRoleDto.RoleId;
-            var response = await userRoleService.AttachRoleToUser(userId, roleId);
+            var response = await userRoleService.AttachRoleToUser(userRoleDto.UserId, userRoleDto.RoleId);
             return ControllerHelper.HandleApiResponse(response);
         }
 
-        [HttpGet]
+        [HttpPost("detach")]
+        public async Task<IActionResult> DetachRoleFromUser([FromBody] UserRoleDto userRoleDto)
+        {
+            var response = await userRoleService.DetachRoleFromUser(userRoleDto.UserId, userRoleDto.RoleId);
+            return ControllerHelper.HandleApiResponse(response);
+        }
+
+       [HttpGet("all")]
          public async Task<IActionResult> GetAllUserRole()
         {
             var response = await userRoleService.GetAllUserRolesAsync();
             return ControllerHelper.HandleApiResponse(response);
         }
 
-        [HttpGet("roles/{id:guid}")]
+        [HttpGet("role/{id:guid}")]
         public async Task<IActionResult> GetUserRoleByRoleId(Guid id)
         {
             var response = await userRoleService.GetUserRolesByRoleId(id);
             return ControllerHelper.HandleApiResponse(response);
 
         }
-        [HttpGet("users/{id:guid}")]
+        [HttpGet("user/{id:guid}")]
        public async Task<IActionResult> GetUserRoleByUserId(Guid id)
        {
         var response = await userRoleService.GetUserRolesByUserId(id);

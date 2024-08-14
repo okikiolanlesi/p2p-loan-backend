@@ -71,9 +71,10 @@ namespace P2PLoan.Services
         {
            // Check if the UserRole association exists using the optimized method
             var userRole = await userRoleRepository.FindByUserIdAndRoleId(id, roleId);
-            if (userRole == null)
+            if (userRole != null)
             {
-                return new ServiceResponse<object>(ResponseStatus.BadRequest,AppStatusCodes.ValidationError, "The user is not assigned to this role or user/role does not exist.",null);
+                return new ServiceResponse<object>(ResponseStatus.BadRequest,AppStatusCodes.ValidationError,  "The user is already assigned to this role.",
+            null);
             }
             // Create and add the new UserRole
             var user_role = new UserRole
@@ -83,7 +84,24 @@ namespace P2PLoan.Services
                 RoleId = roleId
             };
             userRoleRepository.Add(user_role);
-            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", user_role); 
+           // Save changes to the database
+            var success = await userRoleRepository.SaveChangesAsync();
+            if (!success)
+            {
+                return new ServiceResponse<object>(
+                    ResponseStatus.Error,
+                    AppStatusCodes.SaveFailed,
+                    "An error occurred while attaching the role to the user.",
+                    null
+                );
+            }
+
+            return new ServiceResponse<object>(
+                ResponseStatus.Success,
+                AppStatusCodes.Success,
+                "Role attached to user successfully.",
+                newUserRole
+            );
 
         }
 
@@ -93,11 +111,37 @@ namespace P2PLoan.Services
             var userRole = await userRoleRepository.FindByUserIdAndRoleId(id, roleId);
             if (userRole == null)
             {
-                return new ServiceResponse<object>(ResponseStatus.BadRequest,AppStatusCodes.ValidationError,"The user is not assigned to this role or user/role does not exist.",null);
+                // The role is not assigned to the user
+                return new ServiceResponse<object>(
+                    ResponseStatus.BadRequest,
+                    AppStatusCodes.ValidationError,
+                    "The user is not assigned to this role or user/role does not exist.",
+                    null
+                );
             }
+
             // Remove the UserRole
             userRoleRepository.Delete(userRole);
-            return new ServiceResponse<object>( ResponseStatus.Success, AppStatusCodes.Success,"Role detached successfully.",userRole);
+
+            // Save changes to the database
+            var success = await userRoleRepository.SaveChangesAsync();
+            if (!success)
+            {
+                return new ServiceResponse<object>(
+                    ResponseStatus.Error,
+                    AppStatusCodes.SaveFailed,
+                    "An error occurred while detaching the role from the user.",
+                    null
+                );
+            }
+
+            return new ServiceResponse<object>
+            (
+                ResponseStatus.Success,
+                AppStatusCodes.Success,
+                "Role detached successfully.",
+                userRole
+            );
         }
     }
 }
