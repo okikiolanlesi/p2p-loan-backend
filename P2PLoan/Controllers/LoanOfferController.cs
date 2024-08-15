@@ -34,7 +34,7 @@ public class LoanOfferController
 
     [HttpGet]
     [Route("me")]
-    public async Task<IActionResult> GetAllForLoggedInUser([FromQuery] LoanOfferSearchParams searchParams)
+    public async Task<IActionResult> GetOne([FromQuery] LoanOfferSearchParams searchParams)
     {
         var response = await loanOfferService.GetAllForLoggedInUser(searchParams);
         return ControllerHelper.HandleApiResponse(response);

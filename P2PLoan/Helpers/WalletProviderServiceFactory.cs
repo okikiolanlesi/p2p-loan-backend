@@ -15,7 +15,7 @@ namespace P2PLoan.Helpers
             this.serviceProvider = serviceProvider;
         }
 
-        public IWalletProviderService GetWalletProviderService(WalletProviders walletProvider)
+        public IThirdPartyWalletProviderService GetWalletProviderService(WalletProviders walletProvider)
         {
             return walletProvider switch
             {

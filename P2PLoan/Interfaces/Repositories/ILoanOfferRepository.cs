@@ -10,7 +10,7 @@ public interface ILoanOfferRepository
 {
     void Add(LoanOffer loanOffer);
     Task<LoanOffer?> FindById(Guid loanOfferId);
-    Task<PagedResponse<IEnumerable<LoanOffer>>> GetAllAsync(LoanOfferSearchParams searchParams, Guid? userId = null);
+    Task<PagedResponse<IEnumerable<LoanOfferDto>>> GetAllAsync(LoanOfferSearchParams searchParams, Guid? userId = null);
     void AddRange(IEnumerable<LoanOffer> loanOffers);
     void MarkAsModified(LoanOffer loanOffer);
     Task<bool> SaveChangesAsync();
