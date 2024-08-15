@@ -96,4 +96,12 @@ public class AuthController : ControllerBase
         return Ok("Working");
     }
 
+    [HttpPost]
+    [Route("resend-email-verification")]
+    public async Task<IActionResult> ResendVerificationEmail(ResendVerificationEmailDto dto)
+    {
+        var response = await authService.ResendEmailVerification(dto.Email);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
 }

@@ -16,6 +16,11 @@ namespace P2PLoan.Helpers
             CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
+            CreateMap<LoanOffer, LoanOfferDto>();
+            CreateMap<CreateLoanOfferRequestDto, LoanOffer>();
+            CreateMap<UserDto, PublicUserProfileDto>().ReverseMap();
+            CreateMap<User, PublicUserProfileDto>().ReverseMap();
+            CreateMap<Wallet, WalletDto>().ReverseMap();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             // Assuming ResponseBody matches the properties of the destination DTOs

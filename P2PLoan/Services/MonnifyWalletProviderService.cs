@@ -6,7 +6,7 @@ using P2PLoan.Interfaces;
 
 namespace P2PLoan.Services;
 
-public class MonnifyWalletProviderService : IWalletProviderService
+public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
 {
     private readonly IMonnifyApiService monnifyApiService;
     private readonly IMapper mapper;
