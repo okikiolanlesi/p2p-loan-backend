@@ -16,6 +16,7 @@ namespace P2PLoan.Helpers
             CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
+            CreateMap<UserRoleDto, UserRole>();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             // Assuming ResponseBody matches the properties of the destination DTOs
