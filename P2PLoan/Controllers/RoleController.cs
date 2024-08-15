@@ -57,14 +57,14 @@ public class RoleController : ControllerBase
     }
 
     [HttpPost("attach")]
-     public async Task<IActionResult> AttachRoleToUser([FromBody] UserRoleDto userRoleDto )
+     public async Task<IActionResult> AttachRoleToUser([FromBody] UserRoleRequestDto userRoleDto )
     {
             var response = await userRoleService.AttachRoleToUser(userRoleDto.UserId, userRoleDto.RoleId, userRoleDto);
             return ControllerHelper.HandleApiResponse(response);
     }
       
     [HttpPost("detach")]
-    public async Task<IActionResult> DetachRoleFromUser([FromBody] UserRoleDto userRoleDto)
+    public async Task<IActionResult> DetachRoleFromUser([FromBody] UserRoleRequestDto userRoleDto)
     {
             var response = await userRoleService.DetachRoleFromUser(userRoleDto.UserId, userRoleDto.RoleId);
             return ControllerHelper.HandleApiResponse(response);

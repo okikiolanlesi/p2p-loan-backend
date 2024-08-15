@@ -15,7 +15,7 @@ namespace P2PLoan.Interfaces.Services
         Task<ServiceResponse<object>> GetUserRolesByUserId(Guid userId);
         Task<ServiceResponse<object>> GetUserRolesByRoleId(Guid roleId);
         Task<ServiceResponse<object>> DetachRoleFromUser(Guid id, Guid roleId);
-         Task<ServiceResponse<object>> AttachRoleToUser(Guid id, Guid roleId, UserRoleDto userRoleDto);
+         Task<ServiceResponse<object>> AttachRoleToUser(Guid id, Guid roleId, UserRoleRequestDto userRoleDto);
               
     }
 }

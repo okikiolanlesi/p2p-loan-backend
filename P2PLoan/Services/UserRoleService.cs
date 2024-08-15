@@ -33,6 +33,8 @@ namespace P2PLoan.Services
             {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "id does not exist.", null);
             }
+            // Map the list of UserRole entities to a list of UserRoleDto
+             var userRoleDtos = userRole.Select(ur => mapper.Map<UserRoleDto>(ur)).ToList();
              return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", userRole);
             
         }
@@ -44,8 +46,9 @@ namespace P2PLoan.Services
                {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "id does not exist.", null);
             }
-
-             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", userRole);
+            // Map the single UserRole entity to UserRoleDto
+             var userRoleDto = mapper.Map<UserRoleDto>(userRole);
+             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", userRoleDto);
             
         }
 
@@ -57,6 +60,8 @@ namespace P2PLoan.Services
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "id does not exist.", null);
 
             }
+             // Map UserRole entities to UserRoleDto
+            var userRoleDtos = userRole.Select(ur => mapper.Map<UserRoleDto>(ur)).ToList();
              return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", userRole); 
         }
 
@@ -67,11 +72,13 @@ namespace P2PLoan.Services
             {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "id does not exist.", null);
             }
+            // Map UserRole entities to UserRoleDto
+           var userRoleDtos = userRole.Select(ur => mapper.Map<UserRoleDto>(ur)).ToList();
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "userRole retrieved succesfully.", userRole); 
             
         }
 
-        public async Task<ServiceResponse<object>> AttachRoleToUser(Guid id, Guid roleId,UserRoleDto userRoleDto)
+        public async Task<ServiceResponse<object>> AttachRoleToUser(Guid id, Guid roleId,UserRoleRequestDto userRoleDto)
         {
            // Check if the UserRole association exists using the optimized method
             var userRole = await userRoleRepository.FindByUserIdAndRoleId(id, roleId);
@@ -84,6 +91,8 @@ namespace P2PLoan.Services
             {
                 UserId = id,  
                 RoleId = roleId,
+                CreatedById = userRoleDto.CreatedById,
+                ModifiedById = userRoleDto.ModifiedById
             };
 
             mapper.Map(userRoleDto, newUserRole);
