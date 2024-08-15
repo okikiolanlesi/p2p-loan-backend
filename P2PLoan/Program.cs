@@ -33,6 +33,7 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
+using P2PLoan.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,9 +71,11 @@ builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            
         }).AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
+            options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
         }); ;
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -198,6 +201,7 @@ builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceF
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IModuleService, ModuleService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 
 var app = builder.Build();
