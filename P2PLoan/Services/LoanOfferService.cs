@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using P2PLoan.Constants;
+using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -72,7 +73,7 @@ public class LoanOfferService : ILoanOfferService
             throw new Exception();
         }
 
-        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan offer created successfully", null);
+        return new ServiceResponse<object>(ResponseStatus.Created, AppStatusCodes.Success, "Loan offer created successfully", null);
 
     }
 
@@ -122,5 +123,37 @@ public class LoanOfferService : ILoanOfferService
             default:
                 return null;
         }
+    }
+
+    public async Task<ServiceResponse<object>> DisableLoanOffer(Guid loanOfferId)
+    {
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        var result = await loanOfferRepository.FindById(loanOfferId);
+
+        if (result is null || result.UserId != userId)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
+        }
+
+        result.Active = false;
+
+        loanOfferRepository.MarkAsModified(result);
+
+        var saveResult = await loanOfferRepository.SaveChangesAsync();
+
+        if (!saveResult)
+        {
+            throw new Exception();
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan disabled successfully", result);
     }
 }

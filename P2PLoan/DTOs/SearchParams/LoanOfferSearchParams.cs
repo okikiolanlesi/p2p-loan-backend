@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using P2PLoan.ModelBinders;
 using P2PLoan.Models;
 
-namespace P2PLoan.Helpers;
+namespace P2PLoan.DTOs.SearchParams;
 
 public class LoanOfferSearchParams : SearchParams
 {

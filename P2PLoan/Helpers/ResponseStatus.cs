@@ -3,6 +3,7 @@
 public enum ResponseStatus
 {
     Success,
+    Created,
     Error,
     Processing,
     NotFound,

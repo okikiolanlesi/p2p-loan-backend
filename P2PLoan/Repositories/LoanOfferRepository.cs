@@ -10,6 +10,8 @@ using P2PLoan.Models;
 using System.Linq.Dynamic.Core;
 using AutoMapper.QueryableExtensions;
 using AutoMapper;
+using P2PLoan.DTOs;
+using P2PLoan.DTOs.SearchParams;
 
 namespace P2PLoan.Repositories;
 
