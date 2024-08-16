@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
@@ -18,8 +19,10 @@ namespace P2PLoan.Services
         private readonly IRoleRepository roleRepository;
         private readonly IUserRoleRepository userRoleRepository;
         private readonly IMapper mapper;
-        public UserRoleService(IUserRepository userRepository, IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, IMapper mapper)
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public UserRoleService(IHttpContextAccessor httpContextAccessor,IUserRepository userRepository, IRoleRepository roleRepository, IUserRoleRepository userRoleRepository, IMapper mapper)
         {
+            this.httpContextAccessor = httpContextAccessor;
             this.userRepository = userRepository;
             this.roleRepository = roleRepository;
             this.userRoleRepository = userRoleRepository;
@@ -80,6 +83,12 @@ namespace P2PLoan.Services
 
         public async Task<ServiceResponse<object>> AttachRoleToUser(Guid id, Guid roleId,UserRoleRequestDto userRoleDto)
         {
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+            var user = await userRepository.GetByIdAsync(userId);
+            if (user is null)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null); 
+            }
            // Check if the UserRole association exists using the optimized method
             var userRole = await userRoleRepository.FindByUserIdAndRoleId(id, roleId);
             if (userRole != null)
@@ -91,8 +100,8 @@ namespace P2PLoan.Services
             {
                 UserId = id,  
                 RoleId = roleId,
-                CreatedById = userRoleDto.CreatedById,
-                ModifiedById = userRoleDto.ModifiedById
+                CreatedById = user.Id,
+                ModifiedById = user.Id
             };
 
             mapper.Map(userRoleDto, newUserRole);

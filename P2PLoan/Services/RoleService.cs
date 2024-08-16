@@ -33,10 +33,6 @@ namespace P2PLoan.Services
             var role = mapper.Map<Role>(createRoleRequestDto);
             roleRepository.Add(role);
             await roleRepository.SaveChangesAsync();
-
-             // Logic for adding permission to the role
-
-
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Role created successfully.", role);
         }
 

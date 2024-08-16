@@ -9,8 +9,5 @@ namespace P2PLoan.DTOs
     {
     public Guid UserId { get; set; }
     public Guid RoleId { get; set; }
-
-    public Guid CreatedById { get; set; }
-    public Guid ModifiedById { get; set; }
     }
 }
