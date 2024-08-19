@@ -121,82 +121,74 @@ public class AuthService : IAuthService
                     throw new Exception();
                 }
 
-                // Start creating a wallet for the user
 
-                //try parsing the date of birth into the right format
-                string bvnDateOfBirth;
-                try
+                // Check if user already has a wallet
+                if (alreadyExistingUser is null)
                 {
-                    bvnDateOfBirth = DateConverter.ConvertIsoToDate(registerDto.BvnDateOfBirth);
-                }
-                catch
-                {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid BVN date of birth format", null);
-                }
+                    // Start creating a wallet for the user
 
-                var walletReferenceId = Guid.NewGuid();
-                CreateWalletDto createWalletDto = new CreateWalletDto
-                {
-                    WalletReference = $"{walletReferenceId}",
-                    WalletName = $"P2PLoan Wallet - {user.Id}",
-                    CustomerName = $"{user.FirstName} {user.LastName}",
-                    BvnDetails = new BVNDetails
+                    //try parsing the date of birth into the right format
+                    string bvnDateOfBirth;
+                    try
                     {
-                        Bvn = registerDto.BVN,
-                        BvnDateOfBirth = bvnDateOfBirth
-                    },
-                    CustomerEmail = user.Email
-                };
-
-                var createdWalletInfo = await walletService.Create(WalletProviders.monnify, createWalletDto);
-
-                if (!createdWalletInfo.Created)
-                {
-                    //TODO: return response based on create wallet response
-                }
-
-                var wallet = new Wallet
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = user.Id,
-                    WalletProviderId = walletProvider.Id,
-                    AccountNumber = createdWalletInfo.AccountNumber,
-                    ReferenceId = $"{walletReferenceId}",
-                    TopUpAccountName = createdWalletInfo.TopUpAccountName,
-                    TopUpAccountNumber = createdWalletInfo.TopUpAccountNumber,
-                    TopUpBankName = createdWalletInfo.TopUpBankName,
-                    TopUpBankCode = createdWalletInfo.TopUpBankCode,
-                    CreatedById = user.Id,
-                    ModifiedById = user.Id,
-                };
-
-                walletRepository.Add(wallet);
+                        bvnDateOfBirth = DateConverter.ConvertIsoToDate(registerDto.BvnDateOfBirth);
+                    }
+                    catch
+                    {
+                        return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid BVN date of birth format", null);
+                    }
 
 
-                // Committing changes
-                var walletSaveResult = await walletRepository.SaveChangesAsync();
+                    var walletReferenceId = Guid.NewGuid();
+                    CreateWalletDto createWalletDto = new CreateWalletDto
+                    {
+                        WalletReference = $"{walletReferenceId}",
+                        WalletName = $"P2PLoan Wallet - {user.Id}",
+                        CustomerName = $"{user.FirstName} {user.LastName}",
+                        BvnDetails = new BVNDetails
+                        {
+                            Bvn = registerDto.BVN,
+                            BvnDateOfBirth = bvnDateOfBirth
+                        },
+                        CustomerEmail = user.Email
+                    };
 
-                if (!walletSaveResult)
-                {
-                    throw new Exception();
+                    var createdWalletInfo = await walletService.Create(WalletProviders.monnify, createWalletDto);
+
+                    if (!createdWalletInfo.Created)
+                    {
+                        //TODO: return response based on create wallet response
+                    }
+
+                    var wallet = new Wallet
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        WalletProviderId = walletProvider.Id,
+                        AccountNumber = createdWalletInfo.AccountNumber,
+                        ReferenceId = $"{walletReferenceId}",
+                        TopUpAccountName = createdWalletInfo.TopUpAccountName,
+                        TopUpAccountNumber = createdWalletInfo.TopUpAccountNumber,
+                        TopUpBankName = createdWalletInfo.TopUpBankName,
+                        TopUpBankCode = createdWalletInfo.TopUpBankCode,
+                        CreatedById = user.Id,
+                        ModifiedById = user.Id,
+                    };
+
+                    walletRepository.Add(wallet);
+
+
+                    // Committing changes
+                    var walletSaveResult = await walletRepository.SaveChangesAsync();
+
+                    if (!walletSaveResult)
+                    {
+                        throw new Exception();
+                    }
                 }
 
                 // Sending verification mail to newly registered user
-                try
-                {
-                    await emailService.SendHtmlEmailAsync(user.Email, "Verify your email", "VerifyEmail", new
-                    {
-                        FrontendBaseUrl = configuration.GetSection("AppSettings:FrontendBaseUrl").Value,
-                        Name = user.FirstName,
-                        EmailVerificationToken = emailVerificationToken,
-                        UserId = user.Id
-                    });
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    Console.WriteLine("Failed to send verification email");
-                }
+                await SendVerificationMail(user, emailVerificationToken);
 
                 // Commit transaction if it gets to this point
                 await transaction.CommitAsync();
@@ -264,11 +256,7 @@ public class AuthService : IAuthService
         if (user.EmailVerificationTokenExpiration is null || user.EmailVerificationTokenExpiration < DateTime.UtcNow)
         {
             // Invalid or expired token
-            userRepository.Remove(user);
-
-            await userRepository.SaveChangesAsync();
-
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Expired verification token, please register again to verify your email", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Expired verification token, please resend token and verify again", null);
         }
 
         user.EmailConfirmed = true;
@@ -288,6 +276,39 @@ public class AuthService : IAuthService
         {
             user = mapper.Map<UserDto>(user)
         });
+    }
+    public async Task<ServiceResponse<object>> ResendEmailVerification(string email)
+    {
+        var user = await userRepository.GetByEmailAsync(email);
+
+        if (user == null)
+        {
+            // Invalid or expired token
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
+        }
+        if (user.EmailConfirmed)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Email already verified", null);
+        }
+
+        // Restart the verification process
+        user.EmailVerificationToken = RandomCharacterGenerator.GenerateRandomString(constants.EMAIL_VERIFICATION_TOKEN_LENGTH);
+
+        user.EmailVerificationTokenExpiration = DateTime.UtcNow.AddMinutes(constants.EMAIL_VERIFICATION_TOKEN_EXPIRATION_MINUTES);
+
+        // Save the updated user to the database
+        userRepository.MarkAsModified(user);
+
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+
+        // Send the verification email
+        await SendVerificationMail(user, user.EmailVerificationToken);
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Email sent successfully.", null);
     }
 
     public async Task<ServiceResponse<object>> ForgotPassword(ForgotPasswordRequestDto forgotPasswordDto)
@@ -327,7 +348,7 @@ public class AuthService : IAuthService
     {
         var user = await userRepository.GetByEmailAsync(resetPasswordDto.Email);
 
-        if (user == null || user.PasswordResetTokenExpiration < DateTime.UtcNow)
+        if (user == null || user.PasswordResetTokenExpiration < DateTime.UtcNow || user.PasswordResetToken != resetPasswordDto.Token)
         {
             // Token is invalid or expired
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Invalid or expired token", null);
@@ -538,29 +559,9 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public async Task<ServiceResponse<object>> SendEmailVerificationEmail(string email)
+
+    private async Task SendVerificationMail(User user, string emailVerificationToken)
     {
-
-        // Checking if user exists with that email
-        var user = await userRepository.GetByEmailAsync(email);
-
-        if (user is null)
-        {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidCredentials, "Invalid credentials", null);
-        }
-
-        if (user != null && user.EmailConfirmed)
-        {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "Email already verified", null);
-        }
-
-        // Set email verification data
-        var emailVerificationToken = RandomCharacterGenerator.GenerateRandomString(constants.EMAIL_VERIFICATION_TOKEN_LENGTH);
-        user.EmailVerificationToken = emailVerificationToken;
-        user.EmailVerificationTokenExpiration = DateTime.UtcNow.AddMinutes(constants.EMAIL_VERIFICATION_TOKEN_EXPIRATION_MINUTES);
-
-
-        // Sending verification mail to newly registered user
         try
         {
             await emailService.SendHtmlEmailAsync(user.Email, "Verify your email", "VerifyEmail", new
@@ -568,17 +569,14 @@ public class AuthService : IAuthService
                 FrontendBaseUrl = configuration.GetSection("AppSettings:FrontendBaseUrl").Value,
                 Name = user.FirstName,
                 EmailVerificationToken = emailVerificationToken,
-                UserId = user.Id
+                UserId = user.Id,
+                Email = user.Email
             });
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             Console.WriteLine("Failed to send verification email");
-
-            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Unable to send verification email", null);
         }
-
-        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Verification email successfully", null);
     }
 }

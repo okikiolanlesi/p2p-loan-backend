@@ -6,7 +6,7 @@ using P2PLoan.Interfaces;
 
 namespace P2PLoan.Services;
 
-public class MonnifyWalletProviderService : IWalletProviderService
+public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
 {
     private readonly IMonnifyApiService monnifyApiService;
     private readonly IMapper mapper;
@@ -34,5 +34,10 @@ public class MonnifyWalletProviderService : IWalletProviderService
         var walletTransactions = await monnifyApiService.GetWalletTransactions(walletUniqueReference, pageSize, pageNo);
 
         return mapper.Map<GetTransactionsResponseDto>(walletTransactions);
+    }
+
+    public Task<GetTransactionsResponseDto> Transfer(string walletUniqueReference, int pageSize, int pageNo)
+    {
+        throw new NotImplementedException();
     }
 }

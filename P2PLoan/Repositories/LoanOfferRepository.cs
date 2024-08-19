@@ -8,16 +8,22 @@ using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 using System.Linq.Dynamic.Core;
+using AutoMapper.QueryableExtensions;
+using AutoMapper;
+using P2PLoan.DTOs;
+using P2PLoan.DTOs.SearchParams;
 
 namespace P2PLoan.Repositories;
 
 public class LoanOfferRepository : ILoanOfferRepository
 {
     private readonly P2PLoanDbContext dbContext;
+    private readonly IMapper mapper;
 
-    public LoanOfferRepository(P2PLoanDbContext dbContext)
+    public LoanOfferRepository(P2PLoanDbContext dbContext, IMapper mapper)
     {
         this.dbContext = dbContext;
+        this.mapper = mapper;
     }
     public void Add(LoanOffer loanOffer)
     {
@@ -34,7 +40,7 @@ public class LoanOfferRepository : ILoanOfferRepository
         return await dbContext.LoanOffers.FirstOrDefaultAsync(x => x.Id == loanOfferId);
     }
 
-    public async Task<PagedResponse<IEnumerable<LoanOffer>>> GetAllAsync(LoanOfferSearchParams searchParams, Guid? userId = null)
+    public async Task<PagedResponse<IEnumerable<LoanOfferDto>>> GetAllAsync(LoanOfferSearchParams searchParams, Guid? userId = null)
     {
         IQueryable<LoanOffer> query = dbContext.LoanOffers;
 
@@ -128,10 +134,10 @@ public class LoanOfferRepository : ILoanOfferRepository
         var totalItems = query.Count();
         var items = await query
             .Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
-            .Take(searchParams.PageSize)
+            .Take(searchParams.PageSize).Include(lo => lo.User).Include(lo => lo.Wallet).ProjectTo<LoanOfferDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var result = new PagedResponse<IEnumerable<LoanOffer>>
+        var result = new PagedResponse<IEnumerable<LoanOfferDto>>
         {
             TotalItems = totalItems,
             PageNumber = searchParams.PageNumber,

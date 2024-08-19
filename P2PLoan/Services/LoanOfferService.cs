@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using P2PLoan.Constants;
+using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
+using P2PLoan.Repositories;
 
 namespace P2PLoan.Services;
 
@@ -16,13 +18,15 @@ public class LoanOfferService : ILoanOfferService
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
+    private readonly IWalletRepository walletRepository;
 
-    public LoanOfferService(ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper)
+    public LoanOfferService(ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository)
     {
         this.loanOfferRepository = loanOfferRepository;
         this.httpContextAccessor = httpContextAccessor;
         this.userRepository = userRepository;
         this.mapper = mapper;
+        this.walletRepository = walletRepository;
     }
 
     public async Task<ServiceResponse<object>> Create(CreateLoanOfferRequestDto createLoanOfferRequestDto)
@@ -34,6 +38,12 @@ public class LoanOfferService : ILoanOfferService
         if (user is null)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+        var wallet = await walletRepository.FindById(createLoanOfferRequestDto.WalletId);
+
+        if (wallet is null || wallet.UserId != userId)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Invalid wallet", null);
         }
 
         var loanOffer = mapper.Map<LoanOffer>(createLoanOfferRequestDto);
@@ -51,6 +61,9 @@ public class LoanOfferService : ILoanOfferService
 
         loanOffer.Active = true;
 
+        loanOffer.CreatedBy = user;
+        loanOffer.ModifiedBy = user;
+
         loanOfferRepository.Add(loanOffer);
 
         var result = await loanOfferRepository.SaveChangesAsync();
@@ -60,7 +73,7 @@ public class LoanOfferService : ILoanOfferService
             throw new Exception();
         }
 
-        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan offer created successfully", null);
+        return new ServiceResponse<object>(ResponseStatus.Created, AppStatusCodes.Success, "Loan offer created successfully", null);
 
     }
 
@@ -110,5 +123,37 @@ public class LoanOfferService : ILoanOfferService
             default:
                 return null;
         }
+    }
+
+    public async Task<ServiceResponse<object>> DisableLoanOffer(Guid loanOfferId)
+    {
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        var result = await loanOfferRepository.FindById(loanOfferId);
+
+        if (result is null || result.UserId != userId)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
+        }
+
+        result.Active = false;
+
+        loanOfferRepository.MarkAsModified(result);
+
+        var saveResult = await loanOfferRepository.SaveChangesAsync();
+
+        if (!saveResult)
+        {
+            throw new Exception();
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan disabled successfully", result);
     }
 }

@@ -152,6 +152,45 @@ builder.Services.AddDbContext<P2PLoanDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerDatabase"));
 });
 
+
+// builder.Services
+// .AddFluentValidationAutoValidation();
+
+builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new P2PLoan.Clients.TokenHandler("/api/v1/auth/login", builder.Configuration["Monnify:APIKey"], builder.Configuration["Monnify:SecretKey"], builder.Configuration["Monnify:BaseUrl"]))
+;
+
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>();
+// builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+
+
+// Seeders
+builder.Services.AddScoped<P_1_UserSeeder>();
+builder.Services.AddScoped<P_2_ModuleSeeder>();
+builder.Services.AddScoped<P_3_WalletProviderSeeder>();
+builder.Services.AddScoped<P_4_PermissionSeeder>();
+builder.Services.AddScoped<P_5_RoleSeeder>();
+
+//Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+builder.Services.AddScoped<ISeedRepository, SeedRepository>();
+builder.Services.AddScoped<IWalletProviderRepository, WalletProviderRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+
+//services
+builder.Services.AddScoped<ISeederHandler, SeederHandler>();
+builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IWalletProviderService, WalletProviderService>();
+builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
     var logger = provider.GetRequiredService<ILogger<EmailService>>();
@@ -162,41 +201,11 @@ builder.Services.AddSingleton<IEmailService>(provider =>
     return new EmailService(templatesFolderPath, logger, builder.Configuration);
 });
 
-// builder.Services
-// .AddFluentValidationAutoValidation();
-
-builder.Services.AddHttpClient<MonnifyClient>().AddHttpMessageHandler(() => new P2PLoan.Clients.TokenHandler("/api/v1/auth/login", builder.Configuration["Monnify:APIKey"], builder.Configuration["Monnify:SecretKey"], builder.Configuration["Monnify:BaseUrl"]))
-;
-
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, CustomAuthorizationPolicyProvider>();
-
-
-// Seeders
-builder.Services.AddScoped<P_1_UserSeeder>();
-builder.Services.AddScoped<P_2_ModuleSeeder>();
-builder.Services.AddScoped<P_3_WalletProviderSeeder>();
-builder.Services.AddScoped<P_4_PermissionSeeder>();
-builder.Services.AddScoped<P_5_RoleSeeder>();
-
-
-// builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
-builder.Services.AddScoped<ISeedRepository, SeedRepository>();
-builder.Services.AddScoped<IWalletProviderRepository, WalletProviderRepository>();
-builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
-builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+//Constants
 builder.Services.AddScoped<IConstants, Constants>();
-builder.Services.AddScoped<ISeederHandler, SeederHandler>();
-builder.Services.AddScoped<IWalletRepository, WalletRepository>();
-builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific wallet provider services are registered
-builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
-builder.Services.AddScoped<IWalletService, WalletService>();
 
+// Wallet Providers: Ensure specific wallet provider services are registered
+builder.Services.AddScoped<MonnifyWalletProviderService>();
 
 var app = builder.Build();
 
@@ -207,7 +216,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
+app.UseCors();
 
 app.UseAuthentication();
 

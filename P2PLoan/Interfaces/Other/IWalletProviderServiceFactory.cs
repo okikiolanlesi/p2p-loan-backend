@@ -5,6 +5,6 @@ namespace P2PLoan.Interfaces
 {
     public interface IWalletProviderServiceFactory
     {
-        IWalletProviderService GetWalletProviderService(WalletProviders walletProvider);
+        IThirdPartyWalletProviderService GetWalletProviderService(WalletProviders walletProvider);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Models;
 
@@ -11,4 +12,5 @@ public interface ILoanOfferService
     Task<ServiceResponse<object>> GetAllForLoggedInUser(LoanOfferSearchParams searchParams);
     Task<ServiceResponse<object>> GetAll(LoanOfferSearchParams searchParams);
     Task<ServiceResponse<object>> GetOne(Guid loanOfferId);
+    Task<ServiceResponse<object>> DisableLoanOffer(Guid loanOfferId);
 }

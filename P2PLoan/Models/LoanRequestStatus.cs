@@ -2,5 +2,5 @@
 
 public enum LoanRequestStatus
 {
-    pending, approved, declined
+    pending, approved, declined, processing, failed
 }
