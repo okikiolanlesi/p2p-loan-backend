@@ -27,6 +27,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateRoleRequestDto createRoleRequestDto)
     {
         var response = await roleService.CreateRole(createRoleRequestDto);
@@ -35,6 +36,7 @@ public class RoleController : ControllerBase
 
     [HttpGet]
     [Route("{id:guid}")]
+     [Authorize]
     public async Task<IActionResult> GetRole(Guid id)
     {
         var response = await roleService.GetRoleById(id);
@@ -42,6 +44,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet]
+     [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var response = await roleService.GetAllRole();
@@ -50,6 +53,7 @@ public class RoleController : ControllerBase
 
     [HttpPatch]
     [Route("{id:guid}")]
+     [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRoleRequestDto updateRoleRequestDto)
     {
         var response = await roleService.UpdateRoleById(id, updateRoleRequestDto);
@@ -57,6 +61,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpPost("attach")]
+     [Authorize]
      public async Task<IActionResult> AttachRoleToUser([FromBody] UserRoleRequestDto userRoleDto )
     {
             var response = await userRoleService.AttachRoleToUser(userRoleDto.UserId, userRoleDto.RoleId, userRoleDto);
@@ -64,6 +69,7 @@ public class RoleController : ControllerBase
     }
       
     [HttpPost("detach")]
+     [Authorize]
     public async Task<IActionResult> DetachRoleFromUser([FromBody] UserRoleRequestDto userRoleDto)
     {
             var response = await userRoleService.DetachRoleFromUser(userRoleDto.UserId, userRoleDto.RoleId);
@@ -71,6 +77,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("all")]
+     [Authorize]
     public async Task<IActionResult> GetAllUserRole()
     {
             var response = await userRoleService.GetAllUserRolesAsync();
@@ -78,6 +85,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("role/{id:guid}")]
+     [Authorize]
     public async Task<IActionResult> GetUserRoleByRoleId(Guid id)
     {
             var response = await userRoleService.GetUserRolesByRoleId(id);
@@ -85,6 +93,7 @@ public class RoleController : ControllerBase
 
     }
     [HttpGet("user/{id:guid}")]
+     [Authorize]
     public async Task<IActionResult> GetUserRoleByUserId(Guid id)
     {
         var response = await userRoleService.GetUserRolesByUserId(id);
@@ -92,6 +101,7 @@ public class RoleController : ControllerBase
     } 
 
     [HttpGet("userrole/{id:guid}")]
+     [Authorize]
     public async Task<IActionResult> GetUserRoleById(Guid id)
     {
         var response = await userRoleService.GetUserRoleById(id);
@@ -101,6 +111,7 @@ public class RoleController : ControllerBase
       
 
     [HttpDelete]
+     [Authorize]
     [Route("{id:guid}")]
 
     public async Task<IActionResult> Delete(Guid id)

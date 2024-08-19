@@ -120,8 +120,7 @@ namespace P2PLoan.Services
             return new ServiceResponse<object>(
                 ResponseStatus.Success,
                 AppStatusCodes.Success,
-                "Role attached to user successfully.",
-                newUserRole
+                "Role attached to user successfully.", null
             );
 
         }

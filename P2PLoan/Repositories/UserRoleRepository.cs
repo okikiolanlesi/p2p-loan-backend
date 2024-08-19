@@ -84,6 +84,7 @@ public class UserRoleRepository : IUserRoleRepository
     public async Task<UserRole> FindByUserIdAndRoleId(Guid userId, Guid roleId)
     {
         return await dbContext.UserRoles
+          
           .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
     }

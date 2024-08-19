@@ -19,8 +19,7 @@ namespace P2PLoan.Services
         public RoleService(IRoleRepository roleRepository,IMapper mapper)
         {
             this.roleRepository = roleRepository;
-            this.mapper = mapper;
-        
+            this.mapper = mapper;     
 
         }
         public async Task<ServiceResponse<object>> CreateRole(CreateRoleRequestDto createRoleRequestDto)
