@@ -569,7 +569,8 @@ public class AuthService : IAuthService
                 FrontendBaseUrl = configuration.GetSection("AppSettings:FrontendBaseUrl").Value,
                 Name = user.FirstName,
                 EmailVerificationToken = emailVerificationToken,
-                UserId = user.Id
+                UserId = user.Id,
+                Email = user.Email
             });
         }
         catch (Exception e)
