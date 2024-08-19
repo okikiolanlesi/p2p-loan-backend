@@ -9,4 +9,5 @@ public interface IThirdPartyWalletProviderService
     Task<CreateWalletResponseDto> Create(CreateWalletDto createWalletDto);
     Task<GetBalanceResponseDto> GetBalance(string walletUniqueReference);
     Task<GetTransactionsResponseDto> GetTransactions(string walletUniqueReference, int pageSize, int pageNo);
+    Task<GetTransactionsResponseDto> Transfer(string walletUniqueReference, int pageSize, int pageNo);
 }

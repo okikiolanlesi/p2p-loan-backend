@@ -348,7 +348,7 @@ public class AuthService : IAuthService
     {
         var user = await userRepository.GetByEmailAsync(resetPasswordDto.Email);
 
-        if (user == null || user.PasswordResetTokenExpiration < DateTime.UtcNow)
+        if (user == null || user.PasswordResetTokenExpiration < DateTime.UtcNow || user.PasswordResetToken != resetPasswordDto.Token)
         {
             // Token is invalid or expired
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Invalid or expired token", null);

@@ -10,8 +10,16 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyCreateWalletResponseBody>> CreateWallet(CreateWalletDto createWalletDto);
     Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference);
     Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1);
+    Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> Transfer(TransferDto transferDto);
 }
 
+public class MonnifyTransferResponseBody : CreateWalletDto
+{
+    public string FeeBearer { get; set; }
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public TopUpAccountDetails TopUpAccountDetails { get; set; }
+}
 public class MonnifyCreateWalletResponseBody : CreateWalletDto
 {
     public string FeeBearer { get; set; }

@@ -57,7 +57,7 @@ public class MonnifyApiService : IMonnifyApiService
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetTransactionsResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>>(successContent);
             return data;
         }
         else
@@ -67,10 +67,6 @@ public class MonnifyApiService : IMonnifyApiService
         }
     }
 
-    public Task Transfer()
-    {
-        throw new NotImplementedException();
-    }
     public Task VerifyNIN()
     {
         throw new NotImplementedException();
@@ -86,7 +82,7 @@ public class MonnifyApiService : IMonnifyApiService
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetBalanceResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetBalanceResponseBody>>(successContent);
             return data;
         }
         else
@@ -95,6 +91,11 @@ public class MonnifyApiService : IMonnifyApiService
             throw new HttpRequestException($"Error getting wallet balance: {response.StatusCode}, {errorContent}");
         }
 
+    }
+
+    public Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> Transfer(TransferDto transferDto)
+    {
+        throw new NotImplementedException();
     }
 }
 

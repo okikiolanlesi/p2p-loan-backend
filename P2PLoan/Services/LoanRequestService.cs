@@ -205,8 +205,33 @@ public class LoanRequestService : ILoanRequestService
 
     }
 
-    public Task<ServiceResponse<object>> Decline(Guid loanRequestId)
+    public async Task<ServiceResponse<object>> Decline(Guid loanRequestId)
     {
-        throw new NotImplementedException();
+        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var loanRequest = await loanRequestRepository.FindById(loanRequestId);
+
+        if (loanRequest is null || loanRequest.LoanOffer.UserId != userId)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan request does not exist", null);
+        }
+
+        if (loanRequest.Status != LoanRequestStatus.pending)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan request cannot be declined", null);
+        }
+
+        loanRequest.Status = LoanRequestStatus.declined;
+
+        loanRequestRepository.MarkAsModified(loanRequest);
+
+        var saveResult = await loanRequestRepository.SaveChangesAsync();
+
+        if (!saveResult)
+        {
+            throw new Exception();
+        }
+
+        return new ServiceResponse<object>(ResponseStatus.Processing, AppStatusCodes.Success, "Loan request has been declined successfully", null);
     }
 }
