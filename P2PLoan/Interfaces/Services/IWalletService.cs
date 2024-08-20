@@ -10,10 +10,11 @@ public interface IWalletService
 {
     Task<CreateWalletResponse> Create(WalletProviders walletProvider, CreateWalletDto createWalletDto);
     Task<ServiceResponse<object>> CreateWalletForController(WalletProviders walletProvider, CreateWalletDto createWalletDto, User user, Guid walletProviderId);
-    Task<ServiceResponse<object>> GetBalanceForController(WalletProviders walletProvider, string accountNumber);
-    Task<GetBalanceResponseDto> GetBalance(WalletProviders walletProvider, string walletUniqueReference);
-    Task<ServiceResponse<object>> GetTransactions(WalletProviders walletProvider, string accountNumber, int pageSize = 10, int pageNo = 1);
+    Task<ServiceResponse<object>> GetBalanceForController(Guid walletId);
+    Task<GetBalanceResponseDto> GetBalance(Guid walletId);
+    Task<ServiceResponse<object>> GetTransactions(Guid walletId, int pageSize = 10, int pageNo = 1);
     Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber);
+    Task<ServiceResponse<object>> GetLoggedInUserWallets();
 }
 
 public class CreateWalletResponse

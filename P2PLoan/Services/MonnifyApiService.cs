@@ -50,7 +50,7 @@ public class MonnifyApiService : IMonnifyApiService
 
     public async Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1)
     {
-        var requestUri = $"/api/v1/disbursements/wallet/balance?accountNumber={Uri.EscapeDataString(accountNumber)},pageSize={Uri.EscapeDataString($"{pageSize}")},pageNo={Uri.EscapeDataString($"{pageNo}")}";
+        var requestUri = $"/api/v1/disbursements/wallet/transactions?accountNumber={Uri.EscapeDataString(accountNumber)}&pageSize={Uri.EscapeDataString($"{pageSize}")}&pageNo={Uri.EscapeDataString($"{pageNo}")}";
 
         var response = await monnifyClient.Client.GetAsync(requestUri);
 
@@ -75,7 +75,7 @@ public class MonnifyApiService : IMonnifyApiService
     public async Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference)
     {
         // Create the query string with the walletUniqueReference parameter
-        var requestUri = $"/api/v1/disbursements/wallet/balance?walletReference={Uri.EscapeDataString(walletUniqueReference)}";
+        var requestUri = $"/api/v1/disbursements/wallet/balance?walletReference={Uri.EscapeDataString(walletUniqueReference)}&accountNumber={Uri.EscapeDataString(walletUniqueReference)}";
 
         var response = await monnifyClient.Client.GetAsync(requestUri);
 

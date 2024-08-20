@@ -30,7 +30,7 @@ public class WalletRepository : IWalletRepository
 
     public async Task<Wallet?> FindById(Guid id)
     {
-        return await dbContext.Wallets.FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.Wallets.Include(w => w.WalletProvider).FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<IEnumerable<Wallet>> GetAll()

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using P2PLoan.DTOs;
 using P2PLoan.Interfaces;
+using P2PLoan.Models;
 
 namespace P2PLoan.Services;
 
@@ -22,16 +23,16 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
         return mapper.Map<CreateWalletResponseDto>(createdWallet);
     }
 
-    public async Task<GetBalanceResponseDto> GetBalance(string walletUniqueReference)
+    public async Task<GetBalanceResponseDto> GetBalance(Wallet wallet)
     {
-        var walletBalance = await monnifyApiService.GetWalletBalance(walletUniqueReference);
+        var walletBalance = await monnifyApiService.GetWalletBalance(wallet.AccountNumber);
 
         return mapper.Map<GetBalanceResponseDto>(walletBalance);
     }
 
-    public async Task<GetTransactionsResponseDto> GetTransactions(string walletUniqueReference, int pageSize, int pageNo)
+    public async Task<GetTransactionsResponseDto> GetTransactions(Wallet wallet, int pageSize, int pageNo)
     {
-        var walletTransactions = await monnifyApiService.GetWalletTransactions(walletUniqueReference, pageSize, pageNo);
+        var walletTransactions = await monnifyApiService.GetWalletTransactions(wallet.AccountNumber, pageSize, pageNo);
 
         return mapper.Map<GetTransactionsResponseDto>(walletTransactions);
     }

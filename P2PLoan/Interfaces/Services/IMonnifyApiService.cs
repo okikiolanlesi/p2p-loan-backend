@@ -37,8 +37,8 @@ public class TopUpAccountDetails
 }
 public class MonnifyGetBalanceResponseBody
 {
-    public int AvailableBalance { get; set; }
-    public int LedgerBalance { get; set; }
+    public double AvailableBalance { get; set; }
+    public double LedgerBalance { get; set; }
 }
 
 public class MonnifyGetTransactionsResponseBody
