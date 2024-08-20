@@ -42,6 +42,11 @@ public class RolePermissionRepository : IRolePermissionRepository
         return await dbContext.RolePermissions.FirstOrDefaultAsync(x => x.Id == rolePermissionId);
     }
 
+    public async Task<RolePermission> FindByRoleIdandPermissionId(Guid roleId, Guid permissionId)
+    {
+        return await dbContext.RolePermissions.FirstOrDefaultAsync(x=>x.RoleId==roleId && x.PermissionId==permissionId);
+    }
+
     public async Task<IEnumerable<RolePermission>> GetAll()
     {
         return await dbContext.RolePermissions.ToListAsync();
@@ -56,4 +61,10 @@ public class RolePermissionRepository : IRolePermissionRepository
     {
         return await dbContext.SaveChangesAsync() > 0;
     }
+
+     public void Delete(RolePermission rolePermission)
+    {
+        dbContext.Remove(rolePermission);
+    }
+
 }

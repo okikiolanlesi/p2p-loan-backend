@@ -156,7 +156,9 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpContextAccessor();
-;
+
+
+
 
 builder.Services.AddDbContext<P2PLoanDbContext>(opt =>
 {
@@ -208,6 +210,7 @@ builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific w
 builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 
 var app = builder.Build();
 

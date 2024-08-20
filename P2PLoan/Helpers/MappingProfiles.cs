@@ -19,6 +19,7 @@ namespace P2PLoan.Helpers
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
             CreateMap<CreatePermissionRequestDto, Permission>().ReverseMap();
+            CreateMap<RolePermissionRequestDto, RolePermission>().ReverseMap();
 
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs

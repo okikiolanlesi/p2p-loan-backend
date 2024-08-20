@@ -1,13 +1,12 @@
 using System;
-using P2PLoan.Constants;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace P2PLoan.Models;
-
-public class CreatePermissionRequestDto
+namespace P2PLoan.DTOs
 {
-    public Guid ModuleId { get; set; }
-    public PermissionAction Action { get; set; }
-
-    public Guid CreatedById { get; set; }
-    public Guid ModifiedById { get; set; }
+    public class CreatePermissionRequestDto
+    {
+        
+    }
 }

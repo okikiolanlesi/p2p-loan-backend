@@ -12,7 +12,7 @@ using P2PLoan.Data;
 namespace P2PLoan.Migrations
 {
     [DbContext(typeof(P2PLoanDbContext))]
-    [Migration("20240812094754_InitialCreate")]
+    [Migration("20240820113952_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

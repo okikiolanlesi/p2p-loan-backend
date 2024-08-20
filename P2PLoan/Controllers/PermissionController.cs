@@ -14,13 +14,16 @@ namespace P2PLoan.Controllers
     public class PermissionController : ControllerBase
     {
         private readonly IPermissionService permissionService;
+         private readonly IRolePermissionService rolePermissionService;
 
-        public PermissionController(IPermissionService permissionService)
+        public PermissionController(IPermissionService permissionService, IRolePermissionService rolePermissionService)
         {
             this.permissionService = permissionService;
+             this.rolePermissionService = rolePermissionService;
         }
 
         [HttpPost]
+        
         public async Task<IActionResult> CreatePermission([FromBody] CreatePermissionRequestDto createPermissionRequestDto)
         {
             var response = await permissionService.CreatePermissionAsync(createPermissionRequestDto);
@@ -34,6 +37,21 @@ namespace P2PLoan.Controllers
             var response = await permissionService.DeletePermissionAsync(id);
             return ControllerHelper.HandleApiResponse(response);
         }
+
+       [HttpPost("attach")]
+        public async  Task<IActionResult> AttachPermissionToRole([FromBody] RolePermissionRequestDto rolePermissionRequestDto)
+        {
+            var response = await rolePermissionService.AttachPermissionToRole(rolePermissionRequestDto.roleId, rolePermissionRequestDto.permissionId, rolePermissionRequestDto);
+            return ControllerHelper.HandleApiResponse(response);
+        }
+
+       [HttpPost("detach")]
+        public async  Task<IActionResult> DetachPermissionToRole([FromBody] RolePermissionRequestDto rolePermissionRequestDto)
+        {
+            var response = await rolePermissionService.DetachPermissionFromRole(rolePermissionRequestDto.roleId, rolePermissionRequestDto.permissionId);
+            return ControllerHelper.HandleApiResponse(response);
+        }
+
 
 
     }

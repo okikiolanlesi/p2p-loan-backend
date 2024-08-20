@@ -9,11 +9,15 @@ public interface IRolePermissionRepository
 {
     void Add(RolePermission rolePermission);
     Task<RolePermission?> FindById(Guid rolePermissionId);
+
+    Task<RolePermission?> FindByRoleIdandPermissionId(Guid roleId, Guid permissionId);
     Task<IEnumerable<RolePermission>> FindAllByPermissionId(Guid permissionId);
     Task<IEnumerable<RolePermission>> FindAllByRoleId(Guid roleId);
     Task<IEnumerable<RolePermission>> GetAll();
     void AddRange(IEnumerable<RolePermission> rolePermissions);
     void MarkAsModified(RolePermission rolePermission);
     Task<bool> SaveChangesAsync();
+
+    void Delete(RolePermission rolePermission);
    
 }
