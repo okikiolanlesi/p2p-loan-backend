@@ -2,6 +2,8 @@ using AutoMapper;
 using P2PLoan.DTOs;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
+using P2PLoan.Repositories;
+using P2PLoan.Services;
 
 namespace P2PLoan.Helpers
 {
@@ -16,6 +18,8 @@ namespace P2PLoan.Helpers
             CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
+            CreateMap<CreatePermissionRequestDto, Permission>().ReverseMap();
+
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             // Assuming ResponseBody matches the properties of the destination DTOs

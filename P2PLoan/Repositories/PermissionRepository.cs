@@ -1,43 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
 
-namespace P2PLoan.Repositories;
-
-public class PermissionRepository : IPermissionRepository
+namespace P2PLoan.Repositories
 {
-    private readonly P2PLoanDbContext dbContext;
+    public class PermissionRepository : IPermissionRepository
+    {
+        private readonly P2PLoanDbContext dbContext;
 
-    public PermissionRepository(P2PLoanDbContext dbContext)
-    {
-        this.dbContext = dbContext;
-    }
-    public void Add(Permission permission)
-    {
-        dbContext.Permissions.Add(permission);
-    }
+        public PermissionRepository(P2PLoanDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
 
-    public void AddRange(IEnumerable<Permission> permissions)
-    {
-        dbContext.Permissions.AddRange(permissions);
-    }
+        public void Add(Permission permission)
+        {
+            dbContext.Permissions.Add(permission);
+        }
 
-    public async Task<Permission?> FindByModuleAndAction(Guid moduleId, PermissionAction action)
-    {
-        return await dbContext.Permissions.FirstOrDefaultAsync(x => x.ModuleId == moduleId && x.Action == action);
-    }
+        public void AddRange(IEnumerable<Permission> permissions)
+        {
+            dbContext.Permissions.AddRange(permissions);
+        }
 
-    public async Task<IEnumerable<Permission>> GetAll()
-    {
-        return await dbContext.Permissions.ToListAsync();
-    }
+        public async Task<Permission?> FindByModuleAndAction(Guid moduleId, PermissionAction action)
+        {
+            return await dbContext.Permissions.FirstOrDefaultAsync(x => x.ModuleId == moduleId && x.Action == action);
+        }
 
-    public async Task<bool> SaveChangesAsync()
-    {
-        return await dbContext.SaveChangesAsync() > 0;
+        public async Task<IEnumerable<Permission>> GetAll()
+        {
+            return await dbContext.Permissions.ToListAsync();
+        }
+
+        public async Task<Permission?> GetByIdAsync(Guid id)
+        {
+            return await dbContext.Permissions.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public void Delete(Permission permission)
+        {
+            dbContext.Permissions.Remove(permission);
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await dbContext.SaveChangesAsync() > 0;
+        }
     }
 }

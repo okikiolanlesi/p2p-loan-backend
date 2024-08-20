@@ -33,6 +33,7 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
+using P2PLoan.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,15 @@ var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clie
 
 // Add Azure Key Vault to configuration
 builder.Configuration.AddAzureKeyVault(vaultUri, clientSecretCredential);
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+// Register SimpleLogger
+
+
 
 builder.Services.AddCors(options =>
 {
@@ -132,6 +142,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
     });
 
+
 builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("PermissionPolicy", policy =>
@@ -196,7 +207,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<MonnifyWalletProviderService>(); // Ensure specific wallet provider services are registered
 builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceFactory>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 
 var app = builder.Build();
 
@@ -207,6 +218,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add the exception handling middleware to the pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

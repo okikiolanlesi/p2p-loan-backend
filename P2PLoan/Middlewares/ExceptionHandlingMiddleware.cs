@@ -1,5 +1,4 @@
 ﻿using System;
-
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,6 @@ using P2PLoan.Constants;
 using P2PLoan.Helpers;
 
 namespace P2PLoan.Middlewares;
-
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
