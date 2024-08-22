@@ -186,6 +186,7 @@ builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 
 //services
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
