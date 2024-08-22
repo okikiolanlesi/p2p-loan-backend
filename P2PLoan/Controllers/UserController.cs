@@ -20,13 +20,21 @@ namespace P2PLoan.Controllers
             this.userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("me")]
         [Authorize]
-        public async Task<IActionResult> GetUserProfile(Guid id)
+        public async Task<IActionResult> GetMyProfile()
         {
-            var response = await userService.GetUserById(id);
+            var response = await userService.GetCurrentUserProfile();
                return ControllerHelper.HandleApiResponse(response);
         }
-        
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetPublicUserProfile(Guid id)
+        {
+            var response = await userService.GetPublicUserProfileById(id);
+            return ControllerHelper.HandleApiResponse(response);
+
+        }
     }
 }

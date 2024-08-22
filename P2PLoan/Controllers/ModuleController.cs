@@ -22,14 +22,6 @@ public class ModuleController : ControllerBase
         this.moduleService = moduleService;      
     }
 
-    [HttpPost]
-     [Authorize]
-    public async Task<IActionResult> CreateModule([FromBody] CreateModuleRequestDto createModuleRequestDto)
-    {
-        var response = await moduleService.CreateModuleAsync(createModuleRequestDto);
-        return ControllerHelper.HandleApiResponse(response);
-    }
-
     [HttpGet]
      [Authorize]
     [Route("{id:guid}")]

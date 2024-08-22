@@ -6,6 +6,7 @@ namespace P2PLoan.Interfaces;
 
 public interface IUserService
 {
-   Task<ServiceResponse<object>> GetUserById(Guid userId);
+   Task<ServiceResponse<object>> GetPublicUserProfileById(Guid userId);
+   Task<ServiceResponse<object>> GetCurrentUserProfile();
 
 }

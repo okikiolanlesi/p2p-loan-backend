@@ -33,6 +33,8 @@ namespace P2PLoan.Services
                 }
                 // Map the CreateModuleRequestDto to a Module entity
                 var module = mapper.Map<Module>(createModuleRequestDto);
+                module.CreatedById = existingModule.CreatedById;
+                module.ModifiedById = existingModule.ModifiedById;
                 moduleRepository.Add(module);
                 await moduleRepository.SaveChangesAsync();
 

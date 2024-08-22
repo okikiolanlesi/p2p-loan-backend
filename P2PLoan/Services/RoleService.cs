@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
@@ -15,21 +16,33 @@ namespace P2PLoan.Services
     public class RoleService : IRoleService
     {
         private readonly IRoleRepository roleRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
         private IMapper mapper;
-        public RoleService(IRoleRepository roleRepository,IMapper mapper)
+        public RoleService(IRoleRepository roleRepository,IHttpContextAccessor httpContextAccessor,  IMapper mapper)
         {
             this.roleRepository = roleRepository;
+            this.httpContextAccessor = httpContextAccessor;
             this.mapper = mapper;     
 
         }
         public async Task<ServiceResponse<object>> CreateRole(CreateRoleRequestDto createRoleRequestDto)
         {
+             var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+            if (userId== null)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);      
+            }
             // Check if a role with the same name already exists
             if (await roleRepository.RoleExistsAsync(createRoleRequestDto.Name))
             {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Role with the same name already exists.", null);
             }
+               // Map the CreateRoleRequestDto to the Role entity
             var role = mapper.Map<Role>(createRoleRequestDto);
+            
+            role.CreatedById = userId;
+            role.ModifiedById = userId;
+
             roleRepository.Add(role);
             await roleRepository.SaveChangesAsync();
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Role created successfully.", role);
