@@ -1,8 +1,8 @@
 using System;
 
-namespace P2PLoan.DTOs;
+namespace P2PLoan.DTOs.SearchParams;
 
-public class TransferDto
+public class MonnifyTransferRequestBodyDto
 {
     public double Amount { get; set; }
     public string Reference { get; set; }

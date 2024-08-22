@@ -37,8 +37,10 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
         return mapper.Map<GetTransactionsResponseDto>(walletTransactions);
     }
 
-    public Task<GetTransactionsResponseDto> Transfer(string walletUniqueReference, int pageSize, int pageNo)
+    public async Task<TransferResponseDto> Transfer(TransferDto transferDto)
     {
-        throw new NotImplementedException();
+        var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(transferDto));
+
+        return mapper.Map<TransferResponseDto>(response);
     }
 }

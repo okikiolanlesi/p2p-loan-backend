@@ -29,8 +29,9 @@ public class AuthService : IAuthService
     private readonly IWalletRepository walletRepository;
     private readonly IWalletProviderRepository walletProviderRepository;
     private readonly IHttpContextAccessor httpContextAccessor;
+    private readonly IMonnifyApiService monnifyApiService;
 
-    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository, IHttpContextAccessor httpContextAccessor)
+    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository, IHttpContextAccessor httpContextAccessor, IMonnifyApiService monnifyApiService)
     {
         this.userRepository = userRepository;
         this.mapper = mapper;
@@ -41,6 +42,7 @@ public class AuthService : IAuthService
         this.walletRepository = walletRepository;
         this.walletProviderRepository = walletProviderRepository;
         this.httpContextAccessor = httpContextAccessor;
+        this.monnifyApiService = monnifyApiService;
     }
 
     public async Task<ServiceResponse<object>> Register(RegisterRequestDto registerDto)
@@ -73,11 +75,18 @@ public class AuthService : IAuthService
                 }
 
                 // Try to verify bvn
-                var bvnIsVerified = await VerifyBVN(registerDto);
+                var (bvnIsVerified, bvnVerificationMessage) = await VerifyBVN(new VerifyBvnDto
+                {
+                    Bvn = registerDto.BVN,
+                    DateOfBirth = registerDto.BvnDateOfBirth,
+                    Name = $"{registerDto.FirstName} {registerDto.LastName}",
+                    MobileNo = registerDto.PhoneNumber
+
+                });
 
                 if (!bvnIsVerified)
                 {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.BvnNotVerified, "Unable to verify bvn details", null);
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.BvnNotVerified, bvnVerificationMessage, null);
                 }
 
                 User user;
@@ -550,13 +559,52 @@ public class AuthService : IAuthService
         return BCrypt.Net.BCrypt.Verify(password, passwordHash);
     }
 
-    private async Task<bool> VerifyBVN(RegisterRequestDto registerRequestDto)
+    private async Task<(bool, string)> VerifyBVN(VerifyBvnDto verifyBvnDto)
     {
-        // TODO: Implement logic to verify BVN info
-        // Simulating an async operation for demonstration purposes
-        await Task.Delay(1); // Simulate an asynchronous operation
+        var message = "BVN verified successfully";
 
-        return true;
+        //simulate async operation
+        await Task.Delay(0);
+
+        // TODO: Re enable this when monnify verification starts working
+        // try
+        // {
+        //     var response = await monnifyApiService.VerifyBVN(mapper.Map<VerifyBvnDto, MonnifyVerifyBVNRequestDto>(verifyBvnDto));
+
+        //     if (response.ResponseBody.MobileNo != "FULL_MATCH")
+        //     {
+        //         message = "Mobile number does not match BVN details";
+        //         return (false, message);
+        //     }
+        //     if (response.ResponseBody.DateOfBirth != "FULL_MATCH")
+        //     {
+        //         message = "Date of birth does not match BVN details";
+        //         return (false, message);
+        //     }
+
+        //     if (response.ResponseBody.Name.MatchPercentage > 60)
+        //     {
+        //         message = "Name does not match BVN details";
+        //         return (false, message);
+        //     }
+        // }
+        // catch (Exception e)
+        // {
+        //     var parts = e.Message.Split(':');
+
+        //     if (parts.Length > 1 && parts[0] == "99")
+        //     {
+        //         message = parts[1];
+
+        //     }
+        //     else
+        //     {
+        //         message = "Unable to verify BVN details";
+        //     }
+
+        //     return (false, message);
+        // }
+        return (true, message);
     }
 
 

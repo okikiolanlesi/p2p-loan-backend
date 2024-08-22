@@ -10,5 +10,5 @@ public interface IThirdPartyWalletProviderService
     Task<CreateWalletResponseDto> Create(CreateWalletDto createWalletDto);
     Task<GetBalanceResponseDto> GetBalance(Wallet wallet);
     Task<GetTransactionsResponseDto> GetTransactions(Wallet wallet, int pageSize, int pageNo);
-    Task<GetTransactionsResponseDto> Transfer(string walletUniqueReference, int pageSize, int pageNo);
+    Task<TransferResponseDto> Transfer(TransferDto transferDto);
 }

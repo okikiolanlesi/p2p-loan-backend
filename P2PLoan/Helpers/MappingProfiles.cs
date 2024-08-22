@@ -21,9 +21,10 @@ namespace P2PLoan.Helpers
             CreateMap<UserDto, PublicUserProfileDto>().ReverseMap();
             CreateMap<User, PublicUserProfileDto>().ReverseMap();
             CreateMap<Wallet, WalletDto>().ReverseMap();
+            CreateMap<MonnifyTransferResponseBody, TransferResponseDto>().ReverseMap();
+            CreateMap<TransferDto, MonnifyTransferRequestBodyDto>().ReverseMap();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
-            // Assuming ResponseBody matches the properties of the destination DTOs
             CreateMap<MonnifyApiResponse<MonnifyCreateWalletResponseBody>, CreateWalletResponseDto>()
                 .ForMember(dest => dest.AccountNumber, opt => opt.MapFrom(src => src.ResponseBody.AccountNumber))
                 .ForMember(dest => dest.WalletReference, opt => opt.MapFrom(src => src.ResponseBody.WalletReference))
@@ -53,11 +54,21 @@ namespace P2PLoan.Helpers
                 .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.ResponseBody.Number))
                 .ForMember(dest => dest.Empty, opt => opt.MapFrom(src => src.ResponseBody.Empty));
 
+            CreateMap<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>, TransferResponseDto>()
+                .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.ResponseBody.DateCreated))
+                .ForMember(dest => dest.Reference, opt => opt.MapFrom(src => src.ResponseBody.Reference))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.ResponseBody.Status))
+                .ForMember(dest => dest.TotalFee, opt => opt.MapFrom(src => src.ResponseBody.TotalFee))
+                .ForMember(dest => dest.DestinationBankCode, opt => opt.MapFrom(src => src.ResponseBody.DestinationBankCode))
+                .ForMember(dest => dest.DestinationBankName, opt => opt.MapFrom(src => src.ResponseBody.DestinationBankName))
+                .ForMember(dest => dest.DestinationAccountNumber, opt => opt.MapFrom(src => src.ResponseBody.DestinationAccountNumber));
 
             // Mapping for individual response body types to DTOs
             CreateMap<MonnifyCreateWalletResponseBody, CreateWalletResponseDto>();
             CreateMap<MonnifyGetBalanceResponseBody, GetBalanceResponseDto>();
             CreateMap<MonnifyGetTransactionsResponseBody, GetTransactionsResponseDto>();
+
+            CreateMap<VerifyBvnDto, MonnifyVerifyBVNRequestDto>();
         }
     }
 }

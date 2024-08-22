@@ -141,11 +141,6 @@ namespace P2PLoan.Services
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Transactions fetched successfully", transactionsResponse);
         }
 
-        public Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ServiceResponse<object>> GetLoggedInUserWallets()
         {
             var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
@@ -155,5 +150,20 @@ namespace P2PLoan.Services
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallets fetched successfully", wallets);
         }
 
+        public async Task<TransferResponseDto> Transfer(TransferDto transferDto, Wallet wallet)
+        {
+            transferDto.SourceAccountNumber = wallet.AccountNumber;
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            if (providerService == null)
+            {
+                throw new Exception("Invalid wallet provider");
+            }
+
+            var response = await providerService.Transfer(transferDto);
+
+            return response;
+        }
     }
 }

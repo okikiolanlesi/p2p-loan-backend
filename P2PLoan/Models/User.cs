@@ -14,6 +14,7 @@ public class User
     public string PIN { get; set; }
     public bool PinCreated { get; set; }
     public string BVN { get; set; }
+    public string PhoneNumber { get; set; }
     public string? Photo { get; set; }
     public string PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiration { get; set; }
