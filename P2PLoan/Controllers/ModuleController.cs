@@ -13,13 +13,12 @@ namespace P2PLoan.Controllers;
 
 [ApiController]
 [Route("api/module")]
-
 public class ModuleController : ControllerBase
 {
     private readonly IModuleService moduleService;
-    public  ModuleController(IModuleService moduleService)
+    public ModuleController(IModuleService moduleService)
     {
-        this.moduleService = moduleService;      
+        this.moduleService = moduleService;
     }
 
     [HttpPost]
@@ -37,15 +36,15 @@ public class ModuleController : ControllerBase
         return ControllerHelper.HandleApiResponse(response);
     }
 
-    [HttpGet]   
+    [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var response = await  moduleService.GetAllModule();
+        var response = await moduleService.GetAllModule();
         return ControllerHelper.HandleApiResponse(response);
     }
 
     [HttpPatch]
-     [Route("{id:guid}")]
+    [Route("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateModuleRequestDto updateModuleRequestDto)
     {
         var response = await moduleService.UpdateModuleByIdAsync(id, updateModuleRequestDto);

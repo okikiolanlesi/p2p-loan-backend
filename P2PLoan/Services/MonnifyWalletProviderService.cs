@@ -39,6 +39,9 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
 
     public async Task<TransferResponseDto> Transfer(TransferDto transferDto)
     {
+        var payload = mapper.Map<MonnifyTransferRequestBodyDto>(transferDto);
+        payload.Async = true;
+
         var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(transferDto));
 
         return mapper.Map<TransferResponseDto>(response);

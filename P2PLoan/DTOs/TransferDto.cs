@@ -11,5 +11,4 @@ public class TransferDto
     public string DestinationAccountNumber { get; set; }
     public string Currency { get; set; } = "NGN";
     public string SourceAccountNumber { get; set; }
-    public bool Async { get; set; }
 }

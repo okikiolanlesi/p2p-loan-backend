@@ -20,8 +20,9 @@ public class LoanRequestService : ILoanRequestService
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
     private readonly IWalletRepository walletRepository;
+    private readonly IWalletService walletService;
 
-    public LoanRequestService(ILoanRequestRepository loanRequestRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository)
+    public LoanRequestService(ILoanRequestRepository loanRequestRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IWalletService walletService)
     {
         this.loanRequestRepository = loanRequestRepository;
         this.loanOfferRepository = loanOfferRepository;
@@ -29,6 +30,7 @@ public class LoanRequestService : ILoanRequestService
         this.userRepository = userRepository;
         this.mapper = mapper;
         this.walletRepository = walletRepository;
+        this.walletService = walletService;
     }
     public async Task<ServiceResponse<object>> Create(CreateLoanRequestRequestDto createLoanRequestDto)
     {
@@ -189,9 +191,50 @@ public class LoanRequestService : ILoanRequestService
 
         loanRequest.ProcessingStartTime = DateTime.UtcNow;
 
-        // Try debiting the lender's wallet
-        // var debitResult = await walletRepository.Debit(loanRequest.LoanOffer.UserId, loanRequest.Amount);
+        //Check if the lender has enough balance to fund the loan request
+        var lenderWallet = await walletRepository.FindById(loanRequest.LoanOffer.WalletId);
 
+        if (lenderWallet is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Lender wallet does not exist", null);
+        }
+
+        var lenderWalletBalance = await walletService.GetBalance(lenderWallet.Id);
+
+        if (lenderWalletBalance.AvailableBalance < loanRequest.LoanOffer.Amount)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InsufficientFunds, "You do not have enough balance to fund the loan request", null);
+        }
+
+        //Create new payment reference to track the loan request
+        var paymentReference = new PaymentReference
+        {
+            Id = Guid.NewGuid(),
+            ResourceId = loanRequest.Id,
+            paymentReferenceType = PaymentReferenceType.loanRequest
+        };
+
+        // Try debiting the lender's wallet
+        var transferDto = new TransferDto
+        {
+            Amount = loanRequest.LoanOffer.Amount,
+            Reference = paymentReference.Id.ToString(),
+            Narration = $"Loan request {loanRequest.Id} approval",
+            DestinationBankCode = loanRequest.Wallet.TopUpBankCode,
+            DestinationAccountNumber = loanRequest.Wallet.AccountNumber,
+            SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
+        };
+
+        try
+        {
+            var transferResponse = await walletService.Transfer(transferDto, loanRequest.LoanOffer.Wallet);
+        }
+        catch
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to debit lender's wallet", null);
+        }
+
+        // var transferResponse = await Transfer
         loanRequestRepository.MarkAsModified(loanRequest);
 
         var saveResult = await loanRequestRepository.SaveChangesAsync();

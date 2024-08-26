@@ -90,6 +90,8 @@ public class MonnifyApiService : IMonnifyApiService
 
     public async Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto)
     {
+        transferDto.Async = true;
+
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
