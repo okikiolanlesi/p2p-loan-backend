@@ -2,5 +2,5 @@
 
 public enum WalletProviders
 {
-    monnify
+    monnify, borrowHub
 }

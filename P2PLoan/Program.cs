@@ -169,6 +169,7 @@ builder.Services.AddScoped<P_2_ModuleSeeder>();
 builder.Services.AddScoped<P_3_WalletProviderSeeder>();
 builder.Services.AddScoped<P_4_PermissionSeeder>();
 builder.Services.AddScoped<P_5_RoleSeeder>();
+builder.Services.AddScoped<P_6_PersonalWalletProviderSeeder>();
 
 //Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -183,6 +184,7 @@ builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanRequestRepository, LoanRequestRepository>();
+builder.Services.AddScoped<IWalletTopUpDetailRepository, WalletTopUpDetailRepository>();
 
 //services
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();

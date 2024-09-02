@@ -34,11 +34,8 @@ namespace P2PLoan.Helpers
                 .ForMember(dest => dest.CustomerEmail, opt => opt.MapFrom(src => src.ResponseBody.CustomerEmail))
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.ResponseBody.CustomerName))
                 .ForMember(dest => dest.BVN, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.Bvn))
-                .ForMember(dest => dest.BVNDateOfBirth, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.BvnDateOfBirth))
-                .ForMember(dest => dest.TopUpAccountName, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.AccountName))
-                .ForMember(dest => dest.TopUpAccountNumber, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.AccountNumber))
-                .ForMember(dest => dest.TopUpBankName, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.BankName))
-                .ForMember(dest => dest.TopUpBankCode, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.BankCode));
+                .ForMember(dest => dest.BVNDateOfBirth, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.BvnDateOfBirth));
+
 
             CreateMap<MonnifyApiResponse<MonnifyGetBalanceResponseBody>, GetBalanceResponseDto>()
                 .ForMember(dest => dest.AvailableBalance, opt => opt.MapFrom(src => src.ResponseBody.AvailableBalance))

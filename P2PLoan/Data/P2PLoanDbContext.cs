@@ -44,6 +44,7 @@ namespace P2PLoan.Data
             ConfigureAuditableEntity<LoanOffer>(modelBuilder);
             ConfigureAuditableEntity<LoanRequest>(modelBuilder);
             ConfigureAuditableEntity<Loan>(modelBuilder);
+            ConfigureAuditableEntity<WalletTopUpDetail>(modelBuilder);
 
             // Configure delete behavior
             ConfigureDeleteBehavior<LoanOffer, Wallet>(modelBuilder, e => e.Wallet, DeleteBehavior.Restrict);
@@ -108,5 +109,6 @@ namespace P2PLoan.Data
         public DbSet<LoanOffer> LoanOffers { get; set; }
         public DbSet<LoanRequest> LoanRequests { get; set; }
         public DbSet<Loan> Loans { get; set; }
+        public DbSet<WalletTopUpDetail> WalletTopUpDetails { get; set; }
     }
 }

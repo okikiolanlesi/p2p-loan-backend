@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -220,7 +221,7 @@ public class LoanRequestService : ILoanRequestService
             Amount = loanRequest.LoanOffer.Amount,
             Reference = paymentReference.Id.ToString(),
             Narration = $"Loan request {loanRequest.Id} approval",
-            DestinationBankCode = loanRequest.Wallet.TopUpBankCode,
+            DestinationBankCode = loanRequest.Wallet.TopUpDetails.First().BankCode,
             DestinationAccountNumber = loanRequest.Wallet.AccountNumber,
             SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
         };
