@@ -10,8 +10,39 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyCreateWalletResponseBody>> CreateWallet(CreateWalletDto createWalletDto);
     Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference);
     Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1);
+    Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto);
+    Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto);
 }
 
+public class MonnifyVerifyBVNRequestDto
+{
+    public string Bvn { get; set; }
+    public string Name { get; set; }
+    public string DateOfBirth { get; set; }
+    public string MobileNo { get; set; }
+}
+
+public class MonnifyVerifyBVNResponseBody
+{
+    public string BVN { get; set; }
+    public Match Name { get; set; }
+    public string DateOfBirth { get; set; }
+    public string MobileNo { get; set; }
+}
+
+public class Match
+{
+    public string MatchStatus { get; set; }
+    public int MatchPercentage { get; set; }
+}
+
+public class MonnifyTransferResponseBody : CreateWalletDto
+{
+    public string FeeBearer { get; set; }
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public TopUpAccountDetails TopUpAccountDetails { get; set; }
+}
 public class MonnifyCreateWalletResponseBody : CreateWalletDto
 {
     public string FeeBearer { get; set; }
@@ -29,8 +60,21 @@ public class TopUpAccountDetails
 }
 public class MonnifyGetBalanceResponseBody
 {
-    public int AvailableBalance { get; set; }
-    public int LedgerBalance { get; set; }
+    public double AvailableBalance { get; set; }
+    public double LedgerBalance { get; set; }
+}
+
+public class MonnifyGetSingleTransferResponseBody
+{
+    public double Amount { get; set; }
+    public string Reference { get; set; }
+    public string Status { get; set; }
+    public DateTime DateCreated { get; set; }
+    public double TotalFee { get; set; }
+
+    public string DestinationBankCode { get; set; }
+    public string DestinationBankName { get; set; }
+    public string DestinationAccountNumber { get; set; }
 }
 
 public class MonnifyGetTransactionsResponseBody

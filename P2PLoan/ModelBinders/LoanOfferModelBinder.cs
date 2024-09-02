@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using P2PLoan.DTOs;
+using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 
 namespace P2PLoan.ModelBinders;

@@ -10,6 +10,10 @@ public class ControllerHelper
         return response.Status switch
         {
             ResponseStatus.Success => new OkObjectResult(response),
+            ResponseStatus.Created => new ObjectResult(response)
+            {
+                StatusCode = 201,
+            },
             ResponseStatus.Error => new ObjectResult(response)
             {
                 StatusCode = 500,

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
@@ -14,12 +15,14 @@ namespace P2PLoan.Services
         private readonly IWalletRepository walletRepository;
         private readonly IWalletProviderServiceFactory walletProviderServiceFactory;
         private readonly IMapper mapper;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public WalletService(IWalletRepository walletRepository, IWalletProviderServiceFactory walletProviderServiceFactory, IMapper mapper)
+        public WalletService(IWalletRepository walletRepository, IWalletProviderServiceFactory walletProviderServiceFactory, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             this.walletRepository = walletRepository;
             this.walletProviderServiceFactory = walletProviderServiceFactory;
             this.mapper = mapper;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ServiceResponse<object>> CreateWalletForController(WalletProviders walletProvider, CreateWalletDto createWalletDto, User user, Guid walletProviderId)
@@ -84,37 +87,83 @@ namespace P2PLoan.Services
             return result;
         }
 
-        public async Task<ServiceResponse<object>> GetBalanceForController(WalletProviders walletProvider, string walletUniqueReference)
+        public async Task<ServiceResponse<object>> GetBalanceForController(Guid walletId)
         {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
 
-            var balanceResponse = await providerService.GetBalance(walletUniqueReference);
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null || wallet.UserId != userId)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Wallet not found", null);
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            var balanceResponse = await providerService.GetBalance(wallet);
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", balanceResponse);
         }
-        public async Task<GetBalanceResponseDto> GetBalance(WalletProviders walletProvider, string walletUniqueReference)
-        {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
 
-            var balanceResponse = await providerService.GetBalance(walletUniqueReference);
+        public async Task<GetBalanceResponseDto> GetBalance(Guid walletId)
+        {
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null)
+            {
+                throw new Exception("Wallet not found");
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            var balanceResponse = await providerService.GetBalance(wallet);
             return balanceResponse;
         }
 
-        public async Task<ServiceResponse<object>> GetTransactions(WalletProviders walletProvider, string accountNumber, int pageSize = 10, int pageNo = 1)
+        public async Task<ServiceResponse<object>> GetTransactions(Guid walletId, int pageSize = 10, int pageNo = 1)
         {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null || wallet.UserId != userId)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Wallet not found", null);
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
             if (providerService == null)
             {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
-            var transactionsResponse = await providerService.GetTransactions(accountNumber, pageSize, pageNo);
+            var transactionsResponse = await providerService.GetTransactions(wallet, pageSize, pageNo);
 
-            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", transactionsResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Transactions fetched successfully", transactionsResponse);
         }
 
-        public Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)
+        public async Task<ServiceResponse<object>> GetLoggedInUserWallets()
         {
-            throw new NotImplementedException();
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+            var wallets = await walletRepository.GetAllForAUser(userId);
+
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallets fetched successfully", wallets);
+        }
+
+        public async Task<TransferResponseDto> Transfer(TransferDto transferDto, Wallet wallet)
+        {
+            transferDto.SourceAccountNumber = wallet.AccountNumber;
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            if (providerService == null)
+            {
+                throw new Exception("Invalid wallet provider");
+            }
+
+            var response = await providerService.Transfer(transferDto);
+
+            return response;
         }
     }
 }

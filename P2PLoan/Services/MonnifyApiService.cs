@@ -50,14 +50,14 @@ public class MonnifyApiService : IMonnifyApiService
 
     public async Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1)
     {
-        var requestUri = $"/api/v1/disbursements/wallet/balance?accountNumber={Uri.EscapeDataString(accountNumber)},pageSize={Uri.EscapeDataString($"{pageSize}")},pageNo={Uri.EscapeDataString($"{pageNo}")}";
+        var requestUri = $"/api/v1/disbursements/wallet/transactions?accountNumber={Uri.EscapeDataString(accountNumber)}&pageSize={Uri.EscapeDataString($"{pageSize}")}&pageNo={Uri.EscapeDataString($"{pageNo}")}";
 
         var response = await monnifyClient.Client.GetAsync(requestUri);
 
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetTransactionsResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>>(successContent);
             return data;
         }
         else
@@ -67,26 +67,17 @@ public class MonnifyApiService : IMonnifyApiService
         }
     }
 
-    public Task Transfer()
-    {
-        throw new NotImplementedException();
-    }
-    public Task VerifyNIN()
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference)
     {
         // Create the query string with the walletUniqueReference parameter
-        var requestUri = $"/api/v1/disbursements/wallet/balance?walletReference={Uri.EscapeDataString(walletUniqueReference)}";
+        var requestUri = $"/api/v1/disbursements/wallet/balance?walletReference={Uri.EscapeDataString(walletUniqueReference)}&accountNumber={Uri.EscapeDataString(walletUniqueReference)}";
 
         var response = await monnifyClient.Client.GetAsync(requestUri);
 
         if (response.IsSuccessStatusCode)
         {
             var successContent = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<MonnifyApiResponse < MonnifyGetBalanceResponseBody>>(successContent);
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetBalanceResponseBody>>(successContent);
             return data;
         }
         else
@@ -96,5 +87,71 @@ public class MonnifyApiService : IMonnifyApiService
         }
 
     }
+
+    public async Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(transferDto, options);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await monnifyClient.Client.PostAsync("/api/v1/disbursements/single", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle successful response if needed
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>>(successContent);
+
+            return data;
+        }
+        else
+        {
+            // Handle error response
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error executing transfer: {response.StatusCode}, {errorContent}");
+        }
+    }
+
+    public async Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(verifyBVNDto, options);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await monnifyClient.Client.PostAsync("/api/v1/vas/bvn-details-match", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle successful response if needed
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>>(successContent);
+
+            return data;
+        }
+        else
+        {
+            // Handle error response
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+
+            throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+        }
+    }
 }
 
+class ErrorResponse
+{
+    public bool requestSuccessful { get; set; }
+    public string responseMessage { get; set; }
+    public string responseCode { get; set; }
+}

@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using P2PLoan.Interfaces;
+using Azure;
+using Azure.Communication.Email;
+using System.Collections.Generic;
 
 namespace P2PLoan.Services;
 
@@ -37,29 +40,72 @@ public class EmailService : IEmailService
         var templateContent = await File.ReadAllTextAsync(templatePath);
         var mergedContent = MergeTemplateWithModel(templateContent, model);
 
-        var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("PeerLend", _configuration["EmailSettings:smtpUser"]));
-        message.To.Add(new MailboxAddress("", toEmail));
-        message.Subject = subject;
+        // var message = new MimeMessage();
+        // message.From.Add(new MailboxAddress("PeerLend", _configuration["EmailSettings:smtpUser"]));
+        // message.To.Add(new MailboxAddress("", toEmail));
+        // message.Subject = subject;
 
-        var bodyBuilder = new BodyBuilder
+
+        // var bodyBuilder = new BodyBuilder
+        // {
+        //     HtmlBody = mergedContent
+        // };
+
+        // message.Body = bodyBuilder.ToMessageBody();
+
+        // Create the email content
+        var emailContent = new EmailContent(subject)
         {
-            HtmlBody = mergedContent
+            PlainText = mergedContent,
+            Html = mergedContent
         };
 
-        message.Body = bodyBuilder.ToMessageBody();
-
-
-
-        using (var client = new SmtpClient())
+        // Create the To list
+        var toRecipients = new List<EmailAddress>
         {
-            await client.ConnectAsync(_configuration["EmailSettings:smtpServer"], int.Parse(_configuration["EmailSettings:smtpPort"] ?? "465"), true);
-            await client.AuthenticateAsync(_configuration["EmailSettings:smtpUser"], _configuration["EmailSettings:smtpPassword"]);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
-        }
+            new EmailAddress(toEmail),
+        };
 
-        _logger.LogDebug($"{templateFileName} email sent to {toEmail}");
+        // Create the CC list
+        //         var ccRecipients = new List<EmailAddress>
+        // {
+        //   new EmailAddress("<ccemailalias@emaildomain.com>"),
+        // };
+
+        // Create the BCC list
+        //         var bccRecipients = new List<EmailAddress>
+        // {
+        //   new EmailAddress("<bccemailalias@emaildomain.com>"),
+        // };
+
+        // EmailRecipients emailRecipients = new EmailRecipients(toRecipients, ccRecipients, bccRecipients);
+
+        EmailRecipients emailRecipients = new EmailRecipients(toRecipients);
+
+        // Create the EmailMessage
+        var emailMessage = new EmailMessage(
+            senderAddress: "DoNotReply@" + _configuration["EmailSettings:azureCommunicationDomainAddress"], // The email address of the domain registered with the Communication Services resource
+            emailRecipients,
+            emailContent);
+
+        // Add optional ReplyTo address which is where any replies to the email will go to.
+        emailMessage.ReplyTo.Add(new EmailAddress(_configuration["EmailSettings:adminEmail"]));
+
+        var emailClient = new EmailClient(_configuration["EmailSettings:COMMUNICATION_SERVICES_CONNECTION_STRING"]);
+
+
+        //     await client.ConnectAsync(_configuration["EmailSettings:smtpServer"], int.Parse(_configuration["EmailSettings:smtpPort"] ?? "465"), true);
+        // await client.AuthenticateAsync(_configuration["EmailSettings:smtpUser"], _configuration["EmailSettings:smtpPassword"]);
+        // await client.SendAsync(message);
+        // await client.DisconnectAsync(true);
+
+        EmailSendOperation emailSendOperation = emailClient.Send(WaitUntil.Completed, emailMessage);
+
+        /// Get the OperationId so that it can be used for tracking the message for troubleshooting
+        string operationId = emailSendOperation.Id;
+
+
+        _logger.LogDebug($"{templateFileName} email sent to {toEmail} with operationId = {operationId}");
     }
 
     private string MergeTemplateWithModel(string templateContent, object model)

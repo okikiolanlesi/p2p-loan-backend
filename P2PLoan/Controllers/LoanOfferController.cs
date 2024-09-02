@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -45,6 +46,13 @@ public class LoanOfferController
     public async Task<IActionResult> GetAllForLoggedInUser(Guid id)
     {
         var response = await loanOfferService.GetOne(id);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+    [HttpGet]
+    [Route("disable/{id:guid}")]
+    public async Task<IActionResult> DisableLoanOffer(Guid id)
+    {
+        var response = await loanOfferService.DisableLoanOffer(id);
         return ControllerHelper.HandleApiResponse(response);
     }
 }

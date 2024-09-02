@@ -10,6 +10,7 @@ public class PublicUserProfileDto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
+    public string PhoneNumber { get; set; }
     public bool BVNVerified { get; set; }
     public UserType UserType { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

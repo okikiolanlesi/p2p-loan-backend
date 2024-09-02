@@ -5,7 +5,7 @@ namespace P2PLoan.Utils;
 
 public static class RandomCharacterGenerator
 {
-    private static readonly char[] Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()".ToCharArray();
+    private static readonly char[] Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
 
     public static int GenerateRandomNumber(int numberOfDigits)
     {

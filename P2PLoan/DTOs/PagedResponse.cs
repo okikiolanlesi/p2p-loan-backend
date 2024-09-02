@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace P2PLoan.Helpers;
+namespace P2PLoan.DTOs;
 
 public class PagedResponse<T>
 {
