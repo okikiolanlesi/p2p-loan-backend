@@ -1,8 +1,10 @@
 using System;
+using System.Threading.Tasks;
+using P2PLoan.Helpers;
 
 namespace P2PLoan.Interfaces.Services;
 
-public class IMonnifyService
+public interface IMonnifyService
 {
-public int MyProperty { get; set; }
+    Task<ServiceResponse<object>> HandleCallback();
 }

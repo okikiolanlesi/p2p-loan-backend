@@ -1,5 +1,8 @@
 using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using P2PLoan.Helpers;
 
 namespace P2PLoan.Controllers;
 
@@ -9,10 +12,11 @@ public class MonnifyController
 {
 
     [HttpPost("/disbursement/callback")]
-    public async Task<IActionResult> CreateModule([FromBody] CreateModuleRequestDto createModuleRequestDto)
+    public async Task<IActionResult> HandleDisbursementCallback()
     {
-        var response = await moduleService.CreateModuleAsync(createModuleRequestDto);
-        return ControllerHelper.HandleApiResponse(response);
+        await Task.Delay(1000);
+        // return ControllerHelper.HandleApiResponse(response);
+        return new OkResult();
     }
 
 }

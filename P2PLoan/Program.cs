@@ -182,6 +182,7 @@ builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ILoanRequestRepository, LoanRequestRepository>();
 
 //services
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
@@ -191,6 +192,7 @@ builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceF
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IWalletProviderService, WalletProviderService>();
 builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
+builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
     var logger = provider.GetRequiredService<ILogger<EmailService>>();

@@ -35,7 +35,7 @@ public class LoanRequestRepository : ILoanRequestRepository
 
     public async Task<LoanRequest> FindById(Guid loanRequestId)
     {
-        return await dbContext.LoanRequests.FirstOrDefaultAsync(x => x.Id == loanRequestId);
+        return await dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.Id == loanRequestId);
     }
 
     public async Task<PagedResponse<IEnumerable<LoanRequest>>> GetAllAsync(LoanRequestSearchParams searchParams, Guid? userId = null)

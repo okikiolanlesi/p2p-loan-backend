@@ -23,6 +23,7 @@ namespace P2PLoan.Helpers
             CreateMap<Wallet, WalletDto>().ReverseMap();
             CreateMap<MonnifyTransferResponseBody, TransferResponseDto>().ReverseMap();
             CreateMap<TransferDto, MonnifyTransferRequestBodyDto>().ReverseMap();
+            CreateMap<CreateLoanRequestRequestDto, LoanRequest>().ReverseMap();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             CreateMap<MonnifyApiResponse<MonnifyCreateWalletResponseBody>, CreateWalletResponseDto>()

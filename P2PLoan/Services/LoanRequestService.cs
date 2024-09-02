@@ -182,7 +182,7 @@ public class LoanRequestService : ILoanRequestService
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan request does not exist", null);
         }
 
-        if (loanRequest.Status != LoanRequestStatus.pending)
+        if (loanRequest.Status != LoanRequestStatus.pending & loanRequest.Status != LoanRequestStatus.failed)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan request cannot be accepted", null);
         }
