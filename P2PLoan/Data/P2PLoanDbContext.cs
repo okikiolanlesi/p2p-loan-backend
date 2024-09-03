@@ -108,5 +108,6 @@ namespace P2PLoan.Data
         public DbSet<LoanOffer> LoanOffers { get; set; }
         public DbSet<LoanRequest> LoanRequests { get; set; }
         public DbSet<Loan> Loans { get; set; }
+
     }
 }

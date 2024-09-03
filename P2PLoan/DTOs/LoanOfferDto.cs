@@ -12,6 +12,7 @@ public class LoanOfferDto
     public PaymentFrequency RepaymentFrequency { get; set; }
     public int GracePeriodDays { get; set; }
     public int LoanDurationDays { get; set; }
+   
     public double AccruingInterestRate { get; set; }
     public double InterestRate { get; set; }
     public string AdditionalInformation { get; set; }

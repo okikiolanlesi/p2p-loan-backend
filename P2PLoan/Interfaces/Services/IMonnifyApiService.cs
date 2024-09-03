@@ -12,6 +12,8 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1);
     Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto);
     Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto);
+    Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto);
+    Task<MonnifyApiResponse<List<BankDto>>> GetBanks();
 }
 
 public class MonnifyVerifyBVNRequestDto
@@ -28,6 +30,32 @@ public class MonnifyVerifyBVNResponseBody
     public Match Name { get; set; }
     public string DateOfBirth { get; set; }
     public string MobileNo { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsRequestDto
+{
+    public string AccountNumber { get; set; }
+    public string BankCode { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsResponseBody
+{
+    public string accountNumber { get; set; }
+    public string bankCode { get; set; }
+}
+
+public class MonnifyGetBanksResponse
+{
+    public List<BankDto> Banks { get; set; }
+}
+
+public class BankDto
+{
+    public string Name { get; set; }
+    public string Code { get; set; }
+    public string UssdTemplate { get; set; }
+    public string BaseUssdCode { get; set; }
+    public string TransferUssdTemplate { get; set; }
 }
 
 public class Match

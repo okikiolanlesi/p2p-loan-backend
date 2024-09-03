@@ -69,6 +69,7 @@ namespace P2PLoan.Helpers
             CreateMap<MonnifyGetTransactionsResponseBody, GetTransactionsResponseDto>();
 
             CreateMap<VerifyBvnDto, MonnifyVerifyBVNRequestDto>();
+            CreateMap<VerifyAccountDetailsDto, MonnifyVerifyAccountDetailsRequestDto>();
         }
     }
 }
