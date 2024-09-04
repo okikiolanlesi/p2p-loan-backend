@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
@@ -21,6 +22,7 @@ namespace P2PLoan.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("verify")]
         public async Task<IActionResult> VerifyAccount([FromQuery] VerifyAccountDetailsDto verifyAccountDetailsDto)
         {
@@ -29,6 +31,7 @@ namespace P2PLoan.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [Route("banks")]
         public async Task<IActionResult> GetBanksFromMonify()
         {
