@@ -50,10 +50,12 @@ public class LoanOfferRepository : ILoanOfferRepository
             query = query.Where(lo => lo.UserId == userId);
         }
 
-        if (searchParams.Active == true)
+        if (searchParams.Active.HasValue)
         {
-            query = query.Where(lo => lo.Active);
+            query = query.Where(lo => lo.Active == searchParams.Active.Value);
         }
+
+        Console.WriteLine("SQL Query: " + query.ToQueryString());
 
         if (searchParams.LoanOfferType.HasValue)
         {
