@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -33,7 +34,6 @@ public class MonnifyApiService : IMonnifyApiService
 
         if (response.IsSuccessStatusCode)
         {
-            // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyCreateWalletResponseBody>>(successContent);
 
@@ -105,7 +105,6 @@ public class MonnifyApiService : IMonnifyApiService
 
         if (response.IsSuccessStatusCode)
         {
-            // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>>(successContent);
 
@@ -134,7 +133,6 @@ public class MonnifyApiService : IMonnifyApiService
 
         if (response.IsSuccessStatusCode)
         {
-            // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>>(successContent);
 
@@ -165,10 +163,8 @@ public class MonnifyApiService : IMonnifyApiService
 
         if (response.IsSuccessStatusCode)
         {
-            // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>>(successContent);
-
             return data;
         }
         else
@@ -178,6 +174,51 @@ public class MonnifyApiService : IMonnifyApiService
             var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
 
             throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+        }
+
+    }
+
+    public async Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto)
+    {
+        var queryString = $"?accountNumber={verifyAccountDetailsRequestDto.AccountNumber}&bankCode={verifyAccountDetailsRequestDto.BankCode}";
+
+        var url = $"/api/v1/disbursements/account/validate{queryString}";
+        var response = await monnifyClient.Client.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>>(successContent);
+            return data;
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+
+            throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+        }
+    }
+
+    public async Task<MonnifyApiResponse<List<BankDto>>> GetBanks()
+    {
+        var url = $"/api/v1/banks";
+
+        var response = await monnifyClient.Client.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<List<BankDto>>>(successContent);
+
+            return data;
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+            throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+
         }
     }
 }

@@ -21,6 +21,7 @@ public class LoanOfferSearchParams : SearchParams
     public bool? Active { get; set; }
     public LoanOfferType? LoanOfferType { get; set; }
     public List<PaymentFrequency> PaymentFrequencies { get; set; }
+
     [ModelBinder(BinderType = typeof(LoanOfferOrderByModelBinder))]
     public List<(LoanOfferOrderByField Field, SortDirection Direction)> OrderBy { get; set; }
 

@@ -13,6 +13,8 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto);
     Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto);
     Task<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>> CreateReservedAccount(MonnifyCreateReservedAccountRequestDto createReservedAccountDto);
+    Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto);
+    Task<MonnifyApiResponse<List<BankDto>>> GetBanks();
 }
 
 public class MonnifyCreateReservedAccountRequestDto
@@ -75,6 +77,35 @@ public class MonnifyVerifyBVNResponseBody
     public Match Name { get; set; }
     public string DateOfBirth { get; set; }
     public string MobileNo { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsRequestDto
+{
+    public string AccountNumber { get; set; }
+
+
+    public string BankCode { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsResponseBody
+{
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public string BankCode { get; set; }
+}
+
+public class MonnifyGetBanksResponse
+{
+    public List<BankDto> Banks { get; set; }
+}
+
+public class BankDto
+{
+    public string Name { get; set; }
+    public string Code { get; set; }
+    public string UssdTemplate { get; set; }
+    public string BaseUssdCode { get; set; }
+    public string TransferUssdTemplate { get; set; }
 }
 
 public class Match
