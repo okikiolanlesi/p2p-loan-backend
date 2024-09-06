@@ -35,13 +35,16 @@ public class MonnifyVerifyBVNResponseBody
 public class MonnifyVerifyAccountDetailsRequestDto
 {
     public string AccountNumber { get; set; }
+
+   
     public string BankCode { get; set; }
 }
 
 public class MonnifyVerifyAccountDetailsResponseBody
 {
-    public string accountNumber { get; set; }
-    public string bankCode { get; set; }
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public string BankCode { get; set; }
 }
 
 public class MonnifyGetBanksResponse

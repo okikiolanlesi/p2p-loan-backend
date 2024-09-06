@@ -100,7 +100,7 @@ public class RoleController : ControllerBase
         return ControllerHelper.HandleApiResponse(response);
     } 
 
-    [HttpGet("userrole/{id:guid}")]
+    [HttpGet("user-role/{id:guid}")]
      [Authorize]
     public async Task<IActionResult> GetUserRoleById(Guid id)
     {

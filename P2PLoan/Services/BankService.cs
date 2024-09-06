@@ -33,7 +33,7 @@ namespace P2PLoan.Services
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidProvider, "banks not found", null);           
            }
 
-            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Banks fetch successfully", monifyBanks);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Banks fetched successfully", monifyBanks);
 
         }
 

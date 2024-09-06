@@ -55,8 +55,6 @@ public class LoanOfferRepository : ILoanOfferRepository
             query = query.Where(lo => lo.Active == searchParams.Active.Value);
         }
 
-        Console.WriteLine("SQL Query: " + query.ToQueryString());
-
         if (searchParams.LoanOfferType.HasValue)
         {
             query = query.Where(lo => lo.Type == searchParams.LoanOfferType.Value);
