@@ -33,14 +33,15 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
+using P2PLoan.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration variables (retrieved from environment variables)
-var tenantId = builder.Configuration["AZURE_TENANT_ID"];
-var clientId = builder.Configuration["AZURE_CLIENT_ID"];
+ var tenantId = builder.Configuration["AZURE_TENANT_ID"];
+ var clientId = builder.Configuration["AZURE_CLIENT_ID"];
 var clientSecret = builder.Configuration["AZURE_CLIENT_SECRET"];
-var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
+ var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
 
 // Create ClientSecretCredential
 var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
@@ -53,7 +54,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")
+            builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
                 .AllowAnyHeader()
                 .WithMethods("GET", "POST", "PATCH", "PUT", "DELETE")
                 .SetIsOriginAllowed((host) => true)
@@ -70,6 +71,7 @@ builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            
         }).AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
@@ -183,7 +185,9 @@ builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 
+
 //services
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
 builder.Services.AddScoped<IMonnifyApiService, MonnifyApiService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -191,6 +195,7 @@ builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceF
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IWalletProviderService, WalletProviderService>();
 builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
+builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
     var logger = provider.GetRequiredService<ILogger<EmailService>>();
@@ -200,6 +205,9 @@ builder.Services.AddSingleton<IEmailService>(provider =>
 
     return new EmailService(templatesFolderPath, logger, builder.Configuration);
 });
+builder.Services.AddScoped<IModuleService, ModuleService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 //Constants
 builder.Services.AddScoped<IConstants, Constants>();

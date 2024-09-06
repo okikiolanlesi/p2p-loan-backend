@@ -22,14 +22,8 @@ public class ModuleController : ControllerBase
         this.moduleService = moduleService;      
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateModule([FromBody] CreateModuleRequestDto createModuleRequestDto)
-    {
-        var response = await moduleService.CreateModuleAsync(createModuleRequestDto);
-        return ControllerHelper.HandleApiResponse(response);
-    }
-
     [HttpGet]
+     [Authorize]
     [Route("{id:guid}")]
     public async Task<IActionResult> GetModuleById(Guid id)
     {
@@ -38,6 +32,7 @@ public class ModuleController : ControllerBase
     }
 
     [HttpGet]   
+     [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var response = await  moduleService.GetAllModule();
@@ -46,6 +41,7 @@ public class ModuleController : ControllerBase
 
     [HttpPatch]
      [Route("{id:guid}")]
+      [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateModuleRequestDto updateModuleRequestDto)
     {
         var response = await moduleService.UpdateModuleByIdAsync(id, updateModuleRequestDto);

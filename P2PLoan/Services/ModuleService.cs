@@ -20,35 +20,7 @@ namespace P2PLoan.Services
             this.moduleRepository = moduleRepository;
             this.mapper = mapper;
         }
-        public async Task<ServiceResponse<object>> CreateModuleAsync(CreateModuleRequestDto createModuleRequestDto)
-        {
-            using var transaction = await moduleRepository.BeginTransactionAsync();
-            try
-            {
-                var existingModule = await moduleRepository.GetModuleByIdentifierAsync(createModuleRequestDto.Identifier);
-
-                if (existingModule != null)
-                {
-                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "A module with the same identifier already exists.", null);
-                }
-                // Map the CreateModuleRequestDto to a Module entity
-                var module = mapper.Map<Module>(createModuleRequestDto);
-                moduleRepository.Add(module);
-                await moduleRepository.SaveChangesAsync();
-
-                // Commit the transaction if all operations succeed
-                await transaction.CommitAsync();
-                return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes. Success, "Module created successfully.", module);
-            }
-              catch (Exception)
-            {
-                // Rollback the transaction if an error occurs
-                await transaction.RollbackAsync();
-                throw;
-            }
- 
-        }
-
+      
         public async Task<ServiceResponse<IEnumerable<Module>>> GetAllModule()
         {
             var modules = await moduleRepository.GetAllAsync();
