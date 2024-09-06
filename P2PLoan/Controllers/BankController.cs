@@ -22,7 +22,7 @@ namespace P2PLoan.Controllers
         }
 
         [HttpGet]
-       // [Authorize]
+        [Authorize]
         [Route("verify")]
         public async Task<IActionResult> VerifyAccount([FromQuery] VerifyAccountDetailsDto verifyAccountDetailsDto)
         {
@@ -31,7 +31,7 @@ namespace P2PLoan.Controllers
         }
 
         [HttpGet]
-       // [Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBanksFromMonify()
         {
             var response = await bankService.GetBanks();
