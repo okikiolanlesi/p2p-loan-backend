@@ -154,17 +154,20 @@ public class AuthService : IAuthService
                     CreateWalletDto createWalletDto = new CreateWalletDto
                     {
                         WalletReference = $"{walletReferenceId}",
-                        WalletName = $"P2PLoan Wallet - {user.Id}",
+                        WalletName = $"P2PLoan Wallet - {user.FirstName} {user.LastName}",
                         CustomerName = $"{user.FirstName} {user.LastName}",
                         BvnDetails = new BVNDetails
                         {
                             Bvn = registerDto.BVN,
                             BvnDateOfBirth = bvnDateOfBirth
                         },
-                        CustomerEmail = user.Email
+                        Nin = registerDto.NIN,
+                        CustomerEmail = user.Email,
+                        UserId = user.Id,
+                        CurrencyCode = "NGN"
                     };
 
-                    var createdWalletInfo = await walletService.Create(WalletProviders.monnify, createWalletDto);
+                    var createdWalletInfo = await walletService.Create(walletProvider.Slug, createWalletDto);
 
                     if (!createdWalletInfo.Created)
                     {

@@ -101,7 +101,7 @@ public class MonnifyApiService : IMonnifyApiService
         var jsonContent = System.Text.Json.JsonSerializer.Serialize(transferDto, options);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-        var response = await monnifyClient.Client.PostAsync("/api/v1/disbursements/single", content);
+        var response = await monnifyClient.Client.PostAsync("/api/v2/disbursements/single", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -137,6 +137,37 @@ public class MonnifyApiService : IMonnifyApiService
             // Handle successful response if needed
             var successContent = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>>(successContent);
+
+            return data;
+        }
+        else
+        {
+            // Handle error response
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+
+            throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+        }
+    }
+
+    public async Task<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>> CreateReservedAccount(MonnifyCreateReservedAccountRequestDto createReservedAccountDto)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(createReservedAccountDto, options);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await monnifyClient.Client.PostAsync("/api/v2/bank-transfer/reserved-accounts", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle successful response if needed
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>>(successContent);
 
             return data;
         }

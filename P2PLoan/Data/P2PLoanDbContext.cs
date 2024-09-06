@@ -45,6 +45,11 @@ namespace P2PLoan.Data
             ConfigureAuditableEntity<LoanRequest>(modelBuilder);
             ConfigureAuditableEntity<Loan>(modelBuilder);
             ConfigureAuditableEntity<WalletTopUpDetail>(modelBuilder);
+            ConfigureAuditableEntity<ManagedWallet>(modelBuilder);
+            ConfigureAuditableEntity<ManagedWalletTransaction>(modelBuilder);
+            ConfigureAuditableEntity<PaymentReference>(modelBuilder);
+            ConfigureAuditableEntity<Repayment>(modelBuilder);
+            ConfigureAuditableEntity<ManagedWalletTransactionTracker>(modelBuilder);
 
             // Configure delete behavior
             ConfigureDeleteBehavior<LoanOffer, Wallet>(modelBuilder, e => e.Wallet, DeleteBehavior.Restrict);
@@ -109,6 +114,13 @@ namespace P2PLoan.Data
         public DbSet<LoanOffer> LoanOffers { get; set; }
         public DbSet<LoanRequest> LoanRequests { get; set; }
         public DbSet<Loan> Loans { get; set; }
+        public DbSet<PaymentReference> PaymentReferences { get; set; }
+        public DbSet<Repayment> Repayments { get; set; }
         public DbSet<WalletTopUpDetail> WalletTopUpDetails { get; set; }
+
+        // Managed Wallets
+        public DbSet<ManagedWallet> ManagedWallets { get; set; }
+        public DbSet<ManagedWalletTransaction> ManagedWalletTransactions { get; set; }
+        public DbSet<ManagedWalletTransactionTracker> ManagedWalletTransactionTrackers { get; set; }
     }
 }

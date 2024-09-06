@@ -33,6 +33,7 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
+using P2PLoan.Attributes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +67,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    // TODO: Find out why this is not working and causes an error to be returned to the client
+    // options.Filters.Add<ValidateMonnifySignatureAttribute>();
+
+})
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
@@ -170,6 +176,7 @@ builder.Services.AddScoped<P_3_WalletProviderSeeder>();
 builder.Services.AddScoped<P_4_PermissionSeeder>();
 builder.Services.AddScoped<P_5_RoleSeeder>();
 builder.Services.AddScoped<P_6_PersonalWalletProviderSeeder>();
+builder.Services.AddScoped<P_7_DisableMonnifyWalletProvider>();
 
 //Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -185,6 +192,11 @@ builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanRequestRepository, LoanRequestRepository>();
 builder.Services.AddScoped<IWalletTopUpDetailRepository, WalletTopUpDetailRepository>();
+builder.Services.AddScoped<IPaymentReferenceRepository, PaymentReferenceRepository>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<IManagedWalletRepository, ManagedWalletRepository>();
+builder.Services.AddScoped<IManagedWalletTransactionRepository, ManagedWalletTransactionRepository>();
+builder.Services.AddScoped<IManagedWalletTransactionTrackerRepository, ManagedWalletTransactionTrackerRepository>();
 
 //services
 builder.Services.AddScoped<ISeederHandler, SeederHandler>();
@@ -195,6 +207,7 @@ builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IWalletProviderService, WalletProviderService>();
 builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
 builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
+builder.Services.AddScoped<IMonnifyService, MonnifyService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
     var logger = provider.GetRequiredService<ILogger<EmailService>>();
@@ -210,6 +223,10 @@ builder.Services.AddScoped<IConstants, Constants>();
 
 // Wallet Providers: Ensure specific wallet provider services are registered
 builder.Services.AddScoped<MonnifyWalletProviderService>();
+builder.Services.AddScoped<ManagedWalletProviderService>();
+
+// handlers
+builder.Services.AddScoped<IManagedWalletCallbackHandler, ManagedWalletCallbackHandler>();
 
 var app = builder.Build();
 

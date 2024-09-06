@@ -15,5 +15,5 @@ public class Wallet : AuditableEntity
     // navigation properties
     public User User { get; set; }
     public WalletProvider WalletProvider { get; set; }
-    public IEnumerable<WalletTopUpDetail> TopUpDetails { get; set; }
+    public ICollection<WalletTopUpDetail> TopUpDetails { get; set; }
 }
