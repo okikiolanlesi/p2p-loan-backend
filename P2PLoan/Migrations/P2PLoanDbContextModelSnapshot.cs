@@ -219,6 +219,145 @@ namespace P2PLoan.Migrations
                     b.ToTable("LoanRequests");
                 });
 
+            modelBuilder.Entity("P2PLoan.Models.ManagedWallet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("AvailableBalance")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("LedgerBalance")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("WalletReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ManagedWallets");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.ManagedWalletTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Fee")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsCredit")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ManagedWalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Narration")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TransactionReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ManagedWalletId");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.ToTable("ManagedWalletTransactions");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.ManagedWalletTransactionTracker", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DestinationAccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DestinationBankCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InternalReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SourceAccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.ToTable("ManagedWalletTransactionTrackers");
+                });
+
             modelBuilder.Entity("P2PLoan.Models.Module", b =>
                 {
                     b.Property<Guid>("Id")
@@ -257,6 +396,42 @@ namespace P2PLoan.Migrations
                     b.HasIndex("ModifiedById");
 
                     b.ToTable("Modules");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.PaymentReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("paymentReferenceType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.ToTable("PaymentReferences");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Permission", b =>
@@ -298,6 +473,33 @@ namespace P2PLoan.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.Repayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.ToTable("Repayments");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Role", b =>
@@ -426,6 +628,9 @@ namespace P2PLoan.Migrations
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("NIN")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PIN")
                         .HasColumnType("nvarchar(max)");
 
@@ -521,18 +726,6 @@ namespace P2PLoan.Migrations
                     b.Property<string>("ReferenceId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TopUpAccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TopUpAccountNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TopUpBankCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TopUpBankName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -593,6 +786,50 @@ namespace P2PLoan.Migrations
                         .IsUnique();
 
                     b.ToTable("WalletProviders");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.WalletTopUpDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ModifiedById");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("WalletTopUpDetails");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Loan", b =>
@@ -724,7 +961,99 @@ namespace P2PLoan.Migrations
                     b.Navigation("Wallet");
                 });
 
+            modelBuilder.Entity("P2PLoan.Models.ManagedWallet", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.ManagedWalletTransaction", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.ManagedWallet", "ManagedWallet")
+                        .WithMany("WalletTransactions")
+                        .HasForeignKey("ManagedWalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ManagedWallet");
+
+                    b.Navigation("ModifiedBy");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.ManagedWalletTransactionTracker", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
+                });
+
             modelBuilder.Entity("P2PLoan.Models.Module", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.PaymentReference", b =>
                 {
                     b.HasOne("P2PLoan.Models.User", "CreatedBy")
                         .WithMany()
@@ -772,6 +1101,25 @@ namespace P2PLoan.Migrations
                     b.Navigation("ModifiedBy");
 
                     b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.Repayment", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
                 });
 
             modelBuilder.Entity("P2PLoan.Models.Role", b =>
@@ -917,6 +1265,36 @@ namespace P2PLoan.Migrations
                     b.Navigation("ModifiedBy");
                 });
 
+            modelBuilder.Entity("P2PLoan.Models.WalletTopUpDetail", b =>
+                {
+                    b.HasOne("P2PLoan.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.User", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("P2PLoan.Models.Wallet", null)
+                        .WithMany("TopUpDetails")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("ModifiedBy");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.ManagedWallet", b =>
+                {
+                    b.Navigation("WalletTransactions");
+                });
+
             modelBuilder.Entity("P2PLoan.Models.Role", b =>
                 {
                     b.Navigation("Permissions");
@@ -927,6 +1305,11 @@ namespace P2PLoan.Migrations
             modelBuilder.Entity("P2PLoan.Models.User", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("P2PLoan.Models.Wallet", b =>
+                {
+                    b.Navigation("TopUpDetails");
                 });
 #pragma warning restore 612, 618
         }

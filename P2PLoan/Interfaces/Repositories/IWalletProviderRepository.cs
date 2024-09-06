@@ -12,5 +12,6 @@ public interface IWalletProviderRepository
     Task<WalletProvider?> FindById(Guid id);
     Task<IEnumerable<WalletProvider>> GetAll();
     Task<WalletProvider?> FindBySlug(WalletProviders slug);
+    void MarkAsModified(WalletProvider walletProvider);
     Task<bool> SaveChangesAsync();
 }

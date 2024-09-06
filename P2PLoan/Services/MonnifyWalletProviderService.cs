@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using P2PLoan.DTOs;
@@ -20,7 +22,17 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
     public async Task<CreateWalletResponseDto> Create(CreateWalletDto createWalletDto)
     {
         var createdWallet = await monnifyApiService.CreateWallet(createWalletDto);
-        return mapper.Map<CreateWalletResponseDto>(createdWallet);
+        var payload = mapper.Map<CreateWalletResponseDto>(createdWallet);
+        payload.TopUpAccountDetails = new List<TopUpAccountDetail>(){
+            new TopUpAccountDetail
+            {
+                AccountName = createdWallet.ResponseBody.TopUpAccountDetails.AccountName,
+                AccountNumber = createdWallet.ResponseBody.TopUpAccountDetails.AccountNumber,
+                BankCode = createdWallet.ResponseBody.TopUpAccountDetails.BankCode,
+                BankName = createdWallet.ResponseBody.TopUpAccountDetails.BankName,
+            }
+        };
+        return payload;
     }
 
     public async Task<GetBalanceResponseDto> GetBalance(Wallet wallet)
@@ -39,6 +51,9 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
 
     public async Task<TransferResponseDto> Transfer(TransferDto transferDto)
     {
+        var payload = mapper.Map<MonnifyTransferRequestBodyDto>(transferDto);
+        payload.Async = true;
+
         var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(transferDto));
 
         return mapper.Map<TransferResponseDto>(response);
