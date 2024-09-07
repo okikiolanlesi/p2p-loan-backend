@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using P2PLoan.DTOs;
 using P2PLoan.Interfaces;
+using P2PLoan.Models;
 
 namespace P2PLoan.Services;
 
@@ -19,25 +22,40 @@ public class MonnifyWalletProviderService : IThirdPartyWalletProviderService
     public async Task<CreateWalletResponseDto> Create(CreateWalletDto createWalletDto)
     {
         var createdWallet = await monnifyApiService.CreateWallet(createWalletDto);
-        return mapper.Map<CreateWalletResponseDto>(createdWallet);
+        var payload = mapper.Map<CreateWalletResponseDto>(createdWallet);
+        payload.TopUpAccountDetails = new List<TopUpAccountDetail>(){
+            new TopUpAccountDetail
+            {
+                AccountName = createdWallet.ResponseBody.TopUpAccountDetails.AccountName,
+                AccountNumber = createdWallet.ResponseBody.TopUpAccountDetails.AccountNumber,
+                BankCode = createdWallet.ResponseBody.TopUpAccountDetails.BankCode,
+                BankName = createdWallet.ResponseBody.TopUpAccountDetails.BankName,
+            }
+        };
+        return payload;
     }
 
-    public async Task<GetBalanceResponseDto> GetBalance(string walletUniqueReference)
+    public async Task<GetBalanceResponseDto> GetBalance(Wallet wallet)
     {
-        var walletBalance = await monnifyApiService.GetWalletBalance(walletUniqueReference);
+        var walletBalance = await monnifyApiService.GetWalletBalance(wallet.AccountNumber);
 
         return mapper.Map<GetBalanceResponseDto>(walletBalance);
     }
 
-    public async Task<GetTransactionsResponseDto> GetTransactions(string walletUniqueReference, int pageSize, int pageNo)
+    public async Task<GetTransactionsResponseDto> GetTransactions(Wallet wallet, int pageSize, int pageNo)
     {
-        var walletTransactions = await monnifyApiService.GetWalletTransactions(walletUniqueReference, pageSize, pageNo);
+        var walletTransactions = await monnifyApiService.GetWalletTransactions(wallet.AccountNumber, pageSize, pageNo);
 
         return mapper.Map<GetTransactionsResponseDto>(walletTransactions);
     }
 
-    public Task<GetTransactionsResponseDto> Transfer(string walletUniqueReference, int pageSize, int pageNo)
+    public async Task<TransferResponseDto> Transfer(TransferDto transferDto)
     {
-        throw new NotImplementedException();
+        var payload = mapper.Map<MonnifyTransferRequestBodyDto>(transferDto);
+        payload.Async = true;
+
+        var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(transferDto));
+
+        return mapper.Map<TransferResponseDto>(response);
     }
 }

@@ -4,7 +4,7 @@ using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 
-namespace P2PLoan.Interfaces.Services;
+namespace P2PLoan.Interfaces;
 
 public interface ILoanRequestService
 {

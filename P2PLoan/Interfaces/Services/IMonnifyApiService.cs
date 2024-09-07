@@ -10,7 +10,108 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyCreateWalletResponseBody>> CreateWallet(CreateWalletDto createWalletDto);
     Task<MonnifyApiResponse<MonnifyGetBalanceResponseBody>> GetWalletBalance(string walletUniqueReference);
     Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1);
-    Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> Transfer(TransferDto transferDto);
+    Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto);
+    Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto);
+    Task<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>> CreateReservedAccount(MonnifyCreateReservedAccountRequestDto createReservedAccountDto);
+    Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto);
+    Task<MonnifyApiResponse<List<BankDto>>> GetBanks();
+}
+
+public class MonnifyCreateReservedAccountRequestDto
+{
+    public string AccountReference { get; set; }
+    public string AccountName { get; set; }
+    public string CurrencyCode { get; set; }
+    public string ContractCode { get; set; }
+    public string CustomerEmail { get; set; }
+    public string CustomerName { get; set; }
+    public string Bvn { get; set; }
+    public string Nin { get; set; }
+    public bool GetAllAvailableBanks { get; set; }
+}
+
+
+public class MonnifyCreateReservedAccountResponseBody
+{
+    public string ContractCode { get; set; }
+    public string AccountReference { get; set; }
+    public string AccountName { get; set; }
+    public string CurrencyCode { get; set; }
+    public string CustomerEmail { get; set; }
+    public string CustomerName { get; set; }
+    public List<Account> Accounts { get; set; }
+    public string CollectionChannel { get; set; }
+    public string ReservationReference { get; set; }
+    public string ReservedAccountType { get; set; }
+    public string Status { get; set; }
+    public DateTime CreatedOn { get; set; }
+    public List<IncomeSplitConfig> IncomeSplitConfig { get; set; }
+    public string Bvn { get; set; }
+    public bool RestrictPaymentSource { get; set; }
+}
+
+public class Account
+{
+    public string BankCode { get; set; }
+    public string BankName { get; set; }
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+}
+
+public class IncomeSplitConfig
+{
+    // Define properties for income split configuration if needed
+}
+
+public class MonnifyVerifyBVNRequestDto
+{
+    public string Bvn { get; set; }
+    public string Name { get; set; }
+    public string DateOfBirth { get; set; }
+    public string MobileNo { get; set; }
+}
+
+public class MonnifyVerifyBVNResponseBody
+{
+    public string BVN { get; set; }
+    public Match Name { get; set; }
+    public string DateOfBirth { get; set; }
+    public string MobileNo { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsRequestDto
+{
+    public string AccountNumber { get; set; }
+
+
+    public string BankCode { get; set; }
+}
+
+public class MonnifyVerifyAccountDetailsResponseBody
+{
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+    public string BankCode { get; set; }
+}
+
+public class MonnifyGetBanksResponse
+{
+    public List<BankDto> Banks { get; set; }
+}
+
+public class BankDto
+{
+    public string Name { get; set; }
+    public string Code { get; set; }
+    public string UssdTemplate { get; set; }
+    public string BaseUssdCode { get; set; }
+    public string TransferUssdTemplate { get; set; }
+}
+
+public class Match
+{
+    public string MatchStatus { get; set; }
+    public int MatchPercentage { get; set; }
 }
 
 public class MonnifyTransferResponseBody : CreateWalletDto
@@ -37,8 +138,21 @@ public class TopUpAccountDetails
 }
 public class MonnifyGetBalanceResponseBody
 {
-    public int AvailableBalance { get; set; }
-    public int LedgerBalance { get; set; }
+    public double AvailableBalance { get; set; }
+    public double LedgerBalance { get; set; }
+}
+
+public class MonnifyGetSingleTransferResponseBody
+{
+    public double Amount { get; set; }
+    public string Reference { get; set; }
+    public string Status { get; set; }
+    public DateTime DateCreated { get; set; }
+    public double TotalFee { get; set; }
+
+    public string DestinationBankCode { get; set; }
+    public string DestinationBankName { get; set; }
+    public string DestinationAccountNumber { get; set; }
 }
 
 public class MonnifyGetTransactionsResponseBody

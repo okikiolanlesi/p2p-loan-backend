@@ -7,9 +7,9 @@ public class LoanRequestSearchParams : SearchParams
 {
     public Guid? UserId { get; set; }
     public Guid? LoanOfferId { get; set; }
-    public List<(LoanOfferOrderByField Field, SortDirection Direction)> OrderBy { get; set; }
+    public List<(LoanRequestOrderByField Field, SortDirection Direction)> OrderBy { get; set; }
 
-    public TrafficType TrafficType { get; set; }
+    public TrafficType? TrafficType { get; set; }
 }
 
 public enum LoanRequestOrderByField

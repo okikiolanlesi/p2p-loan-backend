@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
@@ -14,12 +16,16 @@ namespace P2PLoan.Services
         private readonly IWalletRepository walletRepository;
         private readonly IWalletProviderServiceFactory walletProviderServiceFactory;
         private readonly IMapper mapper;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IWalletTopUpDetailRepository walletTopUpDetailRepository;
 
-        public WalletService(IWalletRepository walletRepository, IWalletProviderServiceFactory walletProviderServiceFactory, IMapper mapper)
+        public WalletService(IWalletRepository walletRepository, IWalletProviderServiceFactory walletProviderServiceFactory, IMapper mapper, IHttpContextAccessor httpContextAccessor, IWalletTopUpDetailRepository walletTopUpDetailRepository)
         {
             this.walletRepository = walletRepository;
             this.walletProviderServiceFactory = walletProviderServiceFactory;
             this.mapper = mapper;
+            this.httpContextAccessor = httpContextAccessor;
+            this.walletTopUpDetailRepository = walletTopUpDetailRepository;
         }
 
         public async Task<ServiceResponse<object>> CreateWalletForController(WalletProviders walletProvider, CreateWalletDto createWalletDto, User user, Guid walletProviderId)
@@ -37,29 +43,63 @@ namespace P2PLoan.Services
                 return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
             }
 
+            var walletId = Guid.NewGuid();
+            var topUpDetails = new List<WalletTopUpDetail>();
+            foreach (var topUpDetail in createWalletResponse.TopUpAccountDetails)
+            {
+                topUpDetails.Add(new WalletTopUpDetail
+                {
+                    AccountName = topUpDetail.AccountName,
+                    AccountNumber = topUpDetail.AccountNumber,
+                    BankCode = topUpDetail.BankCode,
+                    BankName = topUpDetail.AccountName,
+                    WalletId = walletId,
+                    Id = Guid.NewGuid()
+                });
+            }
             var wallet = new Wallet
             {
-                Id = Guid.NewGuid(),
+                Id = walletId,
                 UserId = user.Id,
                 WalletProviderId = walletProviderId,
                 AccountNumber = createWalletResponse.AccountNumber,
                 ReferenceId = createWalletResponse.WalletReference,
-                TopUpAccountName = createWalletResponse.TopUpAccountName,
-                TopUpAccountNumber = createWalletResponse.TopUpAccountNumber,
-                TopUpBankName = createWalletResponse.TopUpBankName,
-                TopUpBankCode = createWalletResponse.TopUpBankCode,
+                // TopUpDetails = topUpDetails,
             };
 
-            walletRepository.Add(wallet);
-
-            var result = await walletRepository.SaveChangesAsync();
-
-            if (!result)
+            using (var transaction = await walletRepository.BeginTransactionAsync())
             {
-                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
-            }
+                try
+                {
 
-            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallet created successfully", wallet);
+
+                    walletRepository.Add(wallet);
+
+                    var result = await walletRepository.SaveChangesAsync();
+
+                    if (!result)
+                    {
+                        throw new Exception("Unable to save wallet");
+                    }
+
+                    walletTopUpDetailRepository.AddRange(topUpDetails);
+                    var saveTopUpDetailsResult = await walletTopUpDetailRepository.SaveChangesAsync();
+
+                    if (!saveTopUpDetailsResult)
+                    {
+                        throw new Exception("Unable to save wallet top up details");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Rollback the transaction if any error occurs
+                    await transaction.RollbackAsync();
+                    Console.WriteLine(ex);
+                    return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "An unexpected error occurred", null);
+                }
+
+                return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallet created successfully", wallet);
+            }
         }
 
         public async Task<CreateWalletResponse> Create(WalletProviders walletProvider, CreateWalletDto createWalletDto)
@@ -84,37 +124,83 @@ namespace P2PLoan.Services
             return result;
         }
 
-        public async Task<ServiceResponse<object>> GetBalanceForController(WalletProviders walletProvider, string walletUniqueReference)
+        public async Task<ServiceResponse<object>> GetBalanceForController(Guid walletId)
         {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
 
-            var balanceResponse = await providerService.GetBalance(walletUniqueReference);
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null || wallet.UserId != userId)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Wallet not found", null);
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            var balanceResponse = await providerService.GetBalance(wallet);
             return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", balanceResponse);
         }
-        public async Task<GetBalanceResponseDto> GetBalance(WalletProviders walletProvider, string walletUniqueReference)
-        {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
 
-            var balanceResponse = await providerService.GetBalance(walletUniqueReference);
+        public async Task<GetBalanceResponseDto> GetBalance(Guid walletId)
+        {
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null)
+            {
+                throw new Exception("Wallet not found");
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            var balanceResponse = await providerService.GetBalance(wallet);
             return balanceResponse;
         }
 
-        public async Task<ServiceResponse<object>> GetTransactions(WalletProviders walletProvider, string accountNumber, int pageSize = 10, int pageNo = 1)
+        public async Task<ServiceResponse<object>> GetTransactions(Guid walletId, int pageSize = 10, int pageNo = 1)
         {
-            var providerService = walletProviderServiceFactory.GetWalletProviderService(walletProvider);
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+            var wallet = await walletRepository.FindById(walletId);
+
+            if (wallet == null || wallet.UserId != userId)
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Wallet not found", null);
+            }
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
             if (providerService == null)
             {
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidProvider, "Invalid wallet provider", null);
             }
 
-            var transactionsResponse = await providerService.GetTransactions(accountNumber, pageSize, pageNo);
+            var transactionsResponse = await providerService.GetTransactions(wallet, pageSize, pageNo);
 
-            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Balance fetched successfully", transactionsResponse);
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Transactions fetched successfully", transactionsResponse);
         }
 
-        public Task<ServiceResponse<object>> Transfer(WalletProviders walletProvider, string accountNumber)
+        public async Task<ServiceResponse<object>> GetLoggedInUserWallets()
         {
-            throw new NotImplementedException();
+            var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+            var wallets = await walletRepository.GetAllForAUser(userId);
+
+            return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Wallets fetched successfully", wallets);
+        }
+
+        public async Task<TransferResponseDto> Transfer(TransferDto transferDto, Wallet wallet)
+        {
+            transferDto.SourceAccountNumber = wallet.AccountNumber;
+
+            var providerService = walletProviderServiceFactory.GetWalletProviderService(wallet.WalletProvider.Slug);
+
+            if (providerService == null)
+            {
+                throw new Exception("Invalid wallet provider");
+            }
+
+            var response = await providerService.Transfer(transferDto);
+
+            return response;
         }
     }
 }

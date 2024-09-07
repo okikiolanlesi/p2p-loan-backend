@@ -57,8 +57,6 @@ public class TokenHandler : DelegatingHandler
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
 
-        var requestBody = request.Content.ReadAsStringAsync();
-
         var response = await base.SendAsync(request, cancellationToken);
 
         var content = await response.Content.ReadAsStringAsync();

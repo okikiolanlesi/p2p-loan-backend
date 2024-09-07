@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using P2PLoan.Models;
 
 namespace P2PLoan.DTOs;
@@ -17,4 +19,5 @@ public class WalletDto
 
     public UserDto User { get; set; }
     public WalletProvider WalletProvider { get; set; }
+    public IEnumerable<WalletTopUpDetail> TopUpDetails { get; set; }
 }

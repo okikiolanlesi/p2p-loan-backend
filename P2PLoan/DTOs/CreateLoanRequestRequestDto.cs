@@ -1,14 +1,14 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace P2PLoan.DTOs;
 
 public class CreateLoanRequestRequestDto
 {
-    public Guid Id { get; set; }
-
-    public Guid UserId { get; set; }
+    [Required]
     public Guid LoanOfferId { get; set; }
+    [Required]
     public Guid WalletId { get; set; }
-    public int GracePeriodDays { get; set; }
+    [Required]
     public string? AdditionalInformation { get; set; }
 }

@@ -18,8 +18,16 @@ public class RegisterRequestDto
     public string Password { get; set; }
     [Required]
     [MinLength(11)]
+    [MaxLength(13)]
+    public string PhoneNumber { get; set; }
+    [Required]
+    [MinLength(11)]
     [MaxLength(11)]
     public string BVN { get; set; }
+    [Required]
+    [MinLength(11)]
+    [MaxLength(11)]
+    public string NIN { get; set; }
     [Required]
     public UserType UserType { get; set; }
     [Required]

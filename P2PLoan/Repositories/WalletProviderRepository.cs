@@ -42,6 +42,11 @@ public class WalletProviderRepository : IWalletProviderRepository
         return await dbContext.WalletProviders.ToListAsync();
     }
 
+    public void MarkAsModified(WalletProvider walletProvider)
+    {
+        dbContext.Entry(walletProvider).State = EntityState.Modified;
+    }
+
     public async Task<bool> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync() > 0;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -25,12 +26,12 @@ public class WalletRepository : IWalletRepository
 
     public async Task<Wallet?> FindByAccountNumber(string accountNumber)
     {
-        return await dbContext.Wallets.FirstOrDefaultAsync(x => x.AccountNumber == accountNumber);
+        return await dbContext.Wallets.Include(w => w.TopUpDetails).FirstOrDefaultAsync(x => x.AccountNumber == accountNumber);
     }
 
     public async Task<Wallet?> FindById(Guid id)
     {
-        return await dbContext.Wallets.FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.Wallets.Include(w => w.WalletProvider).Include(w => w.TopUpDetails).FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<IEnumerable<Wallet>> GetAll()
@@ -40,11 +41,16 @@ public class WalletRepository : IWalletRepository
 
     public async Task<IEnumerable<Wallet>> GetAllForAUser(Guid userId)
     {
-        return await dbContext.Wallets.Where(x => x.UserId == userId).ToListAsync();
+        return await dbContext.Wallets.Include(w => w.TopUpDetails).Where(x => x.UserId == userId).ToListAsync();
     }
 
     public async Task<bool> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync() > 0;
     }
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
+    {
+        return await dbContext.Database.BeginTransactionAsync();
+    }
+
 }

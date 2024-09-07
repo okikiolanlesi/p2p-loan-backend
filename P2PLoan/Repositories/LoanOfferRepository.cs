@@ -50,9 +50,9 @@ public class LoanOfferRepository : ILoanOfferRepository
             query = query.Where(lo => lo.UserId == userId);
         }
 
-        if (searchParams.Active == true)
+        if (searchParams.Active.HasValue)
         {
-            query = query.Where(lo => lo.Active);
+            query = query.Where(lo => lo.Active == searchParams.Active.Value);
         }
 
         if (searchParams.LoanOfferType.HasValue)
@@ -134,7 +134,7 @@ public class LoanOfferRepository : ILoanOfferRepository
         var totalItems = query.Count();
         var items = await query
             .Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
-            .Take(searchParams.PageSize).Include(lo => lo.User).Include(lo => lo.Wallet).ProjectTo<LoanOfferDto>(mapper.ConfigurationProvider)
+            .Take(searchParams.PageSize).Include(lo => lo.User).Include(lo => lo.Wallet).ThenInclude(w => w.TopUpDetails).ProjectTo<LoanOfferDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
         var result = new PagedResponse<IEnumerable<LoanOfferDto>>
