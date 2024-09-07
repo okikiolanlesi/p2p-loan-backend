@@ -1,0 +1,20 @@
+# Github action to deploy P2PLoan API to Azure App Service
+
+name: Deploy P2PLoan API
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dependencies
+        run: dotnet restore ./P2PLoan/P2PLoan.csproj
+
+      - name: Build
+        run: dotnet build ./P2PLoan/P2PLoan.csproj --configuration Release --no-restore
