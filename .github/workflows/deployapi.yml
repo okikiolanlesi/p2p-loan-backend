@@ -2,14 +2,16 @@
 
 name: Deploy P2PLoan API
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   AZURE_WEBAPP_NAME: "borrowhub" # Set this to your application's name
   AZURE_WEBAPP_PACKAGE_PATH: "./publish" # Set this to the path to your web app project, defaults to the repository root
 
 jobs:
-  build:
+  DeployToAzure:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
