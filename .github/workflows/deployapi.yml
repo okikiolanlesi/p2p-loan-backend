@@ -3,6 +3,11 @@
 name: Deploy P2PLoan API
 on:
   workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: "borrowhub" # Set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish" # Set this to the path to your web app project, defaults to the repository root
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,3 +23,15 @@ jobs:
 
       - name: Build
         run: dotnet build ./P2PLoan/P2PLoan.csproj --configuration Release --no-restore
+
+      # Publish
+      - name: Publish
+        run: dotnet publish ./P2PLoan/P2PLoan.csproj --configuration Release --output ./publish --no-restore
+
+      # Deploy
+      - name: "Deploy to Azure Web App"
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.P2PLOAN_API_PUBLISH_PROFILE }}
