@@ -13,7 +13,7 @@ namespace P2PLoan.Helpers
             CreateMap<RegisterRequestDto, User>();
             CreateMap<CreateWalletResponseDto, CreateWalletResponse>();
             CreateMap<UpdateModuleRequestDto, Module>();
-           // CreateMap<CreateModuleRequestDto, Module>();
+            // CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
             CreateMap<LoanOffer, LoanOfferDto>();

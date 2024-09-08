@@ -224,9 +224,13 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
     private async void handleFailedLoanDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
+        loanRequest.Status = LoanRequestStatus.failed;
+        loanRequestRepository.MarkAsModified(loanRequest);
+        await loanRequestRepository.SaveChangesAsync();
+
         var user = await userRepository.GetByIdAsync(loanRequest.LoanOffer.Type == LoanOfferType.borrower ? loanRequest.UserId : loanRequest.LoanOffer.UserId);
 
-        await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "WithdrawalSucceeded", new { e.Amount, e.TransactionReference });
+        await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "FailedLoanDisbursal", new { e.Amount, e.TransactionReference });
     }
 
     private async void handleFailedRepaymentDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
