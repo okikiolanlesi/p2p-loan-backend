@@ -25,7 +25,7 @@ public class LoanRequestService : ILoanRequestService
     private readonly IPaymentReferenceRepository paymentReferenceRepository;
     private readonly ILoanRepository loanRepository;
 
-    public LoanRequestService(ILoanRequestRepository loanRequestRepository,IWalletTopUpDetailRepository walletTopUpDetailRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IWalletService walletService, IPaymentReferenceRepository paymentReferenceRepository, ILoanRepository loanRepository)
+    public LoanRequestService(ILoanRequestRepository loanRequestRepository, IWalletTopUpDetailRepository walletTopUpDetailRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IWalletService walletService, IPaymentReferenceRepository paymentReferenceRepository, ILoanRepository loanRepository)
     {
         this.loanRequestRepository = loanRequestRepository;
         this.walletTopUpDetailRepository = walletTopUpDetailRepository;
@@ -58,15 +58,21 @@ public class LoanRequestService : ILoanRequestService
 
 
         var loanOffer = await loanOfferRepository.FindById(createLoanRequestDto.LoanOfferId);
-
         if (loanOffer is null || loanOffer.UserId == userId || !loanOffer.Active)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
         }
 
-        var existingLoanRequest = await loanRequestRepository.FindByIdForAUser(createLoanRequestDto.LoanOfferId, user.Id);
+        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower;
 
-        if (existingLoanRequest != null && !(existingLoanRequest.Status == LoanRequestStatus.pending || existingLoanRequest.Status == LoanRequestStatus.processing || existingLoanRequest.Status == LoanRequestStatus.failed))
+        if (!isUserAllowedToSendRequest)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "You are not allowed to send a loan request for this loan offer", null);
+        }
+
+        var existingLoanRequest = await loanRequestRepository.FindByLoanOfferIdForAUser(createLoanRequestDto.LoanOfferId, user.Id);
+
+        if (existingLoanRequest != null && existingLoanRequest.Status != LoanRequestStatus.approved && existingLoanRequest.Status != LoanRequestStatus.declined)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "You already have a loan request for this loan offer", null);
         }
