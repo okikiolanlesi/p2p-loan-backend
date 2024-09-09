@@ -127,8 +127,7 @@ public class LoanOfferService : ILoanOfferService
 
     public async Task<ServiceResponse<object>> DisableLoanOffer(Guid loanOfferId)
     {
-        var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
-
+        var userId =  httpContextAccessor.HttpContext.User.GetLoggedInUserId();
         var user = await userRepository.GetByIdAsync(userId);
 
         if (user is null)
