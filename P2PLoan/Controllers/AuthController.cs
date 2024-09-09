@@ -78,6 +78,27 @@ public class AuthController : ControllerBase
         return ControllerHelper.HandleApiResponse(response);
     }
 
+    [HttpPost]
+    [Route("forgot-pin")]
+    [Authorize]
+
+    public async Task<IActionResult> ForgotPin([FromBody] ForgotPinRequestDto forgotPinRequestDto) 
+    {
+        var response = await authService.ForgotPin(forgotPinRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+
+    }
+
+    [HttpPost]
+    [Route("reset-pin")]
+    [Authorize]
+
+    public async Task<IActionResult> ResetPin([FromBody] ResetPinRequestDto resetPinRequestDto)
+    {
+        var response = await authService.ResetPin(resetPinRequestDto);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
     [HttpPatch]
     [Route("change-password")]
     [Authorize]

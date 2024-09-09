@@ -19,6 +19,8 @@ public class User
     public string? Photo { get; set; }
     public string PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiration { get; set; }
+    public string PinResetToken { get; set; } 
+    public DateTime? PinResetTokenExpiration { get; set; }
     public string EmailVerificationToken { get; set; }
     public bool EmailConfirmed { get; set; }
     public DateTime? EmailVerificationTokenExpiration { get; set; }

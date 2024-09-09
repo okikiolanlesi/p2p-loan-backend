@@ -19,4 +19,8 @@ public class Constants : IConstants
 
     public int EMAIL_VERIFICATION_TOKEN_EXPIRATION_MINUTES { get; } = 1440;
     public string USER_WALLET_NAME_PREFIX { get; } = "P2PLoan Wallet";
+
+    public int PIN_RESET_TOKEN_EXPIRATION_MINUTES {get; } = 60;
+
+    public int PIN_RESET_TOKEN_LENGTH {get; } = 20;
 }

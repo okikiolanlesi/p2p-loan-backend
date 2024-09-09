@@ -652,4 +652,59 @@ public class AuthService : IAuthService
             Console.WriteLine("Failed to send verification email");
         }
     }
+
+    public async Task<ServiceResponse<object>> ResetPin(ResetPinRequestDto resetPinRequestDto)
+    {
+         var user = await userRepository.GetByEmailAsync(resetPinRequestDto.Email);
+
+        if (user == null || user.PinResetTokenExpiration < DateTime.UtcNow || user.PinResetToken != resetPinRequestDto.Token)
+        {
+            // Token is invalid or expired
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidVerificationToken, "Invalid or expired token", null);
+        }
+
+        //Change pin
+        user.PIN =HashPassword(resetPinRequestDto.NewPin);
+         user.ModifiedAt = DateTime.UtcNow;
+
+        userRepository.MarkAsModified(user);
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Pin reset successfully", null);
+        
+    }
+
+    public async Task<ServiceResponse<object>> ForgotPin(ForgotPinRequestDto forgotPinRequestDto)
+    {
+        var user = await userRepository.GetByEmailAsync(forgotPinRequestDto.Email);
+        if(user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+        // Step 2: Generate a verification token
+         var resetToken = RandomCharacterGenerator.GenerateRandomString(constants.PIN_RESET_TOKEN_LENGTH);
+         user.PinResetToken = resetToken;
+         user.PinResetTokenExpiration =  DateTime.UtcNow.AddMinutes(constants.PIN_RESET_TOKEN_EXPIRATION_MINUTES); // Token expiration time
+
+        userRepository.MarkAsModified(user);
+        var result = await userRepository.SaveChangesAsync();
+        if (!result)
+        {
+            return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Something went wrong", null);
+        }
+
+        // Send the reset link via email
+        await emailService.SendHtmlEmailAsync(user.Email, "Reset Pin", "ResetPin", new
+        {
+            FrontendBaseUrl = configuration.GetSection("AppSettings:FrontendBaseUrl").Value,
+            Name = user.FirstName,
+            ResetToken = resetToken,
+            user.Email,
+        });
+
+        return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Pin reset email sent", null);    
+    }
 }
