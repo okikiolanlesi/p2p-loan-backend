@@ -20,6 +20,7 @@ namespace P2PLoan.Helpers
             return walletProvider switch
             {
                 WalletProviders.monnify => serviceProvider.GetService<MonnifyWalletProviderService>(),
+                WalletProviders.borrowHub => serviceProvider.GetService<ManagedWalletProviderService>(),
                 _ => throw new Exception("Invalid wallet provider"),
             };
         }

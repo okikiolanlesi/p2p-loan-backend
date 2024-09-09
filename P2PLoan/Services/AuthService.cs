@@ -30,8 +30,9 @@ public class AuthService : IAuthService
     private readonly IWalletProviderRepository walletProviderRepository;
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IMonnifyApiService monnifyApiService;
+    private readonly IWalletTopUpDetailRepository walletTopUpDetailRepository;
 
-    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository, IHttpContextAccessor httpContextAccessor, IMonnifyApiService monnifyApiService)
+    public AuthService(IUserRepository userRepository, IMapper mapper, IConfiguration configuration, IEmailService emailService, IConstants constants, IWalletService walletService, IWalletRepository walletRepository, IWalletProviderRepository walletProviderRepository, IHttpContextAccessor httpContextAccessor, IMonnifyApiService monnifyApiService, IWalletTopUpDetailRepository walletTopUpDetailRepository)
     {
         this.userRepository = userRepository;
         this.mapper = mapper;
@@ -43,6 +44,7 @@ public class AuthService : IAuthService
         this.walletProviderRepository = walletProviderRepository;
         this.httpContextAccessor = httpContextAccessor;
         this.monnifyApiService = monnifyApiService;
+        this.walletTopUpDetailRepository = walletTopUpDetailRepository;
     }
 
     public async Task<ServiceResponse<object>> Register(RegisterRequestDto registerDto)
@@ -152,45 +154,68 @@ public class AuthService : IAuthService
                     CreateWalletDto createWalletDto = new CreateWalletDto
                     {
                         WalletReference = $"{walletReferenceId}",
-                        WalletName = $"P2PLoan Wallet - {user.Id}",
+                        WalletName = $"P2PLoan Wallet - {user.FirstName} {user.LastName}",
                         CustomerName = $"{user.FirstName} {user.LastName}",
                         BvnDetails = new BVNDetails
                         {
                             Bvn = registerDto.BVN,
                             BvnDateOfBirth = bvnDateOfBirth
                         },
-                        CustomerEmail = user.Email
+                        Nin = registerDto.NIN,
+                        CustomerEmail = user.Email,
+                        UserId = user.Id,
+                        CurrencyCode = "NGN"
                     };
 
-                    var createdWalletInfo = await walletService.Create(WalletProviders.monnify, createWalletDto);
+                    var createdWalletInfo = await walletService.Create(walletProvider.Slug, createWalletDto);
 
                     if (!createdWalletInfo.Created)
                     {
                         //TODO: return response based on create wallet response
                     }
-
+                    var walletId = Guid.NewGuid();
                     var wallet = new Wallet
                     {
-                        Id = Guid.NewGuid(),
+                        Id = walletId,
                         UserId = user.Id,
                         WalletProviderId = walletProvider.Id,
                         AccountNumber = createdWalletInfo.AccountNumber,
                         ReferenceId = $"{walletReferenceId}",
-                        TopUpAccountName = createdWalletInfo.TopUpAccountName,
-                        TopUpAccountNumber = createdWalletInfo.TopUpAccountNumber,
-                        TopUpBankName = createdWalletInfo.TopUpBankName,
-                        TopUpBankCode = createdWalletInfo.TopUpBankCode,
                         CreatedById = user.Id,
                         ModifiedById = user.Id,
                     };
 
                     walletRepository.Add(wallet);
 
-
                     // Committing changes
                     var walletSaveResult = await walletRepository.SaveChangesAsync();
 
                     if (!walletSaveResult)
+                    {
+                        throw new Exception();
+                    }
+
+                    var topUpDetails = new List<WalletTopUpDetail>();
+                    foreach (var topUpDetail in createdWalletInfo.TopUpAccountDetails)
+                    {
+                        topUpDetails.Add(new WalletTopUpDetail
+                        {
+                            AccountName = topUpDetail.AccountName,
+                            AccountNumber = topUpDetail.AccountNumber,
+                            BankCode = topUpDetail.BankCode,
+                            BankName = topUpDetail.BankName,
+                            WalletId = walletId,
+                            Id = Guid.NewGuid(),
+                            CreatedById = user.Id,
+                            ModifiedById = user.Id,
+                        });
+                    }
+                    walletTopUpDetailRepository.AddRange(topUpDetails);
+
+                    // Committing changes
+                    var walletTopUpDetailsSaveResult = await walletTopUpDetailRepository.SaveChangesAsync();
+
+                    if (!walletTopUpDetailsSaveResult)
                     {
                         throw new Exception();
                     }

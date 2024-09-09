@@ -2,5 +2,5 @@
 
 public enum LoanStatus
 {
-    inProgress, completed, defaulted
+    Active, Completed, Defaulted
 }

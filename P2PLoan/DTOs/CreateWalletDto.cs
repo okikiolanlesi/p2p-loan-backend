@@ -15,6 +15,10 @@ public class CreateWalletDto
     public BVNDetails BvnDetails { get; set; }
     [Required]
     public string CustomerEmail { get; set; }
+    [Required]
+    public string Nin { get; set; }
+    public Guid? UserId { get; set; }
+    public string CurrencyCode { get; set; }
 }
 
 public class BVNDetails

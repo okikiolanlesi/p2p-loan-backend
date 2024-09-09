@@ -13,7 +13,7 @@ namespace P2PLoan.Helpers
             CreateMap<RegisterRequestDto, User>();
             CreateMap<CreateWalletResponseDto, CreateWalletResponse>();
             CreateMap<UpdateModuleRequestDto, Module>();
-           // CreateMap<CreateModuleRequestDto, Module>();
+            // CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
             CreateMap<LoanOffer, LoanOfferDto>();
@@ -21,8 +21,12 @@ namespace P2PLoan.Helpers
             CreateMap<UserDto, PublicUserProfileDto>().ReverseMap();
             CreateMap<User, PublicUserProfileDto>().ReverseMap();
             CreateMap<Wallet, WalletDto>().ReverseMap();
+            CreateMap<LoanRequest, LoanRequestDto>().ReverseMap();
             CreateMap<MonnifyTransferResponseBody, TransferResponseDto>().ReverseMap();
             CreateMap<TransferDto, MonnifyTransferRequestBodyDto>().ReverseMap();
+            CreateMap<CreateLoanRequestRequestDto, LoanRequest>().ReverseMap();
+            CreateMap<MonnifyCollectionCallBackData, ManagedWalletCollectionCallbackData>().ReverseMap();
+            CreateMap<MonnifyDisbursementCallbackData, ManagedWalletDisbursementCallbackData>().ReverseMap();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             CreateMap<MonnifyApiResponse<MonnifyCreateWalletResponseBody>, CreateWalletResponseDto>()
@@ -33,11 +37,8 @@ namespace P2PLoan.Helpers
                 .ForMember(dest => dest.CustomerEmail, opt => opt.MapFrom(src => src.ResponseBody.CustomerEmail))
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.ResponseBody.CustomerName))
                 .ForMember(dest => dest.BVN, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.Bvn))
-                .ForMember(dest => dest.BVNDateOfBirth, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.BvnDateOfBirth))
-                .ForMember(dest => dest.TopUpAccountName, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.AccountName))
-                .ForMember(dest => dest.TopUpAccountNumber, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.AccountNumber))
-                .ForMember(dest => dest.TopUpBankName, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.BankName))
-                .ForMember(dest => dest.TopUpBankCode, opt => opt.MapFrom(src => src.ResponseBody.TopUpAccountDetails.BankCode));
+                .ForMember(dest => dest.BVNDateOfBirth, opt => opt.MapFrom(src => src.ResponseBody.BvnDetails.BvnDateOfBirth));
+
 
             CreateMap<MonnifyApiResponse<MonnifyGetBalanceResponseBody>, GetBalanceResponseDto>()
                 .ForMember(dest => dest.AvailableBalance, opt => opt.MapFrom(src => src.ResponseBody.AvailableBalance))
@@ -45,10 +46,8 @@ namespace P2PLoan.Helpers
 
             CreateMap<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>, GetTransactionsResponseDto>()
                 .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.ResponseBody.Content))
-                .ForMember(dest => dest.Last, opt => opt.MapFrom(src => src.ResponseBody.Last))
                 .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.ResponseBody.TotalPages))
                 .ForMember(dest => dest.TotalElements, opt => opt.MapFrom(src => src.ResponseBody.TotalElements))
-                .ForMember(dest => dest.First, opt => opt.MapFrom(src => src.ResponseBody.First))
                 .ForMember(dest => dest.NumberOfElements, opt => opt.MapFrom(src => src.ResponseBody.NumberOfElements))
                 .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.ResponseBody.Size))
                 .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.ResponseBody.Number))

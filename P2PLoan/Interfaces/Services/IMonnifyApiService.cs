@@ -12,8 +12,55 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyGetTransactionsResponseBody>> GetWalletTransactions(string accountNumber, int pageSize = 10, int pageNo = 1);
     Task<MonnifyApiResponse<MonnifyGetSingleTransferResponseBody>> Transfer(MonnifyTransferRequestBodyDto transferDto);
     Task<MonnifyApiResponse<MonnifyVerifyBVNResponseBody>> VerifyBVN(MonnifyVerifyBVNRequestDto verifyBVNDto);
+    Task<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>> CreateReservedAccount(MonnifyCreateReservedAccountRequestDto createReservedAccountDto);
     Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto);
     Task<MonnifyApiResponse<List<BankDto>>> GetBanks();
+}
+
+public class MonnifyCreateReservedAccountRequestDto
+{
+    public string AccountReference { get; set; }
+    public string AccountName { get; set; }
+    public string CurrencyCode { get; set; }
+    public string ContractCode { get; set; }
+    public string CustomerEmail { get; set; }
+    public string CustomerName { get; set; }
+    public string Bvn { get; set; }
+    public string Nin { get; set; }
+    public bool GetAllAvailableBanks { get; set; }
+}
+
+
+public class MonnifyCreateReservedAccountResponseBody
+{
+    public string ContractCode { get; set; }
+    public string AccountReference { get; set; }
+    public string AccountName { get; set; }
+    public string CurrencyCode { get; set; }
+    public string CustomerEmail { get; set; }
+    public string CustomerName { get; set; }
+    public List<Account> Accounts { get; set; }
+    public string CollectionChannel { get; set; }
+    public string ReservationReference { get; set; }
+    public string ReservedAccountType { get; set; }
+    public string Status { get; set; }
+    public DateTime CreatedOn { get; set; }
+    public List<IncomeSplitConfig> IncomeSplitConfig { get; set; }
+    public string Bvn { get; set; }
+    public bool RestrictPaymentSource { get; set; }
+}
+
+public class Account
+{
+    public string BankCode { get; set; }
+    public string BankName { get; set; }
+    public string AccountNumber { get; set; }
+    public string AccountName { get; set; }
+}
+
+public class IncomeSplitConfig
+{
+    // Define properties for income split configuration if needed
 }
 
 public class MonnifyVerifyBVNRequestDto
@@ -36,7 +83,7 @@ public class MonnifyVerifyAccountDetailsRequestDto
 {
     public string AccountNumber { get; set; }
 
-   
+
     public string BankCode { get; set; }
 }
 

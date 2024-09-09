@@ -15,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using P2PLoan;
 using P2PLoan.Clients;
 using P2PLoan.Data;
 using P2PLoan.Interfaces;
@@ -33,15 +32,16 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
+using P2PLoan.Attributes;
 using P2PLoan.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration variables (retrieved from environment variables)
- var tenantId = builder.Configuration["AZURE_TENANT_ID"];
- var clientId = builder.Configuration["AZURE_CLIENT_ID"];
+var tenantId = builder.Configuration["AZURE_TENANT_ID"];
+var clientId = builder.Configuration["AZURE_CLIENT_ID"];
 var clientSecret = builder.Configuration["AZURE_CLIENT_SECRET"];
- var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
+var vaultUri = new Uri(builder.Configuration["AZURE_VAULT_URI"]);
 
 // Create ClientSecretCredential
 var clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
@@ -67,11 +67,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    // TODO: Find out why this is not working and causes an error to be returned to the client
+    // options.Filters.Add<ValidateMonnifySignatureAttribute>();
+
+})
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-            
+
         }).AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
@@ -171,6 +176,8 @@ builder.Services.AddScoped<P_2_ModuleSeeder>();
 builder.Services.AddScoped<P_3_WalletProviderSeeder>();
 builder.Services.AddScoped<P_4_PermissionSeeder>();
 builder.Services.AddScoped<P_5_RoleSeeder>();
+builder.Services.AddScoped<P_6_PersonalWalletProviderSeeder>();
+builder.Services.AddScoped<P_7_DisableMonnifyWalletProvider>();
 
 //Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -184,6 +191,13 @@ builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ILoanOfferRepository, LoanOfferRepository>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ILoanRequestRepository, LoanRequestRepository>();
+builder.Services.AddScoped<IWalletTopUpDetailRepository, WalletTopUpDetailRepository>();
+builder.Services.AddScoped<IPaymentReferenceRepository, PaymentReferenceRepository>();
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<IManagedWalletRepository, ManagedWalletRepository>();
+builder.Services.AddScoped<IManagedWalletTransactionRepository, ManagedWalletTransactionRepository>();
+builder.Services.AddScoped<IManagedWalletTransactionTrackerRepository, ManagedWalletTransactionTrackerRepository>();
 
 
 //services
@@ -195,6 +209,8 @@ builder.Services.AddScoped<IWalletProviderServiceFactory, WalletProviderServiceF
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IWalletProviderService, WalletProviderService>();
 builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
+builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
+builder.Services.AddScoped<IMonnifyService, MonnifyService>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
@@ -214,6 +230,10 @@ builder.Services.AddScoped<IConstants, Constants>();
 
 // Wallet Providers: Ensure specific wallet provider services are registered
 builder.Services.AddScoped<MonnifyWalletProviderService>();
+builder.Services.AddScoped<ManagedWalletProviderService>();
+
+// handlers
+builder.Services.AddScoped<IManagedWalletCallbackHandler, ManagedWalletCallbackHandler>();
 
 var app = builder.Build();
 
