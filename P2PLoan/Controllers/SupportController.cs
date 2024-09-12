@@ -7,16 +7,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using P2PLoan.DTOs;
 
 namespace P2PLoan.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/support")]
     [ApiController]
-    public class AIController : ControllerBase
+    public class SupportController : ControllerBase
     {
         private readonly IAIService _aiService;
 
-        public AIController(IAIService aiService)
+        public SupportController(IAIService aiService)
         {
             _aiService = aiService;
         }
@@ -27,7 +28,7 @@ namespace P2PLoan.Controllers
          * @return a response containing the AI's chat response
          */
         [HttpPost]
-        [Route("ai-chat-bot")]
+        [Route("chat")]
         public async Task ChatWithBot([FromBody] ChatRequest request, CancellationToken cancellationToken)
         {
             var responseStream = Response.Body;

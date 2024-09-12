@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace P2PLoan.Models
+namespace P2PLoan.DTOs
 {
     public class ChatRequest
     {
@@ -9,3 +9,4 @@ namespace P2PLoan.Models
 
     }
 }
+

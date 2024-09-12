@@ -212,6 +212,7 @@ builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
 builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
 builder.Services.AddScoped<IMonnifyService, MonnifyService>();
 builder.Services.AddScoped<IBankService, BankService>();
+builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {
     var logger = provider.GetRequiredService<ILogger<EmailService>>();

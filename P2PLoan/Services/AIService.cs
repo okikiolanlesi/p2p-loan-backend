@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using P2PLoan.Interfaces.Services;
+using P2PLoan.DTOs;
 
 
 namespace P2PLoan.Services
@@ -26,8 +27,8 @@ namespace P2PLoan.Services
         public AIService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _endpoint = _configuration["AzureConfig:OpenAI:OpenAIUrl"];
-            _apiKey = _configuration["AzureConfig:OpenAI:OpenAIKey"];
+            _endpoint = _configuration["AzureConfig:OpenAI:ApiUrl"];
+            _apiKey = _configuration["AzureConfig:OpenAI:ApiKey"];
             _azureClient = new AzureOpenAIClient(new Uri(_endpoint), new AzureKeyCredential(_apiKey));
             _chatClient = _azureClient.GetChatClient(_configuration["AzureConfig:OpenAI:ChatEngine"]);
         }
@@ -43,17 +44,17 @@ namespace P2PLoan.Services
 
             if (!history.Any(msg => msg.Role == "system"))
             {
-                var systemMessage = new Models.ChatMessage
+                var systemMessage = new DTOs.ChatMessage
                 {
                     Role = "system",
-                    Content = $"You are an helpful AI assistant that helps people with loan information. You SHOULD NOT give out users wallet information." +
-                    $" For anything other than loan questions, respond with 'I am a helpful loan assistant, I can only answer questions about loans.' "
+                    Content = $"You are an helpful AI assistant that helps people with peer to peer loan information. You SHOULD NOT give out users wallet information or information that falls under private information." + "" +
+                    $" For anything other than peer to peer loan questions, respond with 'I am a helpful peer to peer loan assistant, I can only answer questions about peer to peer loans.' "
                 };
 
                 history.Insert(0, systemMessage);
             }
 
-            history.Add(new Models.ChatMessage { Role = "user", Content = request.NewMessage });
+            history.Add(new DTOs.ChatMessage { Role = "user", Content = request.NewMessage });
 
             var openAiHistory = history.Select(msg => MapToOpenAIChatMessage(msg)).ToList();
 
@@ -67,7 +68,7 @@ namespace P2PLoan.Services
             }
         }
 
-        private OpenAI.Chat.ChatMessage MapToOpenAIChatMessage(Models.ChatMessage msg)
+        private OpenAI.Chat.ChatMessage MapToOpenAIChatMessage(DTOs.ChatMessage msg)
         {
             return msg.Role switch
             {

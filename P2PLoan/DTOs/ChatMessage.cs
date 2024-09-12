@@ -1,4 +1,4 @@
-namespace P2PLoan.Models
+namespace P2PLoan.DTOs
 {
     public class ChatMessage
     {
