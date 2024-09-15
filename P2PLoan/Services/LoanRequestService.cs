@@ -9,6 +9,7 @@ using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
+using P2PLoan.Utils;
 
 namespace P2PLoan.Services;
 
@@ -197,9 +198,21 @@ public class LoanRequestService : ILoanRequestService
         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan request deleted successfully", loanRequest);
     }
 
-    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId)
+    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId, AcceptLoanRequestDto acceptLoanRequestDto)
     {
         var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        if (!Utilities.VerifyPassword(acceptLoanRequestDto.PIN, user.PIN))
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "Invalid PIN", null);
+        }
 
         var loanRequest = await loanRequestRepository.FindById(loanRequestId);
 
@@ -300,6 +313,8 @@ public class LoanRequestService : ILoanRequestService
                 {
                     throw new Exception();
                 }
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {

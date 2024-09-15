@@ -20,5 +20,6 @@ public enum AppStatusCodes
     PinAlreadyCreated = 00013,
     InsufficientFunds = 0014,
     InvalidOperation = 0015,
+    InvalidData = 0016,
     InternalServerError = 9999,
 }

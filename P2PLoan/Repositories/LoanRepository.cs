@@ -21,14 +21,14 @@ public class LoanRepository : ILoanRepository
         _context = context;
     }
 
-    public void Add(Loan Loan)
+    public void Add(Loan loan)
     {
-        _context.Loans.Add(Loan);
+        _context.Loans.Add(loan);
     }
 
-    public void AddRange(IEnumerable<Loan> Loans)
+    public void AddRange(IEnumerable<Loan> loans)
     {
-        _context.Loans.AddRange(Loans);
+        _context.Loans.AddRange(loans);
     }
 
     public Task<IDbContextTransaction> BeginTransactionAsync()
@@ -36,9 +36,9 @@ public class LoanRepository : ILoanRepository
         return _context.Database.BeginTransactionAsync();
     }
 
-    public async Task<Loan?> FindById(Guid LoanId)
+    public async Task<Loan?> FindById(Guid loanId)
     {
-        return await _context.Loans.FindAsync(LoanId);
+        return await _context.Loans.FirstOrDefaultAsync(x => x.Id == loanId);
     }
 
     public async Task<PagedResponse<IEnumerable<Loan>>> GetAllAsync(LoanSearchParams searchParams, Guid? userId = null)
@@ -55,12 +55,12 @@ public class LoanRepository : ILoanRepository
             query = query.Where(l => l.LoanOfferId == searchParams.LoanOfferId);
         }
 
-        if (searchParams.MinAmount != null)
+        if (searchParams.MinAmount.HasValue)
         {
-            query = query.Where(l => l.PrincipalAmount >= searchParams.MaxAmount);
+            query = query.Where(l => l.PrincipalAmount >= searchParams.MinAmount);
         }
 
-        if (searchParams.MaxAmount != null)
+        if (searchParams.MaxAmount.HasValue)
         {
             query = query.Where(l => l.PrincipalAmount <= searchParams.MaxAmount);
         }
@@ -73,12 +73,14 @@ public class LoanRepository : ILoanRepository
 
         var total = await query.CountAsync();
 
-        query = query.Skip(searchParams.PageNumber * searchParams.PageSize)
+        query = query.Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
                      .Take(searchParams.PageSize);
+
+        var loans = await query.ToListAsync();
 
         return new PagedResponse<IEnumerable<Loan>>
         {
-            Items = await query.ToListAsync(),
+            Items = loans,
             PageNumber = searchParams.PageNumber,
             PageSize = searchParams.PageSize,
             TotalItems = total
@@ -90,9 +92,9 @@ public class LoanRepository : ILoanRepository
         return _context.Loans.FirstOrDefaultAsync(l => l.BorrowerId == userId && l.Status != LoanStatus.Completed);
     }
 
-    public void MarkAsModified(Loan Loan)
+    public void MarkAsModified(Loan loan)
     {
-        _context.Entry(Loan).State = EntityState.Modified;
+        _context.Entry(loan).State = EntityState.Modified;
     }
 
     public async Task<bool> SaveChangesAsync()

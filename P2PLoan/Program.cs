@@ -21,7 +21,7 @@ using P2PLoan.Interfaces;
 using P2PLoan.Repositories;
 using P2PLoan.Seeders;
 using P2PLoan.Services;
-using P2PLoan.Validators;
+// using P2PLoan.Validators;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using P2PLoan.Helpers;
@@ -32,7 +32,7 @@ using P2PLoan.Constants;
 using P2PLoan.Models;
 using P2PLoan.Requirements;
 using P2PLoan.Handlers;
-using P2PLoan.Attributes;
+using P2PLoan.Converters;
 using P2PLoan.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,14 +73,18 @@ builder.Services.AddControllers(options =>
     // options.Filters.Add<ValidateMonnifySignatureAttribute>();
 
 })
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-
-        }).AddNewtonsoftJson(options =>
-        {
-            options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
-        }); ;
+           .AddJsonOptions(options =>
+    {
+        // System.Text.Json configuration
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter()); // Custom DateTime converter for System.Text.Json
+    })
+    .AddNewtonsoftJson(options =>
+    {
+        // Newtonsoft.Json configuration
+        options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter { AllowIntegerValues = true });
+        options.SerializerSettings.Converters.Add(new MultiFormatDateTimeConverter()); // Custom DateTime converter for Newtonsoft.Json
+    });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -195,6 +199,7 @@ builder.Services.AddScoped<ILoanRequestRepository, LoanRequestRepository>();
 builder.Services.AddScoped<IWalletTopUpDetailRepository, WalletTopUpDetailRepository>();
 builder.Services.AddScoped<IPaymentReferenceRepository, PaymentReferenceRepository>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<IRepaymentRepository, RepaymentRepository>();
 builder.Services.AddScoped<IManagedWalletRepository, ManagedWalletRepository>();
 builder.Services.AddScoped<IManagedWalletTransactionRepository, ManagedWalletTransactionRepository>();
 builder.Services.AddScoped<IManagedWalletTransactionTrackerRepository, ManagedWalletTransactionTrackerRepository>();
@@ -212,6 +217,7 @@ builder.Services.AddScoped<ILoanOfferService, LoanOfferService>();
 builder.Services.AddScoped<ILoanRequestService, LoanRequestService>();
 builder.Services.AddScoped<IMonnifyService, MonnifyService>();
 builder.Services.AddScoped<IBankService, BankService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddSingleton<IEmailService>(provider =>
 {

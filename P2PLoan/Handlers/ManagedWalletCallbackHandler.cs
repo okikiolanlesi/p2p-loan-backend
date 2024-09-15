@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using P2PLoan.DTOs;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
@@ -14,8 +15,9 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
     private readonly ILoanRequestRepository loanRequestRepository;
     private readonly ILoanRepository loanRepository;
     private readonly ILoanOfferRepository loanOfferRepository;
+    private readonly IRepaymentRepository repaymentRepository;
 
-    public ManagedWalletCallbackHandler(IPaymentReferenceRepository paymentReferenceRepository, IWalletRepository walletRepository, IEmailService emailService, IUserRepository userRepository, ILoanRequestRepository loanRequestRepository, ILoanRepository loanRepository, ILoanOfferRepository loanOfferRepository)
+    public ManagedWalletCallbackHandler(IPaymentReferenceRepository paymentReferenceRepository, IWalletRepository walletRepository, IEmailService emailService, IUserRepository userRepository, ILoanRequestRepository loanRequestRepository, ILoanRepository loanRepository, ILoanOfferRepository loanOfferRepository, IRepaymentRepository repaymentRepository)
     {
         this.paymentReferenceRepository = paymentReferenceRepository;
         this.walletRepository = walletRepository;
@@ -24,6 +26,7 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
         this.loanOfferRepository = loanOfferRepository;
+        this.repaymentRepository = repaymentRepository;
     }
     public void Subscribe(IMonnifyService processor)
     {
@@ -31,7 +34,7 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
         processor.DisbursementProcessingCompleted += OnDisbursementProcessingCompleted;
     }
 
-    private async void OnCollectionProcessingCompleted(object sender, ManagedWalletCallbackDto<ManagedWalletCollectionCallbackData> e)
+    private async Task OnCollectionProcessingCompleted(object sender, ManagedWalletCallbackDto<ManagedWalletCollectionCallbackData> e)
     {
         // Check if the transaction is a reserved account transaction, if not return because we are only interested in reserved account transactions
         if (e.EventData.Product.Type != "RESERVED_ACCOUNT")
@@ -53,23 +56,23 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
         var paymentReference = await paymentReferenceRepository.FindByReferenceAsync(e.EventData.PaymentReference);
         if (paymentReference == null)
         {
-            handleDeposit(wallet, user, e.EventData);
+            await handleDeposit(wallet, user, e.EventData);
         }
         else
         {
             switch (paymentReference.paymentReferenceType)
             {
                 case PaymentReferenceType.LoanRequest:
-                    handleLoanCollected(paymentReference, e.EventData.TransactionReference);
+                    await handleLoanCollected(paymentReference, e.EventData.TransactionReference);
                     break;
                 case PaymentReferenceType.Repayment:
-                    handleRepaymentCollected(paymentReference);
+                    await handleRepaymentCollected(paymentReference);
                     break;
             }
         }
     }
 
-    private async void OnDisbursementProcessingCompleted(object sender, ManagedWalletCallbackDto<ManagedWalletDisbursementCallbackData> e)
+    private async Task OnDisbursementProcessingCompleted(object sender, ManagedWalletCallbackDto<ManagedWalletDisbursementCallbackData> e)
     {
         var paymentReference = await paymentReferenceRepository.FindByReferenceAsync(e.EventData.Reference);
 
@@ -87,8 +90,8 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
                 user = await userRepository.GetByIdAsync(loanRequest.UserId);
                 break;
             case PaymentReferenceType.Repayment:
-                var loan = await loanRepository.FindById(paymentReference.ResourceId);
-                user = await userRepository.GetByIdAsync(loan.BorrowerId);
+                var repayment = await repaymentRepository.FindById(paymentReference.ResourceId);
+                user = await userRepository.GetByIdAsync(repayment.UserId);
                 break;
             case PaymentReferenceType.Withdrawal:
                 var wallet = await walletRepository.FindById(paymentReference.ResourceId);
@@ -104,53 +107,94 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
             switch (paymentReference.paymentReferenceType)
             {
                 case PaymentReferenceType.LoanRequest:
-                    handleFailedLoanDisbursal(paymentReference, e.EventData);
+                    await handleFailedLoanDisbursal(paymentReference, e.EventData);
                     break;
                 case PaymentReferenceType.Repayment:
-                    handleFailedRepaymentDisbursal(paymentReference, e.EventData);
+                    await handleFailedRepaymentDisbursal(paymentReference, e.EventData);
                     break;
             }
         }
         else if (e.EventType == "REVERSED_DISBURSEMENT")
         {
-            handleDisbursementReversal(paymentReference, e.EventData, user);
+            await handleDisbursementReversal(e.EventData, user);
         }
         else
         {
             switch (paymentReference.paymentReferenceType)
             {
                 case PaymentReferenceType.Withdrawal:
-                    handleWithdrawal(paymentReference, e.EventData);
+                    await handleWithdrawal(paymentReference, e.EventData);
                     break;
                 case PaymentReferenceType.LoanRequest:
-                    handleLoanDisbursed(paymentReference);
+                    await handleLoanDisbursed(paymentReference);
                     break;
                 case PaymentReferenceType.Repayment:
-                    handleRepaymentDisbursed(paymentReference);
+                    await handleRepaymentDisbursed(paymentReference);
                     break;
             }
         }
-        throw new NotImplementedException();
     }
 
-    private void handleRepaymentDisbursed(PaymentReference paymentReference)
+    private async Task handleRepaymentDisbursed(PaymentReference paymentReference)
     {
-        throw new NotImplementedException();
+        var repayment = await repaymentRepository.FindById(paymentReference.ResourceId);
+        var user = await userRepository.GetByIdAsync(repayment.UserId);
+
+        await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "RepaymentDisbursed", new { repayment.Amount, TransactionReference = paymentReference.Reference });
     }
 
-    private void handleRepaymentCollected(PaymentReference paymentReference)
+    private async Task handleRepaymentCollected(PaymentReference paymentReference)
     {
-        throw new NotImplementedException();
+        using (var transaction = await loanRepository.BeginTransactionAsync())
+        {
+            try
+            {
+                var repayment = await repaymentRepository.FindById(paymentReference.ResourceId);
+                repayment.Status = RepaymentStatus.success;
+
+                repaymentRepository.MarkAsModified(repayment);
+                await repaymentRepository.SaveChangesAsync();
+
+                var loan = await loanRepository.FindById(repayment.LoanId);
+
+                loan.AmountLeft -= repayment.Amount;
+
+                if (loan.AmountLeft <= 0)
+                {
+                    loan.Status = LoanStatus.Completed;
+                }
+
+                loanRepository.MarkAsModified(loan);
+                await loanRepository.SaveChangesAsync();
+
+                var user = await userRepository.GetByIdAsync(repayment.UserId);
+
+                try { await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "RepaymentReceived", new { repayment.Amount, TransactionReference = paymentReference.Reference }); }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    // throw new Exception("Failed to send email");
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine(ex);
+                throw new Exception("Failed to save repayment and update loan");
+            }
+        }
     }
 
-    private async void handleLoanDisbursed(PaymentReference paymentReference)
+    private async Task handleLoanDisbursed(PaymentReference paymentReference)
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
 
-        await emailService.SendHtmlEmailAsync(loanRequest.LoanOffer.User.Email, "Transaction Notification", "LoanAcceptedAndDisbursedLender", new { Amount = loanRequest.LoanOffer.Amount, TransactionReference = paymentReference.Reference });
+        await emailService.SendHtmlEmailAsync(loanRequest.LoanOffer.User.Email, "Transaction Notification", "LoanAcceptedAndDisbursedLender", new { loanRequest.LoanOffer.Amount, TransactionReference = paymentReference.Reference });
     }
 
-    private async void handleLoanCollected(PaymentReference paymentReference, string financialTransactionId)
+    private async Task handleLoanCollected(PaymentReference paymentReference, string financialTransactionId)
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
 
@@ -165,15 +209,16 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
             LenderId = loanRequest.LoanOffer.UserId,
             LoanOfferId = loanRequest.LoanOfferId,
             LoanRequestId = loanRequest.Id,
-            AmountLeft = loanRequest.LoanOffer.Amount,
+            AmountLeft = loanRequest.LoanOffer.Amount + (loanRequest.LoanOffer.Amount * loanRequest.LoanOffer.InterestRate / 100),
             DueDate = DateTime.UtcNow.AddDays(loanRequest.LoanOffer.LoanDurationDays),
             InitialInterestRate = loanRequest.LoanOffer.InterestRate,
+            CurrentInterestRate = loanRequest.LoanOffer.InterestRate,
             Status = LoanStatus.Active,
             RepaymentFrequency = loanRequest.LoanOffer.RepaymentFrequency,
             LoanDurationDays = loanRequest.LoanOffer.LoanDurationDays,
             Defaulted = false,
             PrincipalAmount = loanRequest.LoanOffer.Amount,
-            AccruingInterestRate = loanRequest.LoanOffer.InterestRate,
+            AccruingInterestRate = loanRequest.LoanOffer.AccruingInterestRate,
             FinancialTransactionId = financialTransactionId,
             CreatedBy = systemUser,
             ModifiedBy = systemUser
@@ -197,6 +242,8 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
                 loanRequestRepository.MarkAsModified(loanRequest);
 
                 await loanRequestRepository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
@@ -206,22 +253,21 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
             }
         }
         await emailService.SendHtmlEmailAsync(loanRequest.LoanOffer.User.Email, "Transaction Notification", "LoanAcceptedAndDisbursedBorrower", new { loanRequest.LoanOffer.Amount, TransactionReference = paymentReference.Reference });
-        throw new NotImplementedException();
     }
 
-    private async void handleDeposit(Wallet wallet, User user, ManagedWalletCollectionCallbackData e)
+    private async Task handleDeposit(Wallet wallet, User user, ManagedWalletCollectionCallbackData e)
     {
         await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "DepositSucceeded", new { Amount = e.SettlementAmount, TransactionReference = e.PaymentReference });
     }
 
-    private async void handleWithdrawal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
+    private async Task handleWithdrawal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
     {
         var wallet = await walletRepository.FindById(paymentReference.ResourceId);
         var user = await userRepository.GetByIdAsync(wallet.UserId);
         await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "WithdrawalSucceeded", new { e.Amount, e.TransactionReference });
     }
 
-    private async void handleFailedLoanDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
+    private async Task handleFailedLoanDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
         loanRequest.Status = LoanRequestStatus.failed;
@@ -233,15 +279,20 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
         await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "FailedLoanDisbursal", new { e.Amount, e.TransactionReference });
     }
 
-    private async void handleFailedRepaymentDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
+    private async Task handleFailedRepaymentDisbursal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e)
     {
-        var loan = await loanRepository.FindById(paymentReference.ResourceId);
-        var user = await userRepository.GetByIdAsync(loan.BorrowerId);
+        var repayment = await repaymentRepository.FindById(paymentReference.ResourceId);
+        repayment.Status = RepaymentStatus.failed;
+
+        repaymentRepository.MarkAsModified(repayment);
+        await repaymentRepository.SaveChangesAsync();
+
+        var user = await userRepository.GetByIdAsync(repayment.UserId);
 
         await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "FailedRepaymentDisbursal", new { e.Amount, e.TransactionReference });
     }
 
-    private async void handleDisbursementReversal(PaymentReference paymentReference, ManagedWalletDisbursementCallbackData e, User user)
+    private async Task handleDisbursementReversal(ManagedWalletDisbursementCallbackData e, User user)
     {
 
         await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "FailedRepaymentDisbursal", new { e.Amount, e.TransactionReference });
