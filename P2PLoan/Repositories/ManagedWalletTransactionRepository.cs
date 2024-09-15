@@ -25,7 +25,7 @@ public class ManagedWalletTransactionRepository : IManagedWalletTransactionRepos
 
     public async Task<ManagedWalletTransaction?> FindByIdAsync(Guid managedWalletTransactionId)
     {
-        return await dbContext.ManagedWalletTransactions.FirstAsync(mwt => mwt.Id == managedWalletTransactionId);
+        return await dbContext.ManagedWalletTransactions.FirstOrDefaultAsync(mwt => mwt.Id == managedWalletTransactionId);
     }
 
     public async Task<PagedResponse<IEnumerable<ManagedWalletTransaction>>> GetTransactionsByWalletId(Guid managedWalletId, int page, int pageSize)

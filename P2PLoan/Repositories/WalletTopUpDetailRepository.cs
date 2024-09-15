@@ -27,12 +27,17 @@ public class WalletTopUpDetailRepository : IWalletTopUpDetailRepository
         dbContext.WalletTopUpDetails.AddRange(walletTopUpDetails);
     }
 
+    public async Task<WalletTopUpDetail> FindByAccountNumberAndCode(string accountNumber, string code)
+    {
+        return await dbContext.WalletTopUpDetails.FirstOrDefaultAsync(x => x.AccountNumber == accountNumber && x.BankCode == code);
+    }
+
     public async Task<WalletTopUpDetail> FindById(Guid id)
     {
         return await dbContext.WalletTopUpDetails.FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<WalletTopUpDetail>> GetAllForAWallet(Guid walletId)
+    public async Task<ICollection<WalletTopUpDetail>> GetAllForAWallet(Guid walletId)
     {
         return await dbContext.WalletTopUpDetails.Where(x => x.WalletId == walletId).ToListAsync();
     }

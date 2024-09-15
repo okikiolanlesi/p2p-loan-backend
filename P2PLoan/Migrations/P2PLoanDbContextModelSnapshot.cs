@@ -43,6 +43,9 @@ namespace P2PLoan.Migrations
                     b.Property<Guid>("CreatedById")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double>("CurrentInterestRate")
+                        .HasColumnType("float");
+
                     b.Property<bool>("Defaulted")
                         .HasColumnType("bit");
 
@@ -481,10 +484,22 @@ namespace P2PLoan.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FinancialTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("InterestRate")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("LoanId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("ModifiedAt")
@@ -493,9 +508,17 @@ namespace P2PLoan.Migrations
                     b.Property<Guid>("ModifiedById")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("LoanId");
 
                     b.HasIndex("ModifiedById");
 
@@ -1111,6 +1134,12 @@ namespace P2PLoan.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("P2PLoan.Models.Loan", "Loan")
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("P2PLoan.Models.User", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
@@ -1118,6 +1147,8 @@ namespace P2PLoan.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("Loan");
 
                     b.Navigation("ModifiedBy");
                 });

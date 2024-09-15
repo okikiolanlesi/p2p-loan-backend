@@ -11,4 +11,6 @@ public interface IConstants
     public int EMAIL_VERIFICATION_TOKEN_LENGTH { get; }
     public int EMAIL_VERIFICATION_TOKEN_EXPIRATION_MINUTES { get; }
     public string USER_WALLET_NAME_PREFIX { get; }
+    public double WITHDRAWAL_FEE_PERCENTAGE { get; }
+    public double WITHDRAWAL_FEE_CAP { get; }
 }

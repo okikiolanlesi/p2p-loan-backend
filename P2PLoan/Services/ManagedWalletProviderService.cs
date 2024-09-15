@@ -175,6 +175,9 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
         // Replace the source account number with the source account number from the configuration, cause we want to transfer from the source account number in the configuration and then manage the balance and transaction tracking internally
         payload.SourceAccountNumber = configuration["Monnify:SourceAccountNumber"];
 
+        // Replace the reference with the internal reference generated for the transaction tracker
+        payload.Reference = transactionTracker.InternalReference;
+
         // Transfer the amount from the source account number in the configuration to the destination account number
         var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(payload));
 

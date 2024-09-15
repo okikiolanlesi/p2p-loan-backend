@@ -9,6 +9,7 @@ using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
+using P2PLoan.Utils;
 
 namespace P2PLoan.Services;
 
@@ -25,7 +26,7 @@ public class LoanRequestService : ILoanRequestService
     private readonly IPaymentReferenceRepository paymentReferenceRepository;
     private readonly ILoanRepository loanRepository;
 
-    public LoanRequestService(ILoanRequestRepository loanRequestRepository,IWalletTopUpDetailRepository walletTopUpDetailRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IWalletService walletService, IPaymentReferenceRepository paymentReferenceRepository, ILoanRepository loanRepository)
+    public LoanRequestService(ILoanRequestRepository loanRequestRepository, IWalletTopUpDetailRepository walletTopUpDetailRepository, ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IWalletService walletService, IPaymentReferenceRepository paymentReferenceRepository, ILoanRepository loanRepository)
     {
         this.loanRequestRepository = loanRequestRepository;
         this.walletTopUpDetailRepository = walletTopUpDetailRepository;
@@ -58,15 +59,21 @@ public class LoanRequestService : ILoanRequestService
 
 
         var loanOffer = await loanOfferRepository.FindById(createLoanRequestDto.LoanOfferId);
-
         if (loanOffer is null || loanOffer.UserId == userId || !loanOffer.Active)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
         }
 
-        var existingLoanRequest = await loanRequestRepository.FindByIdForAUser(createLoanRequestDto.LoanOfferId, user.Id);
+        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower;
 
-        if (existingLoanRequest != null && !(existingLoanRequest.Status == LoanRequestStatus.pending || existingLoanRequest.Status == LoanRequestStatus.processing || existingLoanRequest.Status == LoanRequestStatus.failed))
+        if (!isUserAllowedToSendRequest)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "You are not allowed to send a loan request for this loan offer", null);
+        }
+
+        var existingLoanRequest = await loanRequestRepository.FindByLoanOfferIdForAUser(createLoanRequestDto.LoanOfferId, user.Id);
+
+        if (existingLoanRequest != null && existingLoanRequest.Status != LoanRequestStatus.approved && existingLoanRequest.Status != LoanRequestStatus.declined)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "You already have a loan request for this loan offer", null);
         }
@@ -191,9 +198,21 @@ public class LoanRequestService : ILoanRequestService
         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan request deleted successfully", loanRequest);
     }
 
-    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId)
+    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId, AcceptLoanRequestDto acceptLoanRequestDto)
     {
         var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        if (!Utilities.VerifyPassword(acceptLoanRequestDto.PIN, user.PIN))
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "Invalid PIN", null);
+        }
 
         var loanRequest = await loanRequestRepository.FindById(loanRequestId);
 
@@ -294,6 +313,8 @@ public class LoanRequestService : ILoanRequestService
                 {
                     throw new Exception();
                 }
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {

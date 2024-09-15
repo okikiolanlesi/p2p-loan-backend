@@ -44,6 +44,10 @@ public class LoanRequestRepository : ILoanRequestRepository
     {
         return dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.Id == LoanRequestId && x.UserId == UserId);
     }
+    public Task<LoanRequest> FindByLoanOfferIdForAUser(Guid loanOfferId, Guid UserId)
+    {
+        return dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.LoanOfferId == loanOfferId && x.UserId == UserId);
+    }
 
     public async Task<PagedResponse<IEnumerable<LoanRequestDto>>> GetAllAsync(LoanRequestSearchParams searchParams, Guid? userId = null)
     {
@@ -52,7 +56,7 @@ public class LoanRequestRepository : ILoanRequestRepository
         // Apply filtering
         if (userId.HasValue)
         {
-            query = query.Where(lr => lr.UserId == userId);
+            query = query.Where(lr => lr.UserId == userId || lr.LoanOffer.UserId == userId);
         }
 
         if (searchParams.TrafficType != null && searchParams.TrafficType == TrafficType.received && userId != null)

@@ -1,20 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
-using P2PLoan.Interfaces.Services;
+using P2PLoan.Interfaces;
 
 namespace P2PLoan.Controllers
 {
     [ApiController]
     [Route("api/bank")]
-    public class BankController: ControllerBase
+    public class BankController : ControllerBase
     {
-       
+
         private readonly IBankService bankService;
         public BankController(IBankService bankService)
         {
@@ -39,6 +36,6 @@ namespace P2PLoan.Controllers
         }
 
 
-        
+
     }
 }
