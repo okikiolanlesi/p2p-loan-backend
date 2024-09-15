@@ -19,14 +19,16 @@ public class LoanOfferService : ILoanOfferService
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
     private readonly IWalletRepository walletRepository;
+    private readonly IConstants constants;
 
-    public LoanOfferService(ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository)
+    public LoanOfferService(ILoanOfferRepository loanOfferRepository, IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IMapper mapper, IWalletRepository walletRepository, IConstants constants)
     {
         this.loanOfferRepository = loanOfferRepository;
         this.httpContextAccessor = httpContextAccessor;
         this.userRepository = userRepository;
         this.mapper = mapper;
         this.walletRepository = walletRepository;
+        this.constants = constants;
     }
 
     public async Task<ServiceResponse<object>> Create(CreateLoanOfferRequestDto createLoanOfferRequestDto)
@@ -39,6 +41,17 @@ public class LoanOfferService : ILoanOfferService
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
         }
+
+        if (createLoanOfferRequestDto.Amount > constants.MAX_LOAN_AMOUNT)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, $"Loan amount cannot exceed {constants.MAX_LOAN_AMOUNT}", null);
+        }
+
+        if (createLoanOfferRequestDto.Amount < constants.MIN_LOAN_AMOUNT)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, $"Loan amount cannot be less than {constants.MIN_LOAN_AMOUNT}", null);
+        }
+
         var wallet = await walletRepository.FindById(createLoanOfferRequestDto.WalletId);
 
         if (wallet is null || wallet.UserId != userId)

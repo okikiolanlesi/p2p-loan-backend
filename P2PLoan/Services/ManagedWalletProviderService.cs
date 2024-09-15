@@ -50,8 +50,8 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
         {
             Id = Guid.NewGuid(),
             UserId = (Guid)createWalletDto.UserId,
-            AvailableBalance = 0,
-            LedgerBalance = 0,
+            AvailableBalance = 5000000,
+            LedgerBalance = 5000000,
             WalletReference = createdReservedAccount.ResponseBody.AccountReference,
             AccountName = createdReservedAccount.ResponseBody.AccountName,
             CreatedById = (Guid)createWalletDto.UserId,
