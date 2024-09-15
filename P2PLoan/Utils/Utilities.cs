@@ -28,4 +28,17 @@ public class Utilities
         return true;
     }
 
+    public static bool VerifyPassword(string password, string passwordHash)
+    {
+        return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+    }
+
+    public static double CalculateFee(double amount, double percentage, double cap)
+    {
+        // Calculate the fee based on the percentage
+        double fee = amount * (percentage / 100);
+
+        // If the fee exceeds the cap, return the cap value
+        return fee > cap ? cap : fee;
+    }
 }

@@ -38,7 +38,7 @@ public class MetaData
 public class PaymentSourceInformation
 {
     public string BankCode { get; set; }
-    public decimal AmountPaid { get; set; }
+    public double AmountPaid { get; set; }
     public string AccountName { get; set; }
     public string SessionId { get; set; }
     public string AccountNumber { get; set; }

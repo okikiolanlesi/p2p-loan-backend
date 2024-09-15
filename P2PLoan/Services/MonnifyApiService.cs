@@ -221,6 +221,36 @@ public class MonnifyApiService : IMonnifyApiService
 
         }
     }
+
+    public async Task<MonnifyApiResponse<MonnifyDummyCreditAccountResponseDto>> DummyCreditAccount(MonnifyDummyCreditAccountRequestDto dummyCreditAccountDto, string providerCode)
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(dummyCreditAccountDto, options);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await monnifyClient.Client.PostAsync($"/api/v1/account-provider/tsq-notification/{providerCode}", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var successContent = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<MonnifyApiResponse<MonnifyDummyCreditAccountResponseDto>>(successContent);
+            return data;
+        }
+        else
+        {
+            // Handle error response
+            var errorContent = await response.Content.ReadAsStringAsync();
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+
+            throw new HttpRequestException($"{error.responseCode}:{error.responseMessage}");
+        }
+
+    }
 }
 
 class ErrorResponse

@@ -15,6 +15,7 @@ public interface IMonnifyApiService
     Task<MonnifyApiResponse<MonnifyCreateReservedAccountResponseBody>> CreateReservedAccount(MonnifyCreateReservedAccountRequestDto createReservedAccountDto);
     Task<MonnifyApiResponse<MonnifyVerifyAccountDetailsResponseBody>> VerifyAccountDetails(MonnifyVerifyAccountDetailsRequestDto verifyAccountDetailsRequestDto);
     Task<MonnifyApiResponse<List<BankDto>>> GetBanks();
+    Task<MonnifyApiResponse<MonnifyDummyCreditAccountResponseDto>> DummyCreditAccount(MonnifyDummyCreditAccountRequestDto dummyCreditAccountDto, string providerCode);
 }
 
 public class MonnifyCreateReservedAccountRequestDto
@@ -153,6 +154,24 @@ public class MonnifyGetSingleTransferResponseBody
     public string DestinationBankCode { get; set; }
     public string DestinationBankName { get; set; }
     public string DestinationAccountNumber { get; set; }
+}
+
+public class MonnifyDummyCreditAccountRequestDto
+{
+    public string SourceAccountNumber { get; set; } = "IGNORE";
+    public string SourceAccountName { get; set; } = "BorrowHub Limited";
+    public string SourceBankCode { get; set; } = "001";
+    public string DestinationAccountNumber { get; set; }
+    public double Amount { get; set; }
+    public string SessionId { get; set; }
+    public string ResponseCode { get; set; } = "00";
+    public string ResponseDescription { get; set; } = "Approved";
+    public string Currency { get; set; } = "NGN";
+    public string TransactionStatus { get; set; } = "SUCCESSFUL";
+}
+
+public class MonnifyDummyCreditAccountResponseDto
+{
 }
 
 public class MonnifyGetTransactionsResponseBody

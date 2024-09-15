@@ -13,7 +13,7 @@ public interface ILoanRequestService
     Task<ServiceResponse<object>> GetAll(LoanRequestSearchParams searchParams);
     Task<ServiceResponse<object>> GetOne(Guid loanRequestId);
     Task<ServiceResponse<object>> GetOneAdmin(Guid loanRequestId);
-    Task<ServiceResponse<object>> Accept(Guid loanRequestId);
+    Task<ServiceResponse<object>> Accept(Guid loanRequestId, AcceptLoanRequestDto acceptLoanRequestDto);
     Task<ServiceResponse<object>> Decline(Guid loanRequestId);
     Task<ServiceResponse<object>> Delete(Guid loanRequestId);
     Task<ServiceResponse<object>> DeleteAdmin(Guid loanRequestId);

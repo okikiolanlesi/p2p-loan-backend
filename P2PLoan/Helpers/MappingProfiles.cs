@@ -13,7 +13,7 @@ namespace P2PLoan.Helpers
             CreateMap<RegisterRequestDto, User>();
             CreateMap<CreateWalletResponseDto, CreateWalletResponse>();
             CreateMap<UpdateModuleRequestDto, Module>();
-           // CreateMap<CreateModuleRequestDto, Module>();
+            // CreateMap<CreateModuleRequestDto, Module>();
             CreateMap<UpdateRoleRequestDto, Role>();
             CreateMap<CreateRoleRequestDto, Role>();
             CreateMap<LoanOffer, LoanOfferDto>();
@@ -27,6 +27,8 @@ namespace P2PLoan.Helpers
             CreateMap<CreateLoanRequestRequestDto, LoanRequest>().ReverseMap();
             CreateMap<MonnifyCollectionCallBackData, ManagedWalletCollectionCallbackData>().ReverseMap();
             CreateMap<MonnifyDisbursementCallbackData, ManagedWalletDisbursementCallbackData>().ReverseMap();
+            CreateMap<MonnifyCallbackDto<MonnifyDisbursementCallbackData>, ManagedWalletCallbackDto<ManagedWalletDisbursementCallbackData>>().ReverseMap();
+            CreateMap<MonnifyCallbackDto<MonnifyCollectionCallBackData>, ManagedWalletCallbackDto<ManagedWalletCollectionCallbackData>>().ReverseMap();
 
             // Map MonnifyApiResponse<T> to the appropriate DTOs
             CreateMap<MonnifyApiResponse<MonnifyCreateWalletResponseBody>, CreateWalletResponseDto>()

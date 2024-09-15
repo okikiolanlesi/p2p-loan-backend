@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using P2PLoan.Middlewares;
 
@@ -18,7 +19,7 @@ namespace P2PLoan.Helpers
 
             if (!result)
             {
-                throw new Exception("Invaid credentials. Please logout and login again");
+                throw new Exception("Invalid credentials. Please logout and login again");
 
             }
             return userId;
@@ -26,5 +27,19 @@ namespace P2PLoan.Helpers
 
         public static void UseCustomExceptionHandler(this IApplicationBuilder app) =>
            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+        public static async Task InvokeAsync<TEventArgs>(this EventHandler<TEventArgs> handler, object sender, TEventArgs eventArgs)
+        {
+            if (handler == null)
+                return;
+
+            var invocationList = handler.GetInvocationList();
+
+            var tasks = invocationList
+                .OfType<EventHandler<TEventArgs>>()
+                .Select(d => Task.Run(() => d(sender, eventArgs)));
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

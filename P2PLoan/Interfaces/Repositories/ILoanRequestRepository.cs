@@ -14,6 +14,7 @@ public interface ILoanRequestRepository
     Task<LoanRequest> FindById(Guid LoanRequestId);
     Task<LoanRequestDto?> FindByIdPublic(Guid LoanRequestId);
     Task<LoanRequest?> FindByIdForAUser(Guid LoanRequestId, Guid UserId);
+    Task<LoanRequest?> FindByLoanOfferIdForAUser(Guid loanOfferId, Guid UserId);
     Task<PagedResponse<IEnumerable<LoanRequestDto>>> GetAllAsync(LoanRequestSearchParams searchParams, Guid? userId = null);
     void AddRange(IEnumerable<LoanRequest> LoanRequests);
     void MarkAsModified(LoanRequest LoanRequest);
