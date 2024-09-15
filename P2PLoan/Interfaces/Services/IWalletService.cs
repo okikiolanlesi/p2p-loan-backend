@@ -17,6 +17,8 @@ public interface IWalletService
     Task<ServiceResponse<object>> GetTransactions(Guid walletId, int pageSize = 10, int pageNo = 1);
     Task<TransferResponseDto> Transfer(TransferDto transferDto, Wallet wallet);
     Task<ServiceResponse<object>> GetLoggedInUserWallets();
+    Task<ServiceResponse<object>> Withdraw(WithdrawRequestDto withdrawRequestDto);
+    Task<ServiceResponse<object>> GetWithdrawalFee(double amount);
 }
 
 public class CreateWalletResponse

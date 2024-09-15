@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P2PLoan.Attributes;
 using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
@@ -10,6 +12,7 @@ namespace P2PLoan.Controllers;
 
 [ApiController]
 [Route("api/loan-request")]
+[Authorize]
 public class LoanRequestController
 {
     private readonly ILoanRequestService loanRequestService;
@@ -69,9 +72,10 @@ public class LoanRequestController
     }
 
     [HttpPost("accept/{loanRequestId:guid}")]
-    public async Task<IActionResult> Accept(Guid loanRequestId)
+    [TypeFilter(typeof(RequiresPinAttribute))]
+    public async Task<IActionResult> Accept(Guid loanRequestId, AcceptLoanRequestDto acceptLoanRequestDto)
     {
-        var response = await loanRequestService.Accept(loanRequestId);
+        var response = await loanRequestService.Accept(loanRequestId, acceptLoanRequestDto);
         return ControllerHelper.HandleApiResponse(response);
     }
 

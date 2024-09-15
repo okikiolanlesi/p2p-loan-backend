@@ -6,8 +6,8 @@ namespace P2PLoan.Interfaces;
 
 public interface IMonnifyService
 {
-    event EventHandler<ManagedWalletCallbackDto<ManagedWalletCollectionCallbackData>> CollectionProcessingCompleted;
-    event EventHandler<ManagedWalletCallbackDto<ManagedWalletDisbursementCallbackData>> DisbursementProcessingCompleted;
+    event Func<object, ManagedWalletCallbackDto<ManagedWalletCollectionCallbackData>, Task> CollectionProcessingCompleted;
+    event Func<object, ManagedWalletCallbackDto<ManagedWalletDisbursementCallbackData>, Task> DisbursementProcessingCompleted;
     Task HandleDisbursementCallback(MonnifyCallbackDto<MonnifyDisbursementCallbackData> requestBody);
     Task HandleTransactionCompletionCallback(MonnifyCallbackDto<MonnifyCollectionCallBackData> requestBody);
 }
