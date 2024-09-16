@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
@@ -282,6 +283,14 @@ public class LoanRequestService : ILoanRequestService
 
                 var topUpAccountDetail = loanRequest.Wallet.TopUpDetails.ToList()[0];
 
+                Console.WriteLine(" About to create Transfer DTO");
+                Console.WriteLine($"Amount: {loanRequest.LoanOffer.Amount}");
+                Console.WriteLine($"Reference: {paymentReference.Id}");
+                Console.WriteLine($"Narration: {$"Loan request {loanRequest.Id} approval"}");
+                Console.WriteLine($"DestinationBankCode: {topUpAccountDetail.BankCode}");
+                Console.WriteLine($"DestinationAccountNumber: {topUpAccountDetail.AccountNumber}");
+                Console.WriteLine($"SourceAccountNumber: {lenderWallet.AccountNumber}");
+
                 // Try debiting the lender's wallet
                 var transferDto = new TransferDto
                 {
@@ -290,12 +299,14 @@ public class LoanRequestService : ILoanRequestService
                     Narration = $"Loan request {loanRequest.Id} approval",
                     DestinationBankCode = topUpAccountDetail.BankCode,
                     DestinationAccountNumber = topUpAccountDetail.AccountNumber,
-                    SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
+                    SourceAccountNumber = lenderWallet.AccountNumber,
                 };
+
+                var transferDtoJson = JsonConvert.SerializeObject(transferDto);
 
                 try
                 {
-                    var transferResponse = await walletService.Transfer(transferDto, loanRequest.LoanOffer.Wallet);
+                    var transferResponse = await walletService.Transfer(transferDto, lenderWallet);
                 }
                 catch
                 {
@@ -319,7 +330,7 @@ public class LoanRequestService : ILoanRequestService
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
             }
         }
 
