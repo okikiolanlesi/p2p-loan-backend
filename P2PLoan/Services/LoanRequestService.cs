@@ -283,14 +283,6 @@ public class LoanRequestService : ILoanRequestService
 
                 var topUpAccountDetail = loanRequest.Wallet.TopUpDetails.ToList()[0];
 
-                Console.WriteLine(" About to create Transfer DTO");
-                Console.WriteLine($"Amount: {loanRequest.LoanOffer.Amount}");
-                Console.WriteLine($"Reference: {paymentReference.Id}");
-                Console.WriteLine($"Narration: {$"Loan request {loanRequest.Id} approval"}");
-                Console.WriteLine($"DestinationBankCode: {topUpAccountDetail.BankCode}");
-                Console.WriteLine($"DestinationAccountNumber: {topUpAccountDetail.AccountNumber}");
-                Console.WriteLine($"SourceAccountNumber: {lenderWallet.AccountNumber}");
-
                 // Try debiting the lender's wallet
                 var transferDto = new TransferDto
                 {
@@ -302,7 +294,6 @@ public class LoanRequestService : ILoanRequestService
                     SourceAccountNumber = lenderWallet.AccountNumber,
                 };
 
-                var transferDtoJson = JsonConvert.SerializeObject(transferDto);
 
                 try
                 {
