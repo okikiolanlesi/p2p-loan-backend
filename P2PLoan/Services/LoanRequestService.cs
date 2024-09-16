@@ -251,7 +251,7 @@ public class LoanRequestService : ILoanRequestService
 
         if (lenderWalletBalance.AvailableBalance < loanRequest.LoanOffer.Amount)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InsufficientFunds, "You do not have enough balance to fund the loan request", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InsufficientFunds, "Lender does not have enough balance to fund the loan request at the moment", null);
         }
 
         // Get system user
