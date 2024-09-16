@@ -15,4 +15,6 @@ public class WithdrawRequestDto
     public string DestinationAccountNumber { get; set; }
     [Required]
     public string Currency { get; set; } = "NGN";
+    [Required]
+    public string PIN { get; set; }
 }

@@ -226,6 +226,11 @@ namespace P2PLoan.Services
                 return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User not found", null);
             }
 
+            if (!Utilities.VerifyPassword(withdrawRequestDto.PIN, user.PIN))
+            {
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "Invalid PIN", null);
+            }
+
             var wallet = await walletRepository.FindById(withdrawRequestDto.WalletId);
 
             if (wallet == null || wallet.UserId != userId)
@@ -259,6 +264,7 @@ namespace P2PLoan.Services
             paymentReferenceRepository.Add(paymentReference);
 
             await paymentReferenceRepository.SaveChangesAsync();
+
             // Try to transfer the funds from the  wallet
             var transferDto = new TransferDto
             {

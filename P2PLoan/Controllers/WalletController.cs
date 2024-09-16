@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P2PLoan.Attributes;
 using P2PLoan.DTOs;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
@@ -53,6 +54,7 @@ public class WalletController
 
     [HttpPost("withdraw")]
     [Authorize]
+    [TypeFilter(typeof(RequiresPinAttribute))]
     public async Task<IActionResult> Withdraw([FromBody] WithdrawRequestDto withdrawRequestDto)
     {
         var response = await walletService.Withdraw(withdrawRequestDto);
