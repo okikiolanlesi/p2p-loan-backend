@@ -277,21 +277,11 @@ public class LoanRequestService : ILoanRequestService
 
                 paymentReferenceRepository.Add(paymentReference);
 
-                Console.WriteLine("Payment Reference Created");
-
                 await paymentReferenceRepository.SaveChangesAsync();
-                Console.WriteLine("Payment Reference Saved");
-                var topUpDetails = await walletTopUpDetailRepository.GetAllForAWallet(loanRequest.Wallet.Id);
-                Console.WriteLine("Top Up Details Fetched");
 
-                var topUpDetailsJson = JsonConvert.SerializeObject(topUpDetails);
-                Console.WriteLine(topUpDetailsJson);
+                var topUpDetails = await walletTopUpDetailRepository.GetAllForAWallet(loanRequest.Wallet.Id);
 
                 var topUpAccountDetail = loanRequest.Wallet.TopUpDetails.ToList()[0];
-                Console.WriteLine("Top Up Account Detail Fetched");
-                var topUpDetailJson = JsonConvert.SerializeObject(topUpAccountDetail);
-                Console.WriteLine(topUpDetailJson);
-
 
                 Console.WriteLine(" About to create Transfer DTO");
                 Console.WriteLine($"Amount: {loanRequest.LoanOffer.Amount}");
@@ -299,7 +289,7 @@ public class LoanRequestService : ILoanRequestService
                 Console.WriteLine($"Narration: {$"Loan request {loanRequest.Id} approval"}");
                 Console.WriteLine($"DestinationBankCode: {topUpAccountDetail.BankCode}");
                 Console.WriteLine($"DestinationAccountNumber: {topUpAccountDetail.AccountNumber}");
-                Console.WriteLine($"DestinationBSourceAccountNumberankCode: {loanRequest.LoanOffer.Wallet.AccountNumber}");
+                Console.WriteLine($"SourceAccountNumber: {lenderWallet.AccountNumber}");
 
                 // Try debiting the lender's wallet
                 var transferDto = new TransferDto
@@ -309,35 +299,26 @@ public class LoanRequestService : ILoanRequestService
                     Narration = $"Loan request {loanRequest.Id} approval",
                     DestinationBankCode = topUpAccountDetail.BankCode,
                     DestinationAccountNumber = topUpAccountDetail.AccountNumber,
-                    SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
+                    SourceAccountNumber = lenderWallet.AccountNumber,
                 };
 
-                Console.WriteLine("Transfer DTO Created");
                 var transferDtoJson = JsonConvert.SerializeObject(transferDto);
-                Console.WriteLine(transferDtoJson);
 
                 try
                 {
-                    var transferResponse = await walletService.Transfer(transferDto, loanRequest.LoanOffer.Wallet);
-                    Console.WriteLine("Transfer Response Received");
-                    var transferResponseJson = JsonConvert.SerializeObject(transferResponse);
-                    Console.WriteLine(transferResponseJson);
+                    var transferResponse = await walletService.Transfer(transferDto, lenderWallet);
                 }
                 catch
                 {
-                    Console.WriteLine("Failed to debit lender's wallet");
                     transaction.Rollback();
-                    Console.WriteLine("Transaction Rolled Back");
 
                     return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to debit lender's wallet", null);
                 }
 
                 // var transferResponse = await Transfer
                 loanRequestRepository.MarkAsModified(loanRequest);
-                Console.WriteLine("Loan Request Status Updated");
 
                 var saveResult = await loanRequestRepository.SaveChangesAsync();
-                Console.WriteLine("Loan Request Saved");
 
                 if (!saveResult)
                 {
@@ -345,12 +326,10 @@ public class LoanRequestService : ILoanRequestService
                 }
 
                 await transaction.CommitAsync();
-                Console.WriteLine("Transaction Committed");
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                throw ex;
                 return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
             }
         }
