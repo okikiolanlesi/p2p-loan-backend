@@ -191,12 +191,41 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
 
-        await emailService.SendHtmlEmailAsync(loanRequest.LoanOffer.User.Email, "Transaction Notification", "LoanAcceptedAndDisbursedLender", new { loanRequest.LoanOffer.Amount, TransactionReference = paymentReference.Reference });
+        User user;
+
+        var loanOffer = await loanOfferRepository.FindById(loanRequest.LoanOfferId);
+
+        if (loanOffer.Type == LoanOfferType.borrower)
+        {
+            user = await userRepository.GetByIdAsync(loanRequest.UserId);
+        }
+        else
+        {
+            user = await userRepository.GetByIdAsync(loanRequest.LoanOffer.UserId);
+        }
+
+        await emailService.SendHtmlEmailAsync(user.Email, "Transaction Notification", "LoanAcceptedAndDisbursedLender", new { loanRequest.LoanOffer.Amount, TransactionReference = paymentReference.Reference });
     }
 
     private async Task handleLoanCollected(PaymentReference paymentReference, string financialTransactionId)
     {
         var loanRequest = await loanRequestRepository.FindById(paymentReference.ResourceId);
+
+        User borrower;
+        User lender;
+
+        var loanOffer = await loanOfferRepository.FindById(loanRequest.LoanOfferId);
+
+        if (loanOffer.Type == LoanOfferType.borrower)
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.LoanOffer.UserId);
+            lender = await userRepository.GetByIdAsync(loanRequest.UserId);
+        }
+        else
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.UserId);
+            lender = await userRepository.GetByIdAsync(loanRequest.LoanOffer.UserId);
+        }
 
         // Get system user
         var systemUser = await userRepository.GetSystemUser();
@@ -205,8 +234,8 @@ public class ManagedWalletCallbackHandler : IManagedWalletCallbackHandler
         var loan = new Loan
         {
             Id = Guid.NewGuid(),
-            BorrowerId = loanRequest.UserId,
-            LenderId = loanRequest.LoanOffer.UserId,
+            BorrowerId = borrower.Id,
+            LenderId = lender.Id,
             LoanOfferId = loanRequest.LoanOfferId,
             LoanRequestId = loanRequest.Id,
             AmountLeft = loanRequest.LoanOffer.Amount + (loanRequest.LoanOffer.Amount * loanRequest.LoanOffer.InterestRate / 100),
