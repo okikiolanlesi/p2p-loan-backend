@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
@@ -276,11 +277,20 @@ public class LoanRequestService : ILoanRequestService
 
                 paymentReferenceRepository.Add(paymentReference);
 
-                await paymentReferenceRepository.SaveChangesAsync();
+                Console.WriteLine("Payment Reference Created");
 
+                await paymentReferenceRepository.SaveChangesAsync();
+                Console.WriteLine("Payment Reference Saved");
                 var topUpDetails = await walletTopUpDetailRepository.GetAllForAWallet(loanRequest.Wallet.Id);
+                Console.WriteLine("Top Up Details Fetched");
+
+                var topUpDetailsJson = JsonConvert.SerializeObject(topUpDetails);
+                Console.WriteLine(topUpDetailsJson);
 
                 var topUpAccountDetail = loanRequest.Wallet.TopUpDetails.ToList()[0];
+                Console.WriteLine("Top Up Account Detail Fetched");
+                var topUpDetailJson = JsonConvert.SerializeObject(topUpDetails);
+                Console.WriteLine(topUpDetailJson);
 
                 // Try debiting the lender's wallet
                 var transferDto = new TransferDto
@@ -293,21 +303,32 @@ public class LoanRequestService : ILoanRequestService
                     SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
                 };
 
+                Console.WriteLine("Transfer DTO Created");
+                var transferDtoJson = JsonConvert.SerializeObject(transferDto);
+                Console.WriteLine(transferDtoJson);
+
                 try
                 {
                     var transferResponse = await walletService.Transfer(transferDto, loanRequest.LoanOffer.Wallet);
+                    Console.WriteLine("Transfer Response Received");
+                    var transferResponseJson = JsonConvert.SerializeObject(transferResponse);
+                    Console.WriteLine(transferResponseJson);
                 }
                 catch
                 {
+                    Console.WriteLine("Failed to debit lender's wallet");
                     transaction.Rollback();
+                    Console.WriteLine("Transaction Rolled Back");
 
                     return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to debit lender's wallet", null);
                 }
 
                 // var transferResponse = await Transfer
                 loanRequestRepository.MarkAsModified(loanRequest);
+                Console.WriteLine("Loan Request Status Updated");
 
                 var saveResult = await loanRequestRepository.SaveChangesAsync();
+                Console.WriteLine("Loan Request Saved");
 
                 if (!saveResult)
                 {
@@ -315,11 +336,12 @@ public class LoanRequestService : ILoanRequestService
                 }
 
                 await transaction.CommitAsync();
+                Console.WriteLine("Transaction Committed");
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
             }
         }
 
