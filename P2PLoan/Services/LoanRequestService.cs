@@ -289,8 +289,17 @@ public class LoanRequestService : ILoanRequestService
 
                 var topUpAccountDetail = loanRequest.Wallet.TopUpDetails.ToList()[0];
                 Console.WriteLine("Top Up Account Detail Fetched");
-                var topUpDetailJson = JsonConvert.SerializeObject(topUpDetails);
+                var topUpDetailJson = JsonConvert.SerializeObject(topUpAccountDetail);
                 Console.WriteLine(topUpDetailJson);
+
+
+                Console.WriteLine(" About to create Transfer DTO");
+                Console.WriteLine($"Amount: {loanRequest.LoanOffer.Amount}");
+                Console.WriteLine($"Reference: {paymentReference.Id}");
+                Console.WriteLine($"Narration: {$"Loan request {loanRequest.Id} approval"}");
+                Console.WriteLine($"DestinationBankCode: {topUpAccountDetail.BankCode}");
+                Console.WriteLine($"DestinationAccountNumber: {topUpAccountDetail.AccountNumber}");
+                Console.WriteLine($"DestinationBSourceAccountNumberankCode: {loanRequest.LoanOffer.Wallet.AccountNumber}");
 
                 // Try debiting the lender's wallet
                 var transferDto = new TransferDto
@@ -341,6 +350,7 @@ public class LoanRequestService : ILoanRequestService
             catch (Exception ex)
             {
                 transaction.Rollback();
+                throw ex;
                 return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
             }
         }
