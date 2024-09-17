@@ -107,7 +107,7 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
     {
         var managedWallet = await managedWalletRepository.GetByWalletReferenceAsync(wallet.ReferenceId);
 
-        var transactions = await managedWalletTransactionRepository.GetTransactionsByWalletId(managedWallet.Id, pageSize, pageNo);
+        var transactions = await managedWalletTransactionRepository.GetTransactionsByWalletId(managedWallet.Id, pageNo, pageSize);
 
         var totalPages = (int)Math.Ceiling((decimal)transactions.TotalItems / pageSize);
         var response = new GetTransactionsResponseDto
