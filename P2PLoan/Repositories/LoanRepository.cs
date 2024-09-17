@@ -65,6 +65,10 @@ public class LoanRepository : ILoanRepository
             query = query.Where(l => l.PrincipalAmount <= searchParams.MaxAmount);
         }
 
+        if (searchParams.Status.HasValue)
+        {
+            query = query.Where(l => l.Status == searchParams.Status);
+        }
 
         if (searchParams.LoanRequestId != null)
         {
