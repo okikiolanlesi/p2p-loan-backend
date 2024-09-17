@@ -31,9 +31,9 @@ public class LoanRepository : ILoanRepository
         _context.Loans.AddRange(loans);
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
-        return _context.Database.BeginTransactionAsync();
+        return await _context.Database.BeginTransactionAsync();
     }
 
     public async Task<Loan?> FindById(Guid loanId)
@@ -73,7 +73,7 @@ public class LoanRepository : ILoanRepository
 
         var total = await query.CountAsync();
 
-        query = query.Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
+        query = query.Include(l => l.Lender).Include(l => l.Borrower).Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
                      .Take(searchParams.PageSize);
 
         var loans = await query.ToListAsync();
@@ -87,9 +87,9 @@ public class LoanRepository : ILoanRepository
         };
     }
 
-    public Task<Loan> GetUserActiveLoan(Guid userId)
+    public async Task<Loan> GetUserActiveLoan(Guid userId)
     {
-        return _context.Loans.FirstOrDefaultAsync(l => l.BorrowerId == userId && l.Status != LoanStatus.Completed);
+        return await _context.Loans.FirstOrDefaultAsync(l => l.BorrowerId == userId && l.Status != LoanStatus.Completed);
     }
 
     public void MarkAsModified(Loan loan)

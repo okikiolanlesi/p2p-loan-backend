@@ -40,13 +40,13 @@ public class LoanRequestRepository : ILoanRequestRepository
         return await dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).ProjectTo<LoanRequestDto>(mapper.ConfigurationProvider).FirstOrDefaultAsync(x => x.Id == loanRequestId);
     }
 
-    public Task<LoanRequest> FindByIdForAUser(Guid LoanRequestId, Guid UserId)
+    public async Task<LoanRequest> FindByIdForAUser(Guid LoanRequestId, Guid UserId)
     {
-        return dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.Id == LoanRequestId && x.UserId == UserId);
+        return await dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.Id == LoanRequestId && x.UserId == UserId);
     }
-    public Task<LoanRequest> FindByLoanOfferIdForAUser(Guid loanOfferId, Guid UserId)
+    public async Task<LoanRequest> FindByLoanOfferIdForAUser(Guid loanOfferId, Guid UserId)
     {
-        return dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.LoanOfferId == loanOfferId && x.UserId == UserId);
+        return await dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.LoanOfferId == loanOfferId && x.UserId == UserId);
     }
 
     public async Task<PagedResponse<IEnumerable<LoanRequestDto>>> GetAllAsync(LoanRequestSearchParams searchParams, Guid? userId = null)
@@ -132,8 +132,8 @@ public class LoanRequestRepository : ILoanRequestRepository
         return await dbContext.LoanRequests.Include(lr => lr.LoanOffer).Include(lr => lr.Wallet).Include(lr => lr.User).FirstOrDefaultAsync(x => x.Id == loanRequestId);
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
-        return dbContext.Database.BeginTransactionAsync();
+        return await dbContext.Database.BeginTransactionAsync();
     }
 }

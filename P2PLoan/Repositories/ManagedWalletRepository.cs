@@ -52,8 +52,8 @@ public class ManagedWalletRepository : IManagedWalletRepository
         context.Entry(managedWallet).State = EntityState.Modified;
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
-        return context.Database.BeginTransactionAsync();
+        return await context.Database.BeginTransactionAsync();
     }
 }
