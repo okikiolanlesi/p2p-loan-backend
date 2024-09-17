@@ -34,10 +34,11 @@ public class ManagedWalletTransactionRepository : IManagedWalletTransactionRepos
 
         // Apply pagination
         var totalItems = query.Count();
-        var items = await query
+        var items = await query.OrderByDescending(mwt => mwt.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
         return new PagedResponse<IEnumerable<ManagedWalletTransaction>>
         {
             Items = items,
