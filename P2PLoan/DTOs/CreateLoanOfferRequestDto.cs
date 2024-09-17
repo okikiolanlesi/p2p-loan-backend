@@ -16,9 +16,9 @@ public class CreateLoanOfferRequestDto
     [Required]
     public int LoanDurationDays { get; set; }
     [Required]
-    public int AccruingInterestRate { get; set; }
+    public double AccruingInterestRate { get; set; }
     [Required]
-    public int InterestRate { get; set; }
+    public double InterestRate { get; set; }
     [Required]
     public string AdditionalInformation { get; set; }
 
