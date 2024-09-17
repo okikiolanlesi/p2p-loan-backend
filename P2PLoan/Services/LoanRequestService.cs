@@ -65,7 +65,7 @@ public class LoanRequestService : ILoanRequestService
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
         }
 
-        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower;
+        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || (user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower);
 
         if (!isUserAllowedToSendRequest)
         {
@@ -215,6 +215,7 @@ public class LoanRequestService : ILoanRequestService
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "Invalid PIN", null);
         }
 
+
         var loanRequest = await loanRequestRepository.FindById(loanRequestId);
 
         if (loanRequest is null || loanRequest.LoanOffer.UserId != userId)
@@ -230,6 +231,24 @@ public class LoanRequestService : ILoanRequestService
         loanRequest.Status = LoanRequestStatus.processing;
 
         loanRequest.ProcessingStartTime = DateTime.UtcNow;
+
+        User borrower;
+        if (loanRequest.LoanOffer.Type == LoanOfferType.borrower)
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.LoanOffer.UserId);
+        }
+        else
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.UserId);
+        }
+
+        // Check if borrower has an uncompleted loan
+        var uncompletedLoan = await loanRepository.GetUserActiveLoan(borrower.Id);
+
+        if (uncompletedLoan != null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "Borrower already has an active loan", null);
+        }
 
         //Check if the lender has enough balance to fund the loan request
         Wallet lenderWallet;
