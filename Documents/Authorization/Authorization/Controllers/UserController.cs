@@ -18,8 +18,8 @@ namespace Authorization.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        [HttpGet("Supervisors")]
-        [Authorize(Roles = "Supervisor")]
+        [HttpGet("Admins")]
+        [Authorize(Roles = "Admin")]
         public IActionResult SupervisorsEndpoint()
         {
             var currentUser = GetCurrentUser();
@@ -28,18 +28,9 @@ namespace Authorization.Controllers
         }
 
 
-        [HttpGet("Designers")]
-        [Authorize(Roles = "Designer")]
+        [HttpGet("Employees")]
+        [Authorize(Roles = "Employee")]
         public IActionResult DesignersEndpoint()
-        {
-            var currentUser = GetCurrentUser();
-
-            return Ok($"Hi, welcome {currentUser.FirstName}, you are a {currentUser.Role}");
-        }
-
-        [HttpGet("Developers")]
-        [Authorize(Roles = "Developer")]
-        public IActionResult DevelopersEndpoint()
         {
             var currentUser = GetCurrentUser();
 
