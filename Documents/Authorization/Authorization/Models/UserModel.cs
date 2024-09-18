@@ -1,0 +1,16 @@
+﻿namespace Authorization.Models
+{
+    public class UserModel
+    {
+        public Guid UserId { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public string? Role { get; set; }
+        //public UserType UserType { get; set; } = UserType.Employee;
+        public bool IsDeleted { get; set; } = false;
+        //public ICollection<Project>? Projects { get; set; }
+        //public ICollection<ProjectUpdate>? ProjectUpdates { get; set; }
+    }
+}
