@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P2PLoan.Attributes;
+using P2PLoan.DTOs;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 
@@ -39,6 +41,23 @@ public class WalletController
     public async Task<IActionResult> GetTransactions(Guid walletId, [FromQuery] int pageSize = 10, [FromQuery] int pageNo = 1)
     {
         var response = await walletService.GetTransactions(walletId, pageSize, pageNo);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpGet("withdrawal/fee/{amount:double}")]
+    [Authorize]
+    public async Task<IActionResult> GetWithdrawalFee(double amount)
+    {
+        var response = await walletService.GetWithdrawalFee(amount);
+        return ControllerHelper.HandleApiResponse(response);
+    }
+
+    [HttpPost("withdraw")]
+    [Authorize]
+    [TypeFilter(typeof(RequiresPinAttribute))]
+    public async Task<IActionResult> Withdraw([FromBody] WithdrawRequestDto withdrawRequestDto)
+    {
+        var response = await walletService.Withdraw(withdrawRequestDto);
         return ControllerHelper.HandleApiResponse(response);
     }
 }

@@ -50,8 +50,8 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
         {
             Id = Guid.NewGuid(),
             UserId = (Guid)createWalletDto.UserId,
-            AvailableBalance = 0,
-            LedgerBalance = 0,
+            AvailableBalance = 5000000,
+            LedgerBalance = 5000000,
             WalletReference = createdReservedAccount.ResponseBody.AccountReference,
             AccountName = createdReservedAccount.ResponseBody.AccountName,
             CreatedById = (Guid)createWalletDto.UserId,
@@ -107,7 +107,7 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
     {
         var managedWallet = await managedWalletRepository.GetByWalletReferenceAsync(wallet.ReferenceId);
 
-        var transactions = await managedWalletTransactionRepository.GetTransactionsByWalletId(managedWallet.Id, pageSize, pageNo);
+        var transactions = await managedWalletTransactionRepository.GetTransactionsByWalletId(managedWallet.Id, pageNo, pageSize);
 
         var totalPages = (int)Math.Ceiling((decimal)transactions.TotalItems / pageSize);
         var response = new GetTransactionsResponseDto
@@ -174,6 +174,9 @@ public class ManagedWalletProviderService : IThirdPartyWalletProviderService
 
         // Replace the source account number with the source account number from the configuration, cause we want to transfer from the source account number in the configuration and then manage the balance and transaction tracking internally
         payload.SourceAccountNumber = configuration["Monnify:SourceAccountNumber"];
+
+        // Replace the reference with the internal reference generated for the transaction tracker
+        payload.Reference = transactionTracker.InternalReference;
 
         // Transfer the amount from the source account number in the configuration to the destination account number
         var response = await monnifyApiService.Transfer(mapper.Map<MonnifyTransferRequestBodyDto>(payload));

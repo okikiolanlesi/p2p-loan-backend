@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using P2PLoan.Constants;
 using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
 using P2PLoan.Interfaces;
 using P2PLoan.Models;
+using P2PLoan.Utils;
 
 namespace P2PLoan.Services;
 
@@ -63,7 +65,7 @@ public class LoanRequestService : ILoanRequestService
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan offer does not exist", null);
         }
 
-        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower;
+        var isUserAllowedToSendRequest = user.UserType == UserType.borrower && loanOffer.Type == LoanOfferType.lender || (user.UserType == UserType.lender && loanOffer.Type == LoanOfferType.borrower);
 
         if (!isUserAllowedToSendRequest)
         {
@@ -197,9 +199,22 @@ public class LoanRequestService : ILoanRequestService
         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan request deleted successfully", loanRequest);
     }
 
-    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId)
+    public async Task<ServiceResponse<object>> Accept(Guid loanRequestId, AcceptLoanRequestDto acceptLoanRequestDto)
     {
         var userId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+
+        var user = await userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
+
+        if (!Utilities.VerifyPassword(acceptLoanRequestDto.PIN, user.PIN))
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "Invalid PIN", null);
+        }
+
 
         var loanRequest = await loanRequestRepository.FindById(loanRequestId);
 
@@ -216,6 +231,24 @@ public class LoanRequestService : ILoanRequestService
         loanRequest.Status = LoanRequestStatus.processing;
 
         loanRequest.ProcessingStartTime = DateTime.UtcNow;
+
+        User borrower;
+        if (loanRequest.LoanOffer.Type == LoanOfferType.borrower)
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.LoanOffer.UserId);
+        }
+        else
+        {
+            borrower = await userRepository.GetByIdAsync(loanRequest.UserId);
+        }
+
+        // Check if borrower has an uncompleted loan
+        var uncompletedLoan = await loanRepository.GetUserActiveLoan(borrower.Id);
+
+        if (uncompletedLoan != null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.AlreadyExists, "Borrower already has an active loan", null);
+        }
 
         //Check if the lender has enough balance to fund the loan request
         Wallet lenderWallet;
@@ -238,7 +271,7 @@ public class LoanRequestService : ILoanRequestService
 
         if (lenderWalletBalance.AvailableBalance < loanRequest.LoanOffer.Amount)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InsufficientFunds, "You do not have enough balance to fund the loan request", null);
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InsufficientFunds, "Lender does not have enough balance to fund the loan request at the moment", null);
         }
 
         // Get system user
@@ -277,12 +310,13 @@ public class LoanRequestService : ILoanRequestService
                     Narration = $"Loan request {loanRequest.Id} approval",
                     DestinationBankCode = topUpAccountDetail.BankCode,
                     DestinationAccountNumber = topUpAccountDetail.AccountNumber,
-                    SourceAccountNumber = loanRequest.LoanOffer.Wallet.AccountNumber,
+                    SourceAccountNumber = lenderWallet.AccountNumber,
                 };
+
 
                 try
                 {
-                    var transferResponse = await walletService.Transfer(transferDto, loanRequest.LoanOffer.Wallet);
+                    var transferResponse = await walletService.Transfer(transferDto, lenderWallet);
                 }
                 catch
                 {
@@ -300,11 +334,13 @@ public class LoanRequestService : ILoanRequestService
                 {
                     throw new Exception();
                 }
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
+                return new ServiceResponse<object>(ResponseStatus.Error, AppStatusCodes.InternalServerError, "Failed to accept loan request", null);
             }
         }
 

@@ -25,7 +25,7 @@ public class ManagedWalletRepository : IManagedWalletRepository
 
     public async Task<ManagedWallet> FindByIdAsync(Guid managedWalletId)
     {
-        return await context.ManagedWallets.FindAsync(managedWalletId);
+        return await context.ManagedWallets.FirstOrDefaultAsync(x => x.Id == managedWalletId);
     }
 
     public async Task<IEnumerable<ManagedWallet>> GetWalletsByUserId(Guid userId)
@@ -52,8 +52,8 @@ public class ManagedWalletRepository : IManagedWalletRepository
         context.Entry(managedWallet).State = EntityState.Modified;
     }
 
-    public Task<IDbContextTransaction> BeginTransactionAsync()
+    public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
-        return context.Database.BeginTransactionAsync();
+        return await context.Database.BeginTransactionAsync();
     }
 }

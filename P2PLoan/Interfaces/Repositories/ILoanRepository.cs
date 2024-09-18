@@ -10,12 +10,12 @@ namespace P2PLoan.Interfaces;
 
 public interface ILoanRepository
 {
-    void Add(Loan Loan);
-    Task<Loan?> FindById(Guid LoanId);
+    void Add(Loan loan);
+    Task<Loan?> FindById(Guid loanId);
     Task<PagedResponse<IEnumerable<Loan>>> GetAllAsync(LoanSearchParams searchParams, Guid? userId = null);
     Task<Loan> GetUserActiveLoan(Guid userId);
-    void AddRange(IEnumerable<Loan> Loans);
-    void MarkAsModified(Loan Loan);
+    void AddRange(IEnumerable<Loan> loans);
+    void MarkAsModified(Loan loan);
     Task<bool> SaveChangesAsync();
     Task<IDbContextTransaction> BeginTransactionAsync();
 }

@@ -9,7 +9,9 @@ public interface IWalletTopUpDetailRepository
 {
     void Add(WalletTopUpDetail walletTopUpDetail);
     Task<WalletTopUpDetail?> FindById(Guid id);
-    Task<IEnumerable<WalletTopUpDetail>> GetAllForAWallet(Guid walletId);
+    Task<WalletTopUpDetail?> FindByAccountNumberAndCode(string AccountNumber, string Code);
+    Task<ICollection<WalletTopUpDetail>> GetAllForAWallet(Guid walletId);
     void AddRange(IEnumerable<WalletTopUpDetail> walletTopUpDetails);
+
     Task<bool> SaveChangesAsync();
 }

@@ -25,7 +25,7 @@ public class ManagedWalletTransactionRepository : IManagedWalletTransactionRepos
 
     public async Task<ManagedWalletTransaction?> FindByIdAsync(Guid managedWalletTransactionId)
     {
-        return await dbContext.ManagedWalletTransactions.FirstAsync(mwt => mwt.Id == managedWalletTransactionId);
+        return await dbContext.ManagedWalletTransactions.FirstOrDefaultAsync(mwt => mwt.Id == managedWalletTransactionId);
     }
 
     public async Task<PagedResponse<IEnumerable<ManagedWalletTransaction>>> GetTransactionsByWalletId(Guid managedWalletId, int page, int pageSize)
@@ -34,10 +34,11 @@ public class ManagedWalletTransactionRepository : IManagedWalletTransactionRepos
 
         // Apply pagination
         var totalItems = query.Count();
-        var items = await query
+        var items = await query.OrderByDescending(mwt => mwt.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
         return new PagedResponse<IEnumerable<ManagedWalletTransaction>>
         {
             Items = items,

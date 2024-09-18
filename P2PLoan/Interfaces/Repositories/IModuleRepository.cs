@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using P2PLoan.Models;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 using P2PLoan.Constants;
 

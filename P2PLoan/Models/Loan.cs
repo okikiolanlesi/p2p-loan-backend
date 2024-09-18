@@ -15,6 +15,7 @@ public class Loan : AuditableEntity
     public double AmountLeft { get; set; }
     public DateTime DueDate { get; set; }
     public double InitialInterestRate { get; set; }
+    public double CurrentInterestRate { get; set; }
     public LoanStatus Status { get; set; }
     public PaymentFrequency RepaymentFrequency { get; set; }
     public int LoanDurationDays { get; set; }
