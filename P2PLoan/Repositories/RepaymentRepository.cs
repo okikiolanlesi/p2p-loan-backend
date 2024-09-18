@@ -76,4 +76,8 @@ public class RepaymentRepository : IRepaymentRepository
     {
         return await context.SaveChangesAsync() > 0;
     }
+    public async Task<List<Repayment>> GetPendingRepaymentsForALoan(Guid loanId)
+    {
+        return await context.Repayments.Where(r => r.Status == RepaymentStatus.pending && r.LoanId == loanId).ToListAsync(); ;
+    }
 }

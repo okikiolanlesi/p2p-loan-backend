@@ -71,7 +71,7 @@ public class LoanService : ILoanService
 
         var loan = await loanRepository.FindById(loanId);
 
-        if (loan is null || loan.BorrowerId != userId)
+        if (loan is null || loan.BorrowerId != userId || loan.LenderId != userId)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan does not exist", null);
         }
@@ -185,6 +185,13 @@ public class LoanService : ILoanService
         if (repayDto.Amount > loan.AmountLeft)
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidData, "Repayment amount exceeds loan amount left", null);
+        }
+
+        var pendingRepayments = await repaymentRepository.GetPendingRepaymentsForALoan(loan.Id);
+
+        if (pendingRepayments.Count > 0)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.InvalidOperation, "You have pending repayments", null);
         }
 
         using (var transaction = await loanRepository.BeginTransactionAsync())
