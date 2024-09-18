@@ -15,4 +15,5 @@ public interface IRepaymentRepository
     void AddRange(IEnumerable<Repayment> repayments);
     void MarkAsModified(Repayment repayment);
     Task<bool> SaveChangesAsync();
+    Task<List<Repayment>> GetPendingRepaymentsForALoan(Guid loanId);
 }
