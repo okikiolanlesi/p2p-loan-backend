@@ -55,7 +55,7 @@ public class RepaymentRepository : IRepaymentRepository
 
         var total = await query.CountAsync();
 
-        query = query.Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
+        query = query.OrderByDescending(r => r.CreatedAt).Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
                      .Take(searchParams.PageSize);
 
         return new PagedResponse<IEnumerable<Repayment>>
