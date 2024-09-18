@@ -71,7 +71,7 @@ public class LoanService : ILoanService
 
         var loan = await loanRepository.FindById(loanId);
 
-        if (loan is null || loan.BorrowerId != userId || loan.LenderId != userId)
+        if (loan is null || (loan.BorrowerId != userId && loan.LenderId != userId))
         {
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Loan does not exist", null);
         }
