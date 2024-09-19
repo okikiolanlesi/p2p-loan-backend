@@ -25,10 +25,10 @@ namespace P2PLoan.Controllers
         public async Task<IActionResult> GetMyProfile()
         {
             var response = await userService.GetCurrentUserProfile();
-               return ControllerHelper.HandleApiResponse(response);
+            return ControllerHelper.HandleApiResponse(response);
         }
 
-        [HttpGet]
+        [HttpGet("{id:guid}")]
         [Authorize]
         public async Task<IActionResult> GetPublicUserProfile(Guid id)
         {
