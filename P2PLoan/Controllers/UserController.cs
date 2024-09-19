@@ -34,7 +34,6 @@ namespace P2PLoan.Controllers
         {
             var response = await userService.GetPublicUserProfileById(id);
             return ControllerHelper.HandleApiResponse(response);
-
         }
     }
 }
