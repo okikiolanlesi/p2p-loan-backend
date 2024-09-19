@@ -8,6 +8,7 @@ using P2PLoan.Data;
 using P2PLoan.DTOs;
 using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Models;
+using System.Linq.Dynamic.Core;
 
 namespace P2PLoan.Repositories;
 
@@ -54,6 +55,15 @@ public class RepaymentRepository : IRepaymentRepository
         }
 
         var total = await query.CountAsync();
+
+        if (searchParams.OrderBy != null && searchParams.OrderBy.Any())
+        {
+            var orderByClauses = searchParams.OrderBy
+                .Select(o => $"{o.Field} {o.Direction}")
+                .ToArray();
+            var orderByString = string.Join(",", orderByClauses);
+            query = query.OrderBy(orderByString);
+        }
 
         query = query.OrderByDescending(r => r.CreatedAt).Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
                      .Take(searchParams.PageSize);
