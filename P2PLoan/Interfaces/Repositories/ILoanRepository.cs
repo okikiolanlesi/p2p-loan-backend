@@ -18,4 +18,6 @@ public interface ILoanRepository
     void MarkAsModified(Loan loan);
     Task<bool> SaveChangesAsync();
     Task<IDbContextTransaction> BeginTransactionAsync();
+    Task<List<Loan>> GetLoansDueForAutomaticRepayment();
+
 }

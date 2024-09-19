@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -77,6 +78,16 @@ public class LoanRepository : ILoanRepository
 
         var total = await query.CountAsync();
 
+        // Apply ordering
+        if (searchParams.OrderBy != null && searchParams.OrderBy.Any())
+        {
+            var orderByClauses = searchParams.OrderBy
+                .Select(o => $"{o.Field} {o.Direction}")
+                .ToArray();
+            var orderByString = string.Join(",", orderByClauses);
+            query = query.OrderBy(orderByString);
+        }
+
         query = query.Include(l => l.Lender).Include(l => l.Borrower).Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
                      .Take(searchParams.PageSize);
 
@@ -105,5 +116,43 @@ public class LoanRepository : ILoanRepository
     {
         return await _context.SaveChangesAsync() > 0;
     }
+    public async Task<List<Loan>> GetLoansDueForAutomaticRepayment()
+    {
+        var today = DateTime.Now;
+
+        var loansDueForRepayment = await _context.Loans
+            .Where(loan => loan.Status == LoanStatus.Active) // Only consider active loans
+            .Where(loan => !loan.Defaulted)                  // Exclude defaulted loans
+            .Where(loan =>
+                _context.Repayments
+                    .Where(r => r.LoanId == loan.Id)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .Select(r => (DateTime?)r.CreatedAt)
+                    .FirstOrDefault() == null // If no repayment exists, use loan start date for comparison
+                    ? IsLoanDue(today, loan.CreatedAt, loan.RepaymentFrequency)
+                    : IsLoanDue(today, _context.Repayments
+                                        .Where(r => r.LoanId == loan.Id)
+                                        .OrderByDescending(r => r.CreatedAt)
+                                        .Select(r => r.CreatedAt)
+                                        .First(), loan.RepaymentFrequency)
+            )
+            .ToListAsync();
+
+        return loansDueForRepayment;
+    }
+
+    private bool IsLoanDue(DateTime today, DateTime lastRepaymentDate, PaymentFrequency repaymentFrequency)
+    {
+        int daysSinceLastRepayment = (today - lastRepaymentDate).Days;
+
+        return repaymentFrequency switch
+        {
+            PaymentFrequency.daily => daysSinceLastRepayment >= 1,
+            PaymentFrequency.weekly => daysSinceLastRepayment >= 7,
+            PaymentFrequency.monthly => daysSinceLastRepayment >= 30,
+            _ => false
+        };
+    }
+
 
 }
