@@ -24,25 +24,25 @@ public class UserService : IUserService
 
     public async Task<ServiceResponse<object>> GetCurrentUserProfile()
     {
-         var loggedInUserId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
-          if (loggedInUserId == null)
-           {
-             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);      
-           }
+        var loggedInUserId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
+        if (loggedInUserId == null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
 
-            var user = await userRepository.GetByIdAsync(loggedInUserId);
-            if(user == null)
-            {
-                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);      
-            }
+        var user = await userRepository.GetByIdAsync(loggedInUserId);
+        if (user == null)
+        {
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
+        }
 
         var userDto = mapper.Map<UserDto>(user);
-         return new ServiceResponse<object>(
-        ResponseStatus.Success, 
-        AppStatusCodes.Success, 
-        "User retrieved successfully", 
-        userDto
-    );     
+        return new ServiceResponse<object>(
+       ResponseStatus.Success,
+       AppStatusCodes.Success,
+       "User retrieved successfully",
+       userDto
+   );
     }
 
 
@@ -51,23 +51,23 @@ public class UserService : IUserService
         var loggedInUserId = httpContextAccessor.HttpContext.User.GetLoggedInUserId();
         if (loggedInUserId == null)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);      
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User does not exist", null);
         }
 
         var user = await userRepository.GetByIdAsync(userId);
-        if(user == null)
+        if (user == null)
         {
-            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User not found", null);     
+            return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "User not found", null);
 
         }
 
         var publicUserDto = mapper.Map<PublicUserProfileDto>(user);
         return new ServiceResponse<object>(
-        ResponseStatus.Success, 
-        AppStatusCodes.Success, 
-        "User retrieved successfully", 
+        ResponseStatus.Success,
+        AppStatusCodes.Success,
+        "User retrieved successfully",
         publicUserDto
-    );
-        
+        );
+
     }
 }
