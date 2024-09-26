@@ -54,7 +54,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://borrowhub.vercel.app", "https://borrowhub.com")
+            builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://borrowhub.vercel.app", "https://borrowhub.com", "https://borrowhub-v1.vercel.app", "https://borrowhub-v1.com")
                 .AllowAnyHeader()
                 .WithMethods("GET", "POST", "PATCH", "PUT", "DELETE")
                 .SetIsOriginAllowed((host) => true)

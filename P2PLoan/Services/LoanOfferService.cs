@@ -59,6 +59,14 @@ public class LoanOfferService : ILoanOfferService
             return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ResourceNotFound, "Invalid wallet", null);
         }
 
+        // Validate loan duration based on repayment frequency
+        var durationValidationResponse = ValidateLoanDuration(createLoanOfferRequestDto.RepaymentFrequency, createLoanOfferRequestDto.LoanDurationDays);
+
+        if (durationValidationResponse != null)
+        {
+            return durationValidationResponse;
+        }
+
         var loanOffer = mapper.Map<LoanOffer>(createLoanOfferRequestDto);
 
         var loanOfferType = GetLoanOfferTypeBasedOnUserType(user.UserType);
@@ -168,5 +176,38 @@ public class LoanOfferService : ILoanOfferService
         }
 
         return new ServiceResponse<object>(ResponseStatus.Success, AppStatusCodes.Success, "Loan disabled successfully", result);
+    }
+
+    // Separate method to validate loan duration based on repayment frequency
+    private ServiceResponse<object> ValidateLoanDuration(PaymentFrequency repaymentFrequency, int loanDurationDays)
+    {
+        switch (repaymentFrequency)
+        {
+            case PaymentFrequency.daily:
+                if (loanDurationDays % 1 != 0)
+                {
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Loan duration must be in multiples of days for daily repayment.", null);
+                }
+                break;
+
+            case PaymentFrequency.weekly:
+                if (loanDurationDays % 7 != 0)
+                {
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Loan duration must be in multiples of weeks (7 days) for weekly repayment.", null);
+                }
+                break;
+
+            case PaymentFrequency.monthly:
+                if (loanDurationDays % 30 != 0)
+                {
+                    return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Loan duration must be in multiples of months (30 days) for monthly repayment.", null);
+                }
+                break;
+
+            default:
+                return new ServiceResponse<object>(ResponseStatus.BadRequest, AppStatusCodes.ValidationError, "Invalid repayment frequency.", null);
+        }
+
+        return null; // No validation errors
     }
 }
