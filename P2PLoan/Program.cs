@@ -99,6 +99,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                // Check if the endpoint requires authentication
+                var endpoint = context.HttpContext.GetEndpoint();
+                var requiresAuth = endpoint?.Metadata?.GetMetadata<IAuthorizeData>() != null;
+
+                if (!requiresAuth)
+                {
+                    // Skip authentication if the endpoint does not require it
+                    context.NoResult();
+                }
+
+                return System.Threading.Tasks.Task.CompletedTask;
+            },
             OnAuthenticationFailed = async context =>
             {
                 // This should handle cases like invalid tokens or malformed tokens.
