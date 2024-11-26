@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P2PLoan.DTOs.SearchParams;
 using P2PLoan.Helpers;
@@ -10,6 +11,7 @@ namespace P2PLoan.Controllers;
 
 [ApiController]
 [Route("api/loan-offer")]
+[Authorize]
 public class LoanOfferController
 {
     private readonly ILoanOfferService loanOfferService;
